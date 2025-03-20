@@ -49,7 +49,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/stenciljs/component-starter.git"
+    "url": "git+https://github.com/gaubee/appn.git"
   },
   "files": [
     "dist/",
@@ -65,5 +65,8 @@
     "prettier": "^3.5.3",
     "puppeteer": "^24.3.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@gaubee/util": "^0.25.1"
+  }
 }
