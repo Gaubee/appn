@@ -21,21 +21,39 @@ export const config: Config = {
       type: 'docs-custom',
       generator: docs => {
         // Custom logic goes here
-        docs.components;
-        const readmeEntry = new FileEntry(path.resolve(__dirname, './README.md'));
+        {
+          const readmeEntry = new FileEntry(path.resolve(__dirname, './README.md'));
 
-        const contents = readmeEntry.readText().split(`<!-- Auto Generated Below -->`);
-        contents[1] = `
+          const contents = readmeEntry.readText().split(`<!-- Auto Generated Below -->`);
+          contents[1] = `
 
 ## Components
 
 ${docs.components
   .map(com => {
-    return `- [${path.basename(com.dirPath ?? '')}](${com.readmePath})`;
+    return `- [${path.basename(com.dirPath!)}](${path.relative(readmeEntry.dir, com.readmePath!)})`;
   })
   .join('\n')}
 `;
-        readmeEntry.write(contents.join(`<!-- Auto Generated Below -->`));
+          readmeEntry.write(contents.join(`<!-- Auto Generated Below -->`));
+        }
+
+        {
+          const readmeZhEntry = new FileEntry(path.resolve(__dirname, './README_zh.md'));
+
+          const contents = readmeZhEntry.readText().split(`<!-- Auto Generated Below -->`);
+          contents[1] = `
+
+## 组件
+
+${docs.components
+  .map(com => {
+    return `- [${path.basename(com.dirPath!)}](${path.relative(readmeZhEntry.dir, com.readmePath!)})`;
+  })
+  .join('\n')}
+`;
+          readmeZhEntry.write(contents.join(`<!-- Auto Generated Below -->`));
+        }
       },
     },
     {
