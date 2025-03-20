@@ -1,0 +1,8 @@
+dialog {
+  border: 0;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+}
