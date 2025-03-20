@@ -11,7 +11,7 @@ export namespace Components {
     interface AppnFooter {
     }
     interface AppnHeader {
-        "pageTitle"?: string;
+        "lines": number;
     }
     interface AppnPage {
         "mode": PageMode;
@@ -69,7 +69,7 @@ declare namespace LocalJSX {
     interface AppnFooter {
     }
     interface AppnHeader {
-        "pageTitle"?: string;
+        "lines"?: number;
     }
     interface AppnPage {
         "mode"?: PageMode;

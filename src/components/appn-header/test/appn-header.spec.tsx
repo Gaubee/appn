@@ -11,9 +11,9 @@ describe('appn-header', () => {
     expect(page.root).toEqualHtml(html`
       <appn-header pageTitle="Hi">
         <mock:shadow-root>
-          <slot name="start">START</slot>
-          <slot name="title">Hi</slot>
-          <slot name="end">END</slot>
+          <slot name="start"></slot>
+          <slot>Hi</slot>
+          <slot name="end"></slot>
         </mock:shadow-root>
       </appn-header>
     `);

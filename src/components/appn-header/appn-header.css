@@ -2,3 +2,24 @@
   display: flex;
   flex-direction: row;
 }
+.leading {
+  flex-shrink: 0;
+  min-width: 48px;
+}
+@property --title-clamp {
+  syntax: '<number>';
+}
+.title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--title-clamp, 1);
+}
+
+.actions {
+  flex-shrink: 0;
+  min-width: 48px;
+}

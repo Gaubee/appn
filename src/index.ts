@@ -9,5 +9,4 @@
  */
 ///<reference path="./components.d.ts"/>
 export { format } from './utils/utils';
-// @ts-ignore
-// export type * from './components.d.ts';
+export type * from './components.d.ts';

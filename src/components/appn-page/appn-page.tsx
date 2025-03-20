@@ -20,7 +20,7 @@ export class AppnPage {
           <div class="page">
             <div class="header">
               <slot name="header">
-                <appn-header pageTitle={this.pageTitle}></appn-header>
+                <appn-header>{this.pageTitle}</appn-header>
               </slot>
             </div>
             <slot></slot>

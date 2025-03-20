@@ -8,8 +8,22 @@
 
     <script type="module" src="/build/appn.esm.js"></script>
     <script nomodule src="/build/appn.js"></script>
+    <style>
+      :root,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
   </head>
   <body>
-    <my-component first="Stencil" middle="'Don't call me a framework'" last="JS"></my-component>
+    <appn-page open>
+      <appn-header lines="2" slot="header"
+        >Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title
+        Title Title Title Title Title Title Title Title Title Title Title</appn-header
+      >
+      <my-component first="Gaubee" middle="Bangeel" last="from CN"></my-component>
+      <appn-footer slot="footer"></appn-footer>
+    </appn-page>
   </body>
 </html>
