@@ -1,0 +1,20 @@
+diff --git a/components/index.js b/components/index.js
+index b2edcc2abc9ea8abe69919348d81ba3acd5ae3a3..19241a3fcef8de7146f6af1a592168618cb2b11a 100644
+--- a/components/index.js
++++ b/components/index.js
+@@ -37,10 +37,11 @@ function loadLanguages(languages) {
+ 		}
+ 
+ 		const pathToLanguage = './prism-' + lang;
+-
+-		// remove from require cache and from Prism
+-		delete require.cache[require.resolve(pathToLanguage)];
+-		delete Prism.languages[lang];
++    try {
++      // remove from require cache and from Prism
++      delete require.cache[require.resolve(pathToLanguage)];
++      delete Prism.languages[lang];
++    } catch {}
+ 
+ 		require(pathToLanguage);
+ 

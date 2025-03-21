@@ -14,10 +14,17 @@
         margin: 0;
         padding: 0;
       }
+      appn-page::part(root) {
+        max-width: 200px;
+        height: 300px;
+      }
+      .page::part(body) {
+        height: 300px;
+      }
     </style>
   </head>
   <body>
-    <appn-page open>
+    <appn-page open class="page">
       <appn-header lines="2" slot="header"
         >Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title Title
         Title Title Title Title Title Title Title Title Title Title Title</appn-header

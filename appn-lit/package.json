@@ -1,0 +1,83 @@
+{
+  "name": "@lit/lit-starter-ts",
+  "private": true,
+  "version": "2.0.2",
+  "description": "A simple web component",
+  "main": "my-element.js",
+  "module": "my-element.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rimraf my-element.{d.ts,d.ts.map,js,js.map} test/my-element.{d.ts,d.ts.map,js,js.map} test/my-element_test.{d.ts,d.ts.map,js,js.map}",
+    "lint": "pnpm lint:lit-analyzer && pnpm lint:eslint",
+    "lint:eslint": "eslint 'src/**/*.ts'",
+    "lint:lit-analyzer": "lit-analyzer",
+    "format": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --ignore-path ./.eslintignore --write",
+    "docs": "pnpm docs:clean && pnpm build && pnpm analyze && pnpm docs:build && pnpm docs:assets && pnpm docs:gen",
+    "docs:clean": "rimraf docs",
+    "docs:gen": "eleventy --config=eleventy.config.cts",
+    "docs:gen:watch": "eleventy --config=eleventy.config.cts --watch",
+    "docs:build": "rollup -c --file docs/my-element.bundled.js",
+    "docs:assets": "cp node_modules/prismjs/themes/prism-okaidia.css docs/",
+    "docs:serve": "wds --root-dir=docs --node-resolve --watch",
+    "analyze": "cem analyze --litelement --globs \"src/**/*.ts\"",
+    "analyze:watch": "cem analyze --litelement --globs \"src/**/*.ts\" --watch",
+    "serve": "wds --watch",
+    "serve:prod": "MODE=prod pnpm serve",
+    "test": "pnpm test:dev && pnpm test:prod",
+    "test:dev": "wtr",
+    "test:watch": "wtr --watch",
+    "test:prod": "MODE=prod wtr",
+    "test:prod:watch": "MODE=prod wtr --watch",
+    "checksize": "rollup -c ; cat my-element.bundled.js | gzip -9 | wc -c ; rm my-element.bundled.js"
+  },
+  "keywords": [
+    "web-components",
+    "lit-element",
+    "typescript",
+    "lit"
+  ],
+  "author": "Google LLC",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "lit": "^3.2.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/chai": "5.2.0"
+    },
+    "patchedDependencies": {
+      "@open-wc/testing": "patches/@open-wc__testing.patch",
+      "prismjs": "patches/prismjs.patch"
+    }
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
+    "@custom-elements-manifest/analyzer": "^0.10.4",
+    "@open-wc/testing": "^4.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-replace": "^6.0.2",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@types/mocha": "^10.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.27.0",
+    "@typescript-eslint/parser": "^8.27.0",
+    "@web/dev-server": "^0.4.6",
+    "@web/dev-server-legacy": "^2.1.1",
+    "@web/test-runner": "^0.20.0",
+    "@web/test-runner-playwright": "^0.11.0",
+    "@webcomponents/webcomponentsjs": "^2.8.0",
+    "eslint": "^9.22.0",
+    "lit-analyzer": "^2.0.3",
+    "prettier": "^3.5.3",
+    "prismjs": "^1.30.0",
+    "react-dom": "^19.0.0",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.18.0",
+    "rollup-plugin-summary": "^3.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "~5.8.2"
+  },
+  "customElements": "custom-elements.json"
+}

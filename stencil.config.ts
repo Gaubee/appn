@@ -4,6 +4,15 @@ import path from 'node:path';
 
 export const config: Config = {
   namespace: 'appn',
+  testing: {
+    browserHeadless: false,
+    browserDevtools: true,
+    testTimeout: 0,
+  },
+  devInspector: true,
+  // testing: {
+  //   browserHeadless: 'shell',
+  // },
   outputTargets: [
     {
       type: 'dist',
@@ -61,7 +70,4 @@ ${docs.components
       serviceWorker: null, // disable service workers
     },
   ],
-  testing: {
-    browserHeadless: 'shell',
-  },
 };
