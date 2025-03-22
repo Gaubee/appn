@@ -1,4 +1,5 @@
 const {inspect} = require('node:util');
+const customElements = require('../custom-elements.json');
 /**
  * This page generates its content from the custom-element.json file as read by
  * the _data/api.11tydata.js script.
@@ -12,17 +13,8 @@ module.exports = class Docs {
   }
 
   render(data) {
-    console.log(data);
-    return `<pre>${inspect(data, true, 5, false)}</pre>`;
-    console.log('QAQ data', data);
-    const manifest = data.api.customElements;
-    const elements = manifest.modules.reduce(
-      (els, module) =>
-        els.concat(
-          module.declarations?.filter((dec) => dec.customElement) ?? []
-        ),
-      []
-    );
+    const elements = customElements.modules.map((m) => m.declarations).flat();
+
     return `
      <h1>API</h1>
      ${elements

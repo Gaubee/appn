@@ -2,6 +2,8 @@
 /docs/
 /lib/
 /test/
+/dist/
+/bundle/
 custom-elements.json
 # top level source
 my-element.js

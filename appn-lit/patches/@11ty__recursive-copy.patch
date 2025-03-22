@@ -1,0 +1,13 @@
+diff --git a/lib/copy.js b/lib/copy.js
+index a98414b4a1500f7308b56c15b69fa60e6cfad2d5..ed6d920626aeaa6e6cc7891d94db1bb09090b3d6 100644
+--- a/lib/copy.js
++++ b/lib/copy.js
+@@ -386,7 +386,7 @@ function copyFile(srcPath, destPath, stats, options) {
+ function copySymlink(srcPath, destPath, stats, options) {
+ 	return readlink(srcPath)
+ 		.then(function(link) {
+-			return symlink(link, destPath);
++			return symlink(link, destPath, options?.symlinkType ?? 'junction');
+ 		});
+ }
+

@@ -1,34 +1,16 @@
 ---
 layout: example.11ty.cjs
-title: <my-element> ⌲ Examples ⌲ Basic
+title: <appn-page> ⌲ Examples
 tags: example
-name: Basic
+name: Examples
 description: A basic example
 ---
 
 <style>
-  my-element p {
-    border: solid 1px blue;
-    padding: 8px;
+  appn-page::part(body) {
+    outline: solid 1px blue;
   }
 </style>
-<my-element>
-  <p>This is child content</p>
-</my-element>
-
-<h3>CSS</h3>
-
-```css
-p {
-  border: solid 1px blue;
-  padding: 8px;
-}
-```
-
-<h3>HTML</h3>
-
-```html
-<my-element>
-  <p>This is child content</p>
-</my-element>
-```
+<appn-page>
+  <p>This is page content</p>
+</appn-page>
