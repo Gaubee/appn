@@ -122,19 +122,22 @@ To enable the site go to the GitHub settings and change the GitHub Pages &quot;S
 To build the site, run:
 
 ```bash
-npm run docs
+pnpm run docs
 ```
 
 To serve the site locally, run:
 
 ```bash
-npm run docs:serve
+pnpm docs:serve
 ```
 
 To watch the site files, and re-build automatically, run:
 
 ```bash
-npm run docs:gen:watch
+pnpm build:watch # gen /dist/
+pnpm analyze:watch # gen /custom-elements.json
+pnpm docs:build:watch # gen /bundle/ (depends on /dist/)
+pnpm docs:gen:watch # gen /docs/ (depends on /bundle/ and /custom-elements.json)
 ```
 
 The site will usually be served at http://localhost:8000.

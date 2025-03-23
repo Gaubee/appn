@@ -1,5 +1,5 @@
 ---
-layout: example.11ty.cjs
+layout: example.11ty.js
 title: <my-element> ⌲ Examples ⌲ Name Property
 tags: example
 name: Name Property

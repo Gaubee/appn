@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, html, css} from 'lit';
-import {customElement, property, query, state} from 'lit/decorators.js';
+import {LitElement, css, html, type PropertyValues} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
 import '../appn-header/appn-header';
 
 export type AppnPageMode = AppnPage['mode'];
@@ -20,12 +20,13 @@ export class AppnPage extends LitElement {
     return this.__all;
   }
   static {
+    console.log(18);
     for (const pos of ['top', 'right', 'bottom', 'left']) {
       CSS.registerProperty({
         name: `--safe-area-inset-${pos}`,
         syntax: '<length-percentage>',
         inherits: true,
-        initialValue: `env(safe-area-inset-${pos})`,
+        initialValue: '0px',
       });
     }
     for (const area of ['header', 'footer']) {
@@ -40,6 +41,10 @@ export class AppnPage extends LitElement {
   static override styles = css`
     :host {
       display: contents;
+      --safe-area-inset-top: env(safe-area-inset-top);
+      --safe-area-inset-bottom: env(safe-area-inset-bottom);
+      --safe-area-inset-left: env(safe-area-inset-left);
+      --safe-area-inset-right: env(safe-area-inset-right);
     }
     dialog {
       margin: 0;
@@ -54,45 +59,19 @@ export class AppnPage extends LitElement {
       box-shadow: 0 0 2px -1px #000;
     }
 
-    /* :host([mode='screen']) dialog {
+    :host([mode='block']) dialog {
+      position: relative;
+    }
+
+    :host([mode='screen']) dialog {
       width: 100%;
       height: 100%;
-    } */
+    }
 
     :host([mode='screen']) dialog::backdrop {
       background-color: #21212133;
     }
 
-    /* @property --safe-area-inset-top {
-      syntax: '<length-percentage>';
-      inherits: true;
-      initial-value: env(safe-area-inset-top);
-    }
-    @property --safe-area-inset-bottom {
-      syntax: '<length-percentage>';
-      inherits: true;
-      initial-value: env(safe-area-inset-bottom);
-    }
-    @property --safe-area-inset-left {
-      syntax: '<length-percentage>';
-      inherits: true;
-      initial-value: env(safe-area-inset-left);
-    }
-    @property --safe-area-inset-right {
-      syntax: '<length-percentage>';
-      inherits: true;
-      initial-value: env(safe-area-inset-right);
-    }
-    @property --page-header-height {
-      syntax: '<length-percentage>';
-      inherits: true;
-      initial-value: 0px;
-    }
-    @property --page-footer-height {
-      syntax: '<length-percentage>';
-      inherits: true;
-      initial-value: 0px;
-    } */
     .root {
       display: grid;
       grid-template-columns: 1fr;
@@ -125,22 +104,54 @@ export class AppnPage extends LitElement {
     }
   `;
 
-  @state()
-  private __headerHeight = 0;
-
   private __headerEleEffect?: () => void;
   protected __headerEleEffectOff() {
     this.__headerEleEffect?.();
     this.__headerEleEffect = undefined;
   }
   @query('.header')
-  set headerEle(headerEle: HTMLElement) {
-    this.__headerEleEffectOff();
-    const resizeObserver = new ResizeObserver((entries) => {
-      this.__headerHeight = entries[0].borderBoxSize[0].blockSize;
+  private headerEle!: HTMLElement;
+
+  private __resizeObserver?: ResizeObserver;
+  private __headerHeight = 0;
+
+  override firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+    // 确保元素已挂载后初始化
+    this.__setupResizeObserver();
+  }
+
+  override updated(_changedProperties: PropertyValues) {
+    super.updated(_changedProperties);
+    if (_changedProperties.has('headerEle')) {
+      // 元素引用变化时重新设置监听
+      this.__setupResizeObserver();
+    }
+  }
+
+  private __setupResizeObserver() {
+    // 先清理旧监听器
+    this.__resizeObserver?.disconnect();
+
+    if (!this.headerEle) return;
+
+    this.__resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        // 兼容性处理（不同浏览器实现不同）
+        const blockSize =
+          entry.borderBoxSize?.[0]?.blockSize || entry.contentRect.height;
+        this.__headerHeight = blockSize;
+        this.requestUpdate(); // 触发重新渲染
+      }
     });
-    resizeObserver.observe(headerEle);
-    this.__headerEleEffect = () => resizeObserver.disconnect();
+
+    this.__resizeObserver.observe(this.headerEle);
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    // 组件卸载时清理
+    this.__resizeObserver?.disconnect();
   }
 
   /**
@@ -162,6 +173,8 @@ export class AppnPage extends LitElement {
   //   super.disconnectedCallback();
   //   this.__headerEleEffectOff();
   // }
+  @property({type: String, reflect: true, attribute: true})
+  pageTitle = '';
 
   override render() {
     return html`
@@ -170,11 +183,11 @@ export class AppnPage extends LitElement {
           --page-header-height: ${this.__headerHeight}px;
         }
       </style>
-      <dialog open="{this.open}" part="layer">
+      <dialog open=${this.open} part="layer">
         <div class="root" part="root">
           <div class="header" part="header">
             <slot name="header">
-              <appn-header>{this.pageTitle}</appn-header>
+              <appn-header>${this.pageTitle}</appn-header>
             </slot>
           </div>
           <div class="body" part="body">

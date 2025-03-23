@@ -1,11 +1,28 @@
-const syntaxHighlight = require('@11ty/eleventy-plugin-syntaxhighlight');
+import syntaxHighlight from '@11ty/eleventy-plugin-syntaxhighlight';
 // require('tsx/esm');
 // const {renderToStaticMarkup} = require('react-dom/server');
 import type {UserConfig} from '@11ty/eleventy';
 
-module.exports = function (eleventyConfig: UserConfig) {
+export default function (eleventyConfig: UserConfig) {
+  eleventyConfig.setTemplateFormats([
+    'ts',
+    'mts',
+    'cts',
+    'js',
+    'mjs',
+    'cjs',
+    'md',
+    'mdx',
+  ]);
+  eleventyConfig.on('importCacheReset', (paths) => {
+    console.log('QAQ paths', require.cache, paths);
+    for (const dep of paths) {
+      delete require.cache[require.resolve(dep)];
+    }
+  });
+
   eleventyConfig.addPlugin(syntaxHighlight);
-  eleventyConfig.setServerPassthroughCopyBehavior('copy');
+  eleventyConfig.setServerPassthroughCopyBehavior('passthrough');
   eleventyConfig.addPassthroughCopy('docs-src/docs.css');
   eleventyConfig.addPassthroughCopy('docs-src/.nojekyll');
   debugger;
@@ -15,6 +32,7 @@ module.exports = function (eleventyConfig: UserConfig) {
   );
   eleventyConfig.addPassthroughCopy('bundle');
   eleventyConfig.addPassthroughCopy('node_modules/lit/polyfill-support.js');
+  eleventyConfig.addWatchTarget('./bundle');
   // // We can add support for TypeScript too, at the same time:
   // eleventyConfig.addExtension(['11ty.jsx', '11ty.ts', '11ty.tsx'], {
   //   key: '11ty.js',
@@ -30,9 +48,9 @@ module.exports = function (eleventyConfig: UserConfig) {
       input: 'docs-src',
       output: 'docs',
     },
-    templateExtensionAliases: {
-      '11ty.cjs': '11ty.js',
-      '11tydata.cjs': '11tydata.js',
-    },
+    // templateExtensionAliases: {
+    //   '11ty.js': '11ty.js',
+    //   '11tydata.js': '11tydata.js',
+    // },
   };
-};
+}

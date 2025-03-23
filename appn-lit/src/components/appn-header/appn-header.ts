@@ -16,48 +16,71 @@ import {customElement, property} from 'lit/decorators.js';
  */
 @customElement('appn-header')
 export class AppnHeader extends LitElement {
+  static {
+    CSS.registerProperty({
+      name: '--title-clamp',
+      syntax: '<integer>',
+      inherits: false,
+      initialValue: '1',
+    });
+  }
   static override styles = css`
     :host {
-      display: block;
-      border: solid 1px gray;
-      padding: 16px;
-      max-width: 800px;
+      display: flex;
+      flex-direction: row;
+    }
+    .leading {
+      flex-shrink: 0;
+      min-width: 48px;
+    }
+    @property --title-clamp {
+      syntax: '<number>';
+    }
+    .title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: var(--title-clamp, 1);
+    }
+
+    .actions {
+      flex-shrink: 0;
+      min-width: 48px;
     }
   `;
 
   /**
    * The name to say "Hello" to.
    */
-  @property()
-  name = 'World';
+  @property({type: String, reflect: true, attribute: true})
+  pageTitle = '';
 
   /**
    * The number of times the button has been clicked.
    */
-  @property({type: Number})
-  count = 0;
+  @property({type: Number, reflect: true, attribute: true})
+  lines = 1;
 
   override render() {
     return html`
-      <h1>${this.sayHello(this.name)}!</h1>
-      <button @click=${this._onClick} part="button">
-        Click Count: ${this.count}
-      </button>
-      <slot></slot>
+      <style>
+        :host {
+          --title-clamp: ${this.lines};
+        }
+      </style>
+      <div class="leading">
+        <slot name="start"></slot>
+      </div>
+      <div class="title">
+        <slot></slot>
+      </div>
+      <div class="actions">
+        <slot name="end"></slot>
+      </div>
     `;
-  }
-
-  private _onClick() {
-    this.count++;
-    this.dispatchEvent(new CustomEvent('count-changed'));
-  }
-
-  /**
-   * Formats a greeting
-   * @param name The name to say "Hello" to
-   */
-  sayHello(name: string): string {
-    return `Hello, ${name}`;
   }
 }
 

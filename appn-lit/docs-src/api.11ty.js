@@ -1,13 +1,12 @@
-const {inspect} = require('node:util');
-const customElements = require('../custom-elements.json');
+import customElements from '../custom-elements.json' with {type: 'json'};
 /**
  * This page generates its content from the custom-element.json file as read by
  * the _data/api.11tydata.js script.
  */
-module.exports = class Docs {
+export default class Docs {
   data() {
     return {
-      layout: 'page.11ty.cjs',
+      layout: 'page.11ty.js',
       title: '<my-element> ⌲ Docs',
     };
   }
@@ -69,7 +68,7 @@ module.exports = class Docs {
        .join('')}
    `;
   }
-};
+}
 
 /**
  * Reads a (possibly deep) path off of an object.

@@ -1,11 +1,10 @@
-const header = require('./header.11ty.cjs');
-const footer = require('./footer.11ty.cjs');
-const nav = require('./nav.11ty.cjs');
-const relative = require('./relative-path.cjs');
-const customElements = require('../../custom-elements.json');
-const path = require('node:path');
+import header from './header.11ty.js';
+import footer from './footer.11ty.js';
+import nav from './nav.11ty.js';
+import {relativePath as relative} from './relative-path.js';
+import customElements from '../../custom-elements.json' with {type: 'json'};
 
-module.exports = function (data) {
+export default function (data) {
   const html = String.raw;
   const {title, page, content} = data;
   const elements = customElements.modules.map((m) => m.declarations).flat();
@@ -40,9 +39,9 @@ module.exports = function (data) {
       <body>
         ${header()} ${nav(data)}
         <div id="main-wrapper">
-          <main>${content}</main>
+          <main>说的是事实${content}</main>
         </div>
         ${footer()}
       </body>
     </html>`;
-};
+}

@@ -1,7 +1,7 @@
-const path = require('path').posix;
+import path from 'path';
 
-module.exports = (base, p) => {
-  const relativePath = path.relative(base, p);
+export const relativePath = (base, p) => {
+  const relativePath = path.posix.relative(base, p);
   if (p.endsWith('/') && !relativePath.endsWith('/') && relativePath !== '') {
     return relativePath + '/';
   }
