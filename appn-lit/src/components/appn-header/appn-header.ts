@@ -44,6 +44,8 @@ export class AppnHeader extends LitElement {
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: var(--title-clamp, 1);
+      height: 2em;
+      line-height: 1.8;
     }
 
     .actions {

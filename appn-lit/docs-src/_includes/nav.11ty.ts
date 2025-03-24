@@ -1,6 +1,8 @@
 import {relativePath as relative} from './relative-path.js';
 
-export default function ({page}) {
+import type {EleventyData} from './types.js';
+
+export default function ({page}: EleventyData): string {
   const html = String.raw;
   return html` <nav>
     <a href="${relative(page.url, '/')}">Home</a>

@@ -77,6 +77,8 @@ export class AppnPage extends LitElement {
       grid-template-columns: 1fr;
       grid-template-rows: min-content 1fr min-content;
       gap: 0px 0px;
+      width: 100%;
+      height: 100%;
     }
     .header {
       grid-area: 1 / 1 / 2 / 2;
@@ -98,6 +100,8 @@ export class AppnPage extends LitElement {
         var(--safe-area-inset-bottom) + var(--page-footer-height)
       );
       scroll-padding-right: var(--safe-area-inset-right);
+
+      padding-inline: 0.5em;
     }
     .footer {
       grid-area: 3 / 1 / 4 / 2;
@@ -112,7 +116,7 @@ export class AppnPage extends LitElement {
   @query('.header')
   private headerEle!: HTMLElement;
 
-  private __resizeObserver?: ResizeObserver;
+  private __headerResizeObserver?: ResizeObserver;
   private __headerHeight = 0;
 
   override firstUpdated(_changedProperties: PropertyValues) {
@@ -131,11 +135,11 @@ export class AppnPage extends LitElement {
 
   private __setupResizeObserver() {
     // 先清理旧监听器
-    this.__resizeObserver?.disconnect();
+    this.__headerResizeObserver?.disconnect();
 
     if (!this.headerEle) return;
 
-    this.__resizeObserver = new ResizeObserver((entries) => {
+    this.__headerResizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         // 兼容性处理（不同浏览器实现不同）
         const blockSize =
@@ -145,13 +149,13 @@ export class AppnPage extends LitElement {
       }
     });
 
-    this.__resizeObserver.observe(this.headerEle);
+    this.__headerResizeObserver.observe(this.headerEle);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     // 组件卸载时清理
-    this.__resizeObserver?.disconnect();
+    this.__headerResizeObserver?.disconnect();
   }
 
   /**

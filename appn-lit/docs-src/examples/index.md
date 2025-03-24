@@ -1,8 +1,8 @@
 ---
-layout: example.11ty.js
-title: <appn-page> ⌲ Examples
+layout: example.11ty.ts
+title: Appn ➡️ AppnPage Example
 tags: example
-name: Examples
+name: AppnPage
 description: A basic example
 ---
 
@@ -14,6 +14,8 @@ description: A basic example
     position: relative;
   }
 </style>
+
 <appn-page pagetitle="Page Title" >
   <p>This is page content</p>
+  <div  slot="footer" style="text-align:center;">This is Page Footer</div>
 </appn-page>
