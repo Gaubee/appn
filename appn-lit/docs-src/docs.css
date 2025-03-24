@@ -26,6 +26,7 @@ body {
 
 #main-wrapper {
   flex-grow: 1;
+  border-top: 1px solid #efefef;
 }
 
 main {
@@ -209,6 +210,10 @@ nav.collection a:hover {
 section pre[class*='language-'] {
   font-size: 0.8rem;
 }
+main {
+  container-type: inline-size;
+  container-name: main;
+}
 
 section.columns {
   display: grid;
@@ -222,24 +227,26 @@ section.columns > div {
 
 section.examples {
   display: grid;
-  grid-template-columns: 240px minmax(400px, 784px);
+  grid-template-columns: 1fr;
   grid-gap: 16px;
   justify-content: center;
 }
 section.examples > .content {
   max-width: 100%;
-  overflow: hidden;
-  padding-inline-start: 16px;
-  padding-block-end: 16px;
-  border-inline-start: 1px solid #efefef;
+  overflow: auto;
 }
-@media (max-width: 600px) {
+@container (min-width: 600px) {
   section.examples {
-    grid-template-columns: auto;
+    grid-template-columns: 240px minmax(344px, 784px);
   }
+}
+@container (min-width: 600px) {
   section.examples > .content {
-    padding: 0px;
-    border: none;
+    /* padding: 0px;
+    border: none; */
+    padding-inline-start: 16px;
+    padding-block-end: 16px;
+    border-inline-start: 1px solid #efefef;
   }
 }
 

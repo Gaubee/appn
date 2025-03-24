@@ -4,8 +4,16 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-import {LitElement, css, html, type PropertyValues} from 'lit';
+import {
+  CSSResult,
+  LitElement,
+  css,
+  html,
+  unsafeCSS,
+  type PropertyValues,
+} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
+import {getScrollbarOverlayFlow} from '../../utils/match-media';
 import '../appn-header/appn-header';
 
 export type AppnPageMode = AppnPage['mode'];
@@ -38,75 +46,136 @@ export class AppnPage extends LitElement {
       });
     }
   }
-  static override styles = css`
-    :host {
-      display: contents;
-      --safe-area-inset-top: env(safe-area-inset-top);
-      --safe-area-inset-bottom: env(safe-area-inset-bottom);
-      --safe-area-inset-left: env(safe-area-inset-left);
-      --safe-area-inset-right: env(safe-area-inset-right);
-    }
-    dialog {
-      margin: 0;
-      border: 0;
-      padding: 0;
-      width: fit-content;
-      height: fit-content;
+  static override styles = (() => {
+    const dark = (cssText: string | CSSResult) => {
+      cssText = cssText.toString().trim();
+      if (false === cssText.startsWith(':host')) {
+        cssText = ' ' + cssText;
+      }
 
-      background-color: #fafafa;
-      border-radius: 16px;
-      box-sizing: border-box;
-      box-shadow: 0 0 2px -1px #000;
-    }
+      return unsafeCSS(`
+        :host([colorscheme='dark'])${cssText}
+        @media (prefers-color-scheme: dark) {
+          :host([colorscheme='auto'])${cssText}
+        }
+      `);
+    };
+    return css`
+      :host {
+        display: contents;
+        --safe-area-inset-top: env(safe-area-inset-top);
+        --safe-area-inset-bottom: env(safe-area-inset-bottom);
+        --safe-area-inset-left: env(safe-area-inset-left);
+        --safe-area-inset-right: env(safe-area-inset-right);
+      }
+      dialog {
+        margin: 0;
+        border: 0;
+        padding: 0;
+        width: fit-content;
+        height: fit-content;
+        overflow: hidden;
 
-    :host([mode='block']) dialog {
-      position: relative;
-    }
+        color: #333;
+        background-color: #fafafa;
+        border-radius: 16px;
+        box-sizing: border-box;
+        box-shadow: 0 0 2px -1px #000;
+      }
+      ${dark(css`
+        dialog {
+          color: #fff;
+          background-color: #333;
+        }
+      `)}
 
-    :host([mode='screen']) dialog {
-      width: 100%;
-      height: 100%;
-    }
+      :host([mode='block']) dialog {
+        position: relative;
+      }
 
-    :host([mode='screen']) dialog::backdrop {
-      background-color: #21212133;
-    }
+      :host([mode='screen']) dialog {
+        width: 100%;
+        height: 100%;
+      }
 
-    .root {
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-template-rows: min-content 1fr min-content;
-      gap: 0px 0px;
-      width: 100%;
-      height: 100%;
-    }
-    .header {
-      grid-area: 1 / 1 / 2 / 2;
-    }
-    .body {
-      grid-area: 1 / 1 / 4 / 2;
-      padding-top: calc(var(--safe-area-inset-top) + var(--page-header-height));
-      padding-left: var(--safe-area-inset-left);
-      padding-bottom: calc(
-        var(--safe-area-inset-bottom) + var(--page-footer-height)
-      );
-      padding-right: var(--safe-area-inset-right);
+      :host([mode='screen']) dialog::backdrop {
+        background-color: #21212133;
+      }
+      ${dark(css`
+        :host([mode='screen']) dialog::backdrop {
+          background-color: #fff9;
+        }
+      `)}
 
-      scroll-padding-top: calc(
-        var(--safe-area-inset-top) + var(--page-header-height)
-      );
-      scroll-padding-left: var(--safe-area-inset-left);
-      scroll-padding-bottom: calc(
-        var(--safe-area-inset-bottom) + var(--page-footer-height)
-      );
-      scroll-padding-right: var(--safe-area-inset-right);
+      .root {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: min-content 1fr min-content;
+        gap: 0px 0px;
+        width: 100%;
+        height: 100%;
+      }
+      .scrollable {
+        overflow: auto;
+        scrollbar-gutter: stable both-edges;
+        scrollbar-width: thin; /* 11px */
+        scrollbar-color: #0003 transparent;
+      }
 
-      padding-inline: 0.5em;
-    }
-    .footer {
-      grid-area: 3 / 1 / 4 / 2;
-    }
-  `;
+      ${dark(css`
+        .scrollable {
+          scrollbar-color: #fff9 transparent;
+        }
+      `)}
+
+      .header {
+        grid-area: 1 / 1 / 2 / 2;
+        z-index: 3;
+        position: sticky;
+        top: 0;
+      }
+      .translucent {
+        backdrop-filter: blur(20px) contrast(0.5) brightness(1.5);
+      }
+      ${dark(css`
+        .translucent {
+          backdrop-filter: blur(20px) contrast(0.5) brightness(0.5);
+        }
+      `)}
+
+      .body {
+        grid-area: 1 / 1 / 4 / 2;
+        z-index: 1;
+        --_pt: calc(var(--safe-area-inset-top) + var(--page-header-height));
+        --_pb: calc(var(--safe-area-inset-bottom) + var(--page-footer-height));
+
+        padding-top: var(--_pt);
+        padding-bottom: var(--_pb);
+        scroll-padding-top: var(--_pt);
+        scroll-padding-bottom: var(--_pb);
+
+        /** 在桌面端，page-padding-line 使用 scrollbar: both-edges 来提供支撑 */
+        /** 在桌面端，page-padding-line 使用 max(safe-area-inset, 0.5em) 来提供支撑 */
+        --_pl: max(var(--safe-area-inset-left), var(--_scrollbar-base, 0px));
+        --_pr: max(var(--safe-area-inset-right), var(--_scrollbar-base, 0px));
+        padding-left: var(--_pl);
+        padding-right: var(--_pr);
+        scroll-padding-left: var(--_pl);
+        scroll-padding-right: var(--_pr);
+      }
+
+      .footer {
+        grid-area: 3 / 1 / 4 / 2;
+        z-index: 2;
+        position: sticky;
+        bottom: 0;
+      }
+      ::slotted(*) {
+        /* 3D加速可以顺便解决 scrollbar: both-edges 带来的边缘裁切的BUG */
+        transform: translateZ(0);
+      }
+    `;
+  })();
 
   private __headerEleEffect?: () => void;
   protected __headerEleEffectOff() {
@@ -173,6 +242,9 @@ export class AppnPage extends LitElement {
     | 'leftslide'
     | 'rightslide' = 'screen';
 
+  @property({type: String, reflect: true, attribute: true})
+  colorScheme: 'dark' | 'light' | 'auto' = 'auto';
+
   // override disconnectedCallback(): void {
   //   super.disconnectedCallback();
   //   this.__headerEleEffectOff();
@@ -180,24 +252,37 @@ export class AppnPage extends LitElement {
   @property({type: String, reflect: true, attribute: true})
   pageTitle = '';
 
+  private __scrollbarOverlayFlow = (() => {
+    const flow = getScrollbarOverlayFlow();
+    flow.watch(() => {
+      this.requestUpdate();
+    });
+    return flow;
+  })();
   override render() {
     return html`
       <style>
         :host {
           --page-header-height: ${this.__headerHeight}px;
         }
+        /* 在移动端，scrollbar是overlay的，这里默认提供了0.5em的padding，来让 */
+        .scrollable {
+          --_scrollbar-base: ${this.__scrollbarOverlayFlow.value
+            ? '0.5em'
+            : '0px'};
+        }
       </style>
       <dialog open=${this.open} part="layer">
         <div class="root" part="root">
-          <div class="header" part="header">
+          <div class="header translucent" part="header">
             <slot name="header">
               <appn-header>${this.pageTitle}</appn-header>
             </slot>
           </div>
-          <div class="body" part="body">
+          <div class="body scrollable" part="body">
             <slot></slot>
           </div>
-          <div class="footer" part="footer">
+          <div class="footer translucent" part="footer">
             <slot name="footer"></slot>
           </div>
         </div>
