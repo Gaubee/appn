@@ -205,6 +205,7 @@ a:target {
   --underline-width: 100%;
 }
 a.target {
+  font-weight: bold;
   --underline-width: 100%;
 }
 
