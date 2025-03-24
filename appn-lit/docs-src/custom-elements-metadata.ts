@@ -63,7 +63,8 @@ export namespace CustomElementsJson {
     description?: string;
   }
 
-  export interface Declaration {
+  export interface ClassDeclaration {
+    kind: 'class';
     name: string;
     tagName: string;
     description?: string;
@@ -74,6 +75,11 @@ export namespace CustomElementsJson {
     cssParts?: CssPart[];
     cssProperties?: CssProperty[];
   }
+  export interface VariableDeclaration {
+    kind: 'variable';
+    name: string;
+  }
+  export type Declaration = ClassDeclaration | VariableDeclaration;
 
   export interface Module {
     declarations: Declaration[];
@@ -82,4 +88,9 @@ export namespace CustomElementsJson {
 
 // Export a type-safe customElements object
 import _customElements from '../custom-elements.json' with {type: 'json'};
-export const customElements = _customElements as CustomElementsJson;
+export const customElementsMetadata = _customElements as CustomElementsJson;
+
+export const customElementDeclarations = customElementsMetadata.modules
+  .map((m) => m.declarations)
+  .flat()
+  .filter((d) => d.kind === 'class');

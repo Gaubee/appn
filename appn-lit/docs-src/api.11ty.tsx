@@ -1,6 +1,6 @@
-import React, {type JSX} from 'react';
-import {customElements} from './custom-elements-metadata.ts';
 import {iter_map_not_null} from '@gaubee/util';
+import React, {type JSX} from 'react';
+import {customElementDeclarations} from './custom-elements-metadata.ts';
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -21,11 +21,10 @@ export default class Docs {
   }
 
   render(data) {
-    const elements = customElements.modules.map((m) => m.declarations).flat();
     return (
       <>
         <h1>API</h1>
-        {elements.map((element) => (
+        {customElementDeclarations.map((element) => (
           <div key={element.name}>
             <h2>&lt;{element.tagName}&gt;</h2>
             <div>{element.description}</div>
@@ -37,7 +36,7 @@ export default class Docs {
             {renderTable(
               'Properties',
               ['name', 'attribute', 'description', 'type.text', 'default'],
-              element.members.filter((m: any) => m.kind === 'field')
+              element.members.filter((m) => m.kind === 'field')
             )}
             {renderTable(
               'Methods',

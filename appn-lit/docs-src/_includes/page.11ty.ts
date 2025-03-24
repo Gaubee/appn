@@ -1,15 +1,14 @@
-import header from './header.11ty.js';
+import {customElementDeclarations} from '../custom-elements-metadata.js';
 import footer from './footer.11ty.js';
+import header from './header.11ty.js';
 import nav from './nav.11ty.js';
 import {relativePath as relative} from './relative-path.js';
-import {customElements} from '../custom-elements-metadata.js';
 
 import type {EleventyData} from './types.js';
 
 export default function (data: EleventyData): string {
   const html = String.raw;
   const {title, page, content} = data;
-  const elements = customElements.modules.map((m) => m.declarations).flat();
   return html` <!doctype html>
     <html lang="en">
       <head>
@@ -31,7 +30,7 @@ export default function (data: EleventyData): string {
         />
         <script src="/node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
         <script src="/node_modules/lit/polyfill-support.js"></script>
-        ${elements
+        ${customElementDeclarations
           .map((ele) => {
             return html`
               <script
