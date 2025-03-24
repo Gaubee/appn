@@ -117,6 +117,7 @@ export class AppnPage extends LitElement {
       }
       .scrollable {
         overflow: auto;
+        scroll-behavior: smooth;
         scrollbar-gutter: stable both-edges;
         scrollbar-width: thin; /* 11px */
         scrollbar-color: #0003 transparent;
@@ -184,47 +185,83 @@ export class AppnPage extends LitElement {
   }
   @query('.header')
   private headerEle!: HTMLElement;
+  @query('.footer')
+  private footerEle!: HTMLElement;
 
   private __headerResizeObserver?: ResizeObserver;
   private __headerHeight = 0;
+  private __footerResizeObserver?: ResizeObserver;
+  private __footerHeight = 0;
 
   override firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     // 确保元素已挂载后初始化
-    this.__setupResizeObserver();
+    this.__setupElementResizeObserver('header', this.headerEle, (height) => {
+      this.__headerHeight = height;
+      this.requestUpdate();
+    });
+    this.__setupElementResizeObserver('footer', this.footerEle, (height) => {
+      this.__footerHeight = height;
+      this.requestUpdate();
+    });
   }
 
   override updated(_changedProperties: PropertyValues) {
     super.updated(_changedProperties);
     if (_changedProperties.has('headerEle')) {
       // 元素引用变化时重新设置监听
-      this.__setupResizeObserver();
+      this.__setupElementResizeObserver('header', this.headerEle, (height) => {
+        this.__headerHeight = height;
+        this.requestUpdate();
+      });
+    }
+    if (_changedProperties.has('footerEle')) {
+      // 元素引用变化时重新设置监听
+      this.__setupElementResizeObserver('footer', this.footerEle, (height) => {
+        this.__footerHeight = height;
+        this.requestUpdate();
+      });
     }
   }
 
-  private __setupResizeObserver() {
+  private __setupElementResizeObserver(
+    type: 'header' | 'footer',
+    element: HTMLElement,
+    callback: (height: number) => void
+  ) {
     // 先清理旧监听器
-    this.__headerResizeObserver?.disconnect();
+    if (type === 'header') {
+      this.__headerResizeObserver?.disconnect();
+    } else {
+      this.__footerResizeObserver?.disconnect();
+    }
 
-    if (!this.headerEle) return;
+    if (!element) return;
 
-    this.__headerResizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         // 兼容性处理（不同浏览器实现不同）
         const blockSize =
           entry.borderBoxSize?.[0]?.blockSize || entry.contentRect.height;
-        this.__headerHeight = blockSize;
-        this.requestUpdate(); // 触发重新渲染
+        callback(blockSize);
       }
     });
 
-    this.__headerResizeObserver.observe(this.headerEle);
+    resizeObserver.observe(element);
+
+    // 保存观察器引用
+    if (type === 'header') {
+      this.__headerResizeObserver = resizeObserver;
+    } else {
+      this.__footerResizeObserver = resizeObserver;
+    }
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     // 组件卸载时清理
     this.__headerResizeObserver?.disconnect();
+    this.__footerResizeObserver?.disconnect();
   }
 
   /**
@@ -264,6 +301,7 @@ export class AppnPage extends LitElement {
       <style>
         :host {
           --page-header-height: ${this.__headerHeight}px;
+          --page-footer-height: ${this.__footerHeight}px;
         }
         /* 在移动端，scrollbar是overlay的，这里默认提供了0.5em的padding，来让 */
         .scrollable {
