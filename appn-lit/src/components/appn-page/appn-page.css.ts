@@ -73,6 +73,13 @@ for (const systemColor of [
   });
 }
 export const styles = css`
+  @supports not (color: AccentColor) {
+    :host {
+      --system-color-accent-color: #2e75ff;
+      --system-color-accent-color-text: #fff;
+    }
+  }
+
   :host {
     display: contents;
     --safe-area-inset-top: env(safe-area-inset-top);
@@ -172,8 +179,8 @@ export const styles = css`
   .scrollable {
     overflow: auto;
     scroll-behavior: smooth;
-    scrollbar-gutter: stable both-edges;
-    scrollbar-width: thin; /* 11px */
+    /* scrollbar-gutter: stable both-edges; */
+    scrollbar-width: none;
     scrollbar-color: var(--system-color-canvas-text) transparent;
     scrollbar-color: color-mix(
         in hsl,
@@ -181,14 +188,25 @@ export const styles = css`
         transparent 75.3%
       )
       transparent;
+    position: absolute;
   }
-
+  /* .scrollable::-webkit-scrollbar {
+    display: none;
+  } */
+  .scrollable::after {
+    content: ' ';
+    overflow: scroll;
+    position: absolute;
+    width: 10px;
+    height: 100%;
+    right: 0;
+    top: 0;
+  }
   .header {
     grid-area: 1 / 1 / 2 / 2;
     z-index: 3;
     position: sticky;
     top: 0;
-    padding-top: var(--safe-area-inset-top);
   }
   ${ios(css`
     .header {
@@ -234,17 +252,37 @@ export const styles = css`
     padding-right: var(--_pr);
     scroll-padding-left: var(--_pl);
     scroll-padding-right: var(--_pr);
+    height: fit-content;
   }
 
   .footer {
     grid-area: 3 / 1 / 4 / 2;
     z-index: 2;
     position: sticky;
-    bottom: 0;
+    top: calc(100% - var(--page-footer-height));
     padding-bottom: var(--safe-area-inset-bottom);
   }
   ::slotted(*) {
     /* 3D加速可以顺便解决 scrollbar: both-edges 带来的边缘裁切的BUG */
     transform: translateZ(0);
+  }
+
+  .stuck-top {
+    container-type: scroll-state;
+  }
+  .stuck-top appn-header,
+  ::slotted([slot='header']) {
+    background-color: red;
+  }
+  @container scroll-state(stuck: top) {
+    .stuck-top appn-header,
+    ::slotted([slot='header']) {
+      background: blue;
+    }
+  }
+  .stuck-top appn-header {
+    @container scroll-state(stuck: top) {
+      background: blue;
+    }
   }
 `;

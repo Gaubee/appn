@@ -1,7 +1,7 @@
 /**
  * @license
- * Copyright 2019 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright 2025 Gaubee
+ * SPDX-License-Identifier: MIT
  */
 
 import {LitElement, html} from 'lit';
@@ -26,16 +26,24 @@ export class AppnPage extends LitElement {
 
   @state()
   private __headerHeight = 0;
-  private __headerSize = new ResizeController(this, (entry) => {
-    this.__headerHeight =
-      entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
-  });
+  private __headerSize = new ResizeController(
+    this,
+    (entry) => {
+      this.__headerHeight =
+        entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+    },
+    {box: 'border-box'}
+  );
   @state()
   private __footerHeight = 0;
-  private __footerSize = new ResizeController(this, (entry) => {
-    this.__footerHeight =
-      entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
-  });
+  private __footerSize = new ResizeController(
+    this,
+    (entry) => {
+      this.__footerHeight =
+        entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+    },
+    {box: 'border-box'}
+  );
 
   /**
    * The name to say "Hello" to.
@@ -96,9 +104,9 @@ export class AppnPage extends LitElement {
         }
       </style>
       <dialog open=${this.open} part="layer">
-        <div class="root" part="root">
+        <div class="root scrollable" part="root">
           <div
-            class="header toolbar"
+            class="header toolbar stuck-top"
             part="header"
             ${this.__headerSize.observe()}
           >
@@ -106,7 +114,7 @@ export class AppnPage extends LitElement {
               <appn-header>${this.pageTitle}</appn-header>
             </slot>
           </div>
-          <div class="body scrollable" part="body">
+          <div class="body" part="body">
             <slot></slot>
           </div>
           <div

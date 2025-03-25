@@ -7,11 +7,9 @@ import {
 import {Directive, directive, PartType, type PartInfo} from 'lit/directive.js';
 
 class ResizeDirective extends Directive {
-  private __observedElement?: Element;
-
   constructor(partInfo: PartInfo) {
     super(partInfo);
-    console.log('ResizeDirective created', partInfo);
+    console.debug('ResizeDirective created', partInfo);
     if (partInfo.type !== PartType.ELEMENT) {
       throw new Error(
         'The `resizeDirective` directive must be used on property of Element or SVGElement.'
@@ -23,23 +21,8 @@ class ResizeDirective extends Directive {
     partInfo: ElementPart,
     [resizeController]: [ResizeController]
   ) {
-    console.log('ResizeDirective > update()');
-    const observedElement = partInfo.element;
-    if (this.__observedElement !== observedElement) {
-      if (this.__observedElement != null) {
-        console.log(
-          'ResizeDirective > update() > Unobserving',
-          this.__observedElement
-        );
-        resizeController.__resizeObserver?.unobserve(this.__observedElement);
-      }
-      console.log(
-        'ResizeDirective > update() > Now observing',
-        observedElement
-      );
-      this.__observedElement = observedElement;
-      resizeController.__resizeObserver?.observe(observedElement);
-    }
+    resizeController.bindElement(partInfo.element);
+
     return noChange;
   }
   override render(_: ResizeController) {
@@ -54,26 +37,48 @@ export interface ResizeSize {
   inlineSize: number;
 }
 export class ResizeController implements ReactiveController {
-  __resizeObserver?: ResizeObserver;
+  __resizeObserver: ResizeObserver;
+  __options;
   __host;
 
   __callback;
   constructor(
     host: ReactiveControllerHost,
-    callback: (entry: ResizeObserverEntry) => void
+    callback: (entry: ResizeObserverEntry) => void,
+    options?: ResizeObserverOptions
   ) {
     (this.__host = host).addController(this); // register for lifecycle updates
     this.__callback = callback;
-  }
-  hostConnected(): void {
+    this.__options = options;
     this.__resizeObserver = new ResizeObserver((entries) => {
       this.__callback(entries[0]);
     });
   }
+  hostConnected(): void {
+    if (this.__bindingElement) {
+      this.bindElement(this.__bindingElement);
+    }
+  }
 
   hostDisconnected(): void {
-    this.__resizeObserver?.disconnect();
-    this.__resizeObserver = undefined;
+    this.__resizeObserver.disconnect();
+  }
+  private __bindingElement?: Element;
+  bindElement(ele: Element) {
+    console.debug('ResizeController > bindElement');
+    if (this.__bindingElement !== ele) {
+      if (this.__bindingElement != null) {
+        console.debug(
+          'ResizeController > bindElement > Unobserving',
+          this.__bindingElement
+        );
+        this.__resizeObserver.unobserve(this.__bindingElement);
+      }
+      console.debug('ResizeController > bindElement > Now observing', ele);
+      this.__bindingElement = ele;
+      this.__resizeObserver.observe(ele, this.__options);
+    }
+    return this;
   }
 
   observe() {

@@ -1,7 +1,7 @@
 /**
  * @license
- * Copyright 2019 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright 2025 Gaubee
+ * SPDX-License-Identifier: MIT
  */
 
 import {LitElement, html, css} from 'lit';
@@ -28,6 +28,7 @@ export class AppnHeader extends LitElement {
     :host {
       display: flex;
       flex-direction: row;
+      padding-top: var(--safe-area-inset-top, 0px);
     }
     .leading {
       flex-shrink: 0;
