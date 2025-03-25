@@ -22,24 +22,6 @@ export class AppnPage extends LitElement {
   static get all() {
     return this.__all;
   }
-  static {
-    for (const pos of ['top', 'right', 'bottom', 'left']) {
-      CSS.registerProperty({
-        name: `--safe-area-inset-${pos}`,
-        syntax: '<length-percentage>',
-        inherits: true,
-        initialValue: '0px',
-      });
-    }
-    for (const area of ['header', 'footer']) {
-      CSS.registerProperty({
-        name: `--page-${area}-height`,
-        syntax: '<length-percentage>',
-        inherits: true,
-        initialValue: `0px`,
-      });
-    }
-  }
   static override styles = styles;
 
   @state()
@@ -72,6 +54,9 @@ export class AppnPage extends LitElement {
 
   @property({type: String, reflect: true, attribute: 'color-scheme'})
   colorScheme: 'dark' | 'light' | 'auto' = 'auto';
+
+  @property({type: String, reflect: true, attribute: true})
+  theme: 'ios' | 'unstyled' = 'unstyled'; // 目前不支持 'md'
 
   private __colorSchemeFlow = flowColorScheme(this);
   get isDark() {
@@ -113,7 +98,7 @@ export class AppnPage extends LitElement {
       <dialog open=${this.open} part="layer">
         <div class="root" part="root">
           <div
-            class="header translucent"
+            class="header toolbar"
             part="header"
             ${this.__headerSize.observe()}
           >
@@ -125,7 +110,7 @@ export class AppnPage extends LitElement {
             <slot></slot>
           </div>
           <div
-            class="footer translucent"
+            class="footer toolbar"
             part="footer"
             ${this.__footerSize.observe()}
           >

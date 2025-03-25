@@ -5,7 +5,7 @@
 body {
   margin: 0;
   color: #333;
-  font-family:  'Open Sans', arial, sans-serif;
+  font-family: 'Open Sans', arial, sans-serif;
   min-width: min-content;
   min-height: 100vh;
   font-size: 18px;
@@ -46,7 +46,7 @@ header {
   text-wrap: balance;
   text-align: center;
   color: white;
-  padding: 0 24px;
+  padding: 24px;
 }
 .bg-ani {
   position: relative;

@@ -42,14 +42,15 @@ export default class Page {
       }
       .item {
         background: linear-gradient(45deg, #f006, #00f6);
+        height: 100px;
       }
     `;
     return (
       <>
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
 
-        <appn-page pagetitle="Page Title">
-          {Array.from({length: 30}, (_, i) => (
+        <appn-page pagetitle="Page Title" theme="ios">
+          {Array.from({length: 60}, (_, i) => (
             <div className="item">This is page content. index: {i + 1}</div>
           ))}
           <div slot="footer" style={{textAlign: 'center'}}>
