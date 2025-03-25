@@ -1,17 +1,24 @@
-import {func_remember} from '@gaubee/util';
 import {StateFlow} from '@gaubee/flow';
+import {func_lazy} from '@gaubee/util';
+import type {LitElement} from 'lit';
 
-export const getColorSchemeFlow = func_remember(() => {
+export const flowColorScheme = func_lazy(() => {
   const colorSchemeMedia = matchMedia('(prefers-color-scheme: dark)');
-  const colorScheme = (isDark: boolean) => (isDark ? 'dark' : 'light');
+  const colorScheme = (isDark: boolean) =>
+    isDark ? ('dark' as const) : ('light' as const);
   const flow = new StateFlow(colorScheme(colorSchemeMedia.matches));
   // 添加监听（现代浏览器）
   colorSchemeMedia.addEventListener('change', (e) => {
     flow.value = colorScheme(e.matches);
   });
-  return flow;
+  return (ele?: LitElement) => {
+    if (ele) {
+      flow.watch(() => ele.requestUpdate());
+    }
+    return flow;
+  };
 });
-export const getScrollbarOverlayFlow = func_remember(() => {
+export const flowScrollbarOverlay = func_lazy(() => {
   const flow = new StateFlow(
     /// 简单根据当前的光标行为判断一下，但这种判断并不准确，比如说开发模式下，模拟移动端，打开元素选择器，pointer的行为会发生改变
     matchMedia('(hover: none) and (pointer: coarse)').matches
@@ -73,5 +80,10 @@ export const getScrollbarOverlayFlow = func_remember(() => {
   const outer = new ScrollbarTracker();
   document.body.appendChild(outer);
 
-  return flow; // 返回滚动条宽度
+  return (ele?: LitElement) => {
+    if (ele) {
+      flow.watch(() => ele.requestUpdate());
+    }
+    return flow;
+  }; // 返回滚动条宽度
 });

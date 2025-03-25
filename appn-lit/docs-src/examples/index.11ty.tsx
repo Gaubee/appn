@@ -19,6 +19,26 @@ export default class Page {
         width: 280px;
         height: 600px;
         position: relative;
+        border-radius: 24px;
+        --safe-area-inset-top: 22px;
+        --safe-area-inset-bottom: 20px;
+
+        position: relative;
+      }
+      appn-page::part(layer)::after {
+        content: ' ';
+        display: block;
+        position: absolute;
+        width: 98px;
+        height: 4px;
+        border-radius: 2px;
+        backdrop-filter: invert(1);
+        bottom: calc((20px - 4px) * 0.38);
+        left: calc((280px - 98px) / 2);
+        z-index: 10;
+        transition-property: all;
+        transition-duration: 300ms;
+        transition-timing-function: ease-out;
       }
       .item {
         background: linear-gradient(45deg, #f006, #00f6);

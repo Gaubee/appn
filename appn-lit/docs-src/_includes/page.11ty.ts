@@ -42,7 +42,7 @@ export default function (data: EleventyData): string {
           .join('\n')}
       </head>
       <body>
-        ${header(data)} ${nav(data)}
+        ${header(data, {default: nav(data)})}
         <div id="main-wrapper">
           <main>${content}</main>
         </div>

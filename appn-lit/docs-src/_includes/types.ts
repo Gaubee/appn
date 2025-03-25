@@ -21,3 +21,5 @@ export interface EleventyData {
   description?: string;
   customElements?: CustomElementsJson;
 }
+
+export type Slots<K extends string> = {[slotName in K]?: string};

@@ -13,6 +13,7 @@
       "DOM",
       "DOM.Iterable"
     ],
+    "noEmitOnError": false,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

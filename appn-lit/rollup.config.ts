@@ -40,19 +40,19 @@ export default defineConfig({
   plugins: [
     replace({preventAssignment: false, 'Reflect.decorate': 'undefined'}),
     resolve(),
-    /**
-     * This minification setup serves the static site generation.
-     * For bundling and minification, check the README.md file.
-     */
-    terser({
-      ecma: 2020,
-      module: true,
-      mangle: {
-        properties: {
-          regex: /^__/,
-        },
-      },
-    }),
+    // /**
+    //  * This minification setup serves the static site generation.
+    //  * For bundling and minification, check the README.md file.
+    //  */
+    // terser({
+    //   ecma: 2020,
+    //   module: true,
+    //   mangle: {
+    //     properties: {
+    //       regex: /^__/,
+    //     },
+    //   },
+    // }),
     summary(),
   ],
 });
