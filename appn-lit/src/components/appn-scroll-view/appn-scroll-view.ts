@@ -52,12 +52,16 @@ export class AppnScrollView extends LitElement {
       position: relative;
       overflow: scroll;
       scroll-behavior: smooth;
+      container-type: size;
+      container-type: size scroll-state;
+      container-name: scrollview;
     }
     .content {
       width: max-content;
       height: max-content;
       z-index: 1;
       position: relative;
+      transform: translateZ(0); // 渲染成独立的层
     }
     .scrollbar-sticky {
       position: sticky;
@@ -88,15 +92,15 @@ export class AppnScrollView extends LitElement {
       right: 0;
       top: 0;
       width: var(--scrollbar-track-size);
-      height: calc(100% - var(--scrollbar-track-size)); // 为 corner 预留位置
+      height: calc(100% - var(--scrollbar-track-size)); /* 为 corner 预留位置 */
     }
     .axis-x {
       overflow-x: auto;
       overflow-y: clip;
       left: 0;
       bottom: 0;
-      width: calc(100% - var(--scrollbar-track-size)); // 为 corner 预留位置
       height: var(--scrollbar-track-size);
+      width: calc(100% - var(--scrollbar-track-size)); /* 为 corner 预留位置 */
     }
   `;
   @property({
@@ -303,7 +307,7 @@ export class AppnScrollView extends LitElement {
               </div>
             </div>`}
       </div>
-      <div class="content" ${this.__contentSize.observe()}>
+      <div part="content" class="content" ${this.__contentSize.observe()}>
         <slot></slot>
       </div>
     `;

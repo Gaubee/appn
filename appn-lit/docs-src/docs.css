@@ -35,7 +35,7 @@ main {
   padding: 0 24px;
 }
 
-header {
+body > header {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -116,7 +116,7 @@ header {
     background-position: 0% 100%;
   }
 }
-header > nav {
+body > header > nav {
   margin-top: 2em;
   padding: 0 2em;
   border-radius: 2em;
@@ -124,7 +124,7 @@ header > nav {
   width: fit-content;
 }
 
-footer {
+body > footer {
   width: 100%;
   min-height: 120px;
   color: white;
@@ -133,7 +133,7 @@ footer {
   justify-content: center;
   margin-top: 64px;
 }
-footer a {
+body > footer a {
   display: inline-block;
   width: fit-content;
   height: fit-content;

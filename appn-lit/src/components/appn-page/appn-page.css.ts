@@ -203,7 +203,7 @@ export const styles = css`
     top: 0;
   }
   .header {
-    width: var(--view-width);
+    width: 100cqw;
     grid-area: 1 / 1 / 2 / 2;
     z-index: 3;
     position: sticky;
@@ -235,15 +235,16 @@ export const styles = css`
   )}
 
   .body {
-    width: var(--view-width);
+    width: 100cqw;
     grid-area: 1 / 1 / 4 / 2;
     z-index: 1;
     --_pt: var(--page-header-height);
     --_pb: var(--page-footer-height);
 
-    padding-top: var(--_pt);
+    /* padding-top: var(--_pt);
+    scroll-padding-top: var(--_pt); */
+    margin-top: calc(var(--_pb) * -1);
     padding-bottom: var(--_pb);
-    scroll-padding-top: var(--_pt);
     scroll-padding-bottom: var(--_pb);
 
     /** 在桌面端，page-padding-line 使用 scrollbar: both-edges 来提供支撑 */
@@ -258,7 +259,7 @@ export const styles = css`
   }
 
   .footer {
-    width: var(--view-width);
+    width: 100cqw;
     grid-area: 3 / 1 / 4 / 2;
     z-index: 2;
     position: sticky;

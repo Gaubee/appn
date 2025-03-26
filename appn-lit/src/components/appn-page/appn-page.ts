@@ -107,7 +107,7 @@ export class AppnPage extends LitElement {
       <dialog open=${this.open} part="layer">
         <appn-scroll-view class="root" part="root">
           <div
-            class="header toolbar stuck-top"
+            class="header toolbar "
             part="header"
             ${this.__headerSize.observe()}
           >
@@ -115,15 +115,16 @@ export class AppnPage extends LitElement {
               <appn-header>${this.pageTitle}</appn-header>
             </slot>
           </div>
-          <div class="body" part="body">
-            <slot></slot>
-          </div>
           <div
             class="footer toolbar"
             part="footer"
             ${this.__footerSize.observe()}
           >
             <slot name="footer"></slot>
+          </div>
+
+          <div class="body" part="body">
+            <slot></slot>
           </div>
         </appn-scroll-view>
       </dialog>
