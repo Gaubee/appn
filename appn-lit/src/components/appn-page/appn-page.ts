@@ -9,6 +9,7 @@ import {customElement, property, state} from 'lit/decorators.js';
 import {flowColorScheme, flowScrollbarOverlay} from '../../utils/match-media';
 import {ResizeController} from '../../utils/resize-controller';
 import '../appn-header/appn-header';
+import '../appn-scroll-view/appn-scroll-view';
 import {styles} from './appn-page.css';
 
 export type AppnPageMode = AppnPage['mode'];
@@ -104,7 +105,7 @@ export class AppnPage extends LitElement {
         }
       </style>
       <dialog open=${this.open} part="layer">
-        <div class="root scrollable" part="root">
+        <appn-scroll-view class="root" part="root">
           <div
             class="header toolbar stuck-top"
             part="header"
@@ -124,7 +125,7 @@ export class AppnPage extends LitElement {
           >
             <slot name="footer"></slot>
           </div>
-        </div>
+        </appn-scroll-view>
       </dialog>
     `;
   }

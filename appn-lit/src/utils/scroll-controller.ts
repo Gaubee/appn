@@ -5,6 +5,10 @@ import {
   type ReactiveControllerHost,
 } from 'lit';
 import {Directive, type PartInfo, PartType, directive} from 'lit/directive.js';
+import {
+  addScrollendEventListener,
+  removeScrollendEventListener,
+} from '../ponyfill/scrollend';
 
 class ScrollDirective extends Directive {
   constructor(partInfo: PartInfo) {
@@ -73,6 +77,18 @@ export class ScrollController implements ReactiveController {
     }
     return this;
   }
+  unbindElement(ele = this.__bindingElement) {
+    if (this.__bindingElement === ele && this.__bindingElement) {
+      if (this.__bindingElement != null) {
+        console.debug(
+          'ScrollController > unbindElement',
+          this.__bindingElement
+        );
+        this.__scrollObserver.unobserve(this.__bindingElement);
+        this.__bindingElement = undefined;
+      }
+    }
+  }
   observe() {
     // Pass a reference to the controller so the directive can
     // notify the controller on size changes.
@@ -98,7 +114,7 @@ class ScrollObserver {
     }
     this.__eles.set(ele, opts);
     ele.addEventListener('scroll', this.__onscroll);
-    ele.addEventListener('scrollend', this.__onscrollend);
+    addScrollendEventListener(ele, this.__onscrollend);
   }
   unobserve(ele: Element) {
     if (!this.__eles.has(ele)) {
@@ -106,7 +122,7 @@ class ScrollObserver {
     }
     this.__eles.delete(ele);
     ele.removeEventListener('scroll', this.__onscroll);
-    ele.removeEventListener('scrollend', this.__onscrollend);
+    removeScrollendEventListener(ele, this.__onscrollend);
   }
   disconnect() {
     for (const ele of [...this.__eles.keys()]) {

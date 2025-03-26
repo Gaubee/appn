@@ -12,3 +12,11 @@
    - 有垫片
    - chrome 121+
    - safari 18.2+
+1. [`overflow:clip`](https://caniuse.com/css-overflow)
+   - 无垫片
+   - chrome 90+
+   - safari 16.0+
+1. [`scrollend event`](https://caniuse.com/mdn-api_element_scrollend_event)
+   - 有垫片
+   - chrome 114+
+   - safari 未支持

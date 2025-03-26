@@ -7,7 +7,7 @@ export default class Page {
       title: 'Appn ➡️ AppnScrollView Example',
       tags: 'example',
       name: 'AppnScrollView',
-      description: 'A basic example',
+      description: 'appn-scroll-view',
     };
   }
   render(data) {
@@ -18,12 +18,12 @@ export default class Page {
         margin: 8px;
         width: 300px;
         height: 300px;
-        border-radius: 24px;
+        border-radius: 8px;
       }
       .item {
         background: linear-gradient(45deg, #f006, #00f6);
         height: 100px;
-        width: 100%;
+        width: 800px;
       }
     `;
     return (

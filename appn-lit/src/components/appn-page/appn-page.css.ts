@@ -203,6 +203,7 @@ export const styles = css`
     top: 0;
   }
   .header {
+    width: var(--view-width);
     grid-area: 1 / 1 / 2 / 2;
     z-index: 3;
     position: sticky;
@@ -234,6 +235,7 @@ export const styles = css`
   )}
 
   .body {
+    width: var(--view-width);
     grid-area: 1 / 1 / 4 / 2;
     z-index: 1;
     --_pt: var(--page-header-height);
@@ -256,6 +258,7 @@ export const styles = css`
   }
 
   .footer {
+    width: var(--view-width);
     grid-area: 3 / 1 / 4 / 2;
     z-index: 2;
     position: sticky;
