@@ -105,7 +105,7 @@ export class AppnPage extends LitElement {
         }
       </style>
       <dialog open=${this.open} part="layer">
-        <appn-scroll-view class="root" part="root">
+        <appn-scroll-view class="root stuck-top" part="root">
           <div
             class="header toolbar "
             part="header"

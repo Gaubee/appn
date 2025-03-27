@@ -6,20 +6,23 @@ export interface EleventyData {
     url: string;
     [key: string]: unknown;
   };
+  tags?: string | string[];
   content: string;
   collections?: {
     example?: Array<{
       url: string;
-      data: {
-        description: string;
-        [key: string]: unknown;
-      };
+      data: EleventyExampleData;
     }>;
     [key: string]: unknown;
   };
-  name?: string;
   description?: string;
   customElements?: CustomElementsJson;
+}
+
+export interface EleventyExampleData extends EleventyData {
+  tags: 'example';
+  name: string;
+  showNav?: boolean;
 }
 
 export type Slots<K extends string> = {[slotName in K]?: string};

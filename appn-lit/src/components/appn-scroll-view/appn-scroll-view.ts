@@ -12,7 +12,6 @@ import {
   propertyEvent,
   type PropertyEventListener,
 } from '../../utils/property-event';
-import {accessor} from '@gaubee/util';
 
 /**
  * A scroll-view element of the style 'overflow: overlay'.
@@ -24,7 +23,7 @@ import {accessor} from '@gaubee/util';
  * - CSS Scrollbars specification compliant
  *
  * @fires scrollend - Provides polyfill for browsers without native scrollend support
- * @slot default - Scrollable content container
+ * @slot - Scrollable content container
  * @csspart scrollbar - Scrollbar track
  * @csspart axis-y - Vertical scrollbar track
  * @csspart axis-x - Horizontal scrollbar track
@@ -40,7 +39,7 @@ import {accessor} from '@gaubee/util';
  * - 符合 CSS 滚动条标准规范
  *
  * @fires scrollend - 为不支持原生scrollend事件的浏览器提供垫片
- * @slot default - 滚动内容容器
+ * @slot - 滚动内容容器
  * @csspart scrollbar - 滚动条轨道
  * @csspart axis-y - 垂直滚动条轨道
  * @csspart axis-x - 水平滚动条轨道

@@ -79,6 +79,7 @@
     "@web/test-runner": "^0.20.0",
     "@web/test-runner-playwright": "^0.11.0",
     "@webcomponents/webcomponentsjs": "^2.8.0",
+    "es-escape-html": "^0.1.1",
     "eslint": "^9.22.0",
     "lit-analyzer": "^2.0.3",
     "prettier": "^3.5.3",

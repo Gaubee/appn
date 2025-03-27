@@ -272,7 +272,7 @@ export const styles = css`
   }
 
   .stuck-top {
-    container-type: scroll-state;
+    /* container-type: scroll-state; */
   }
   .stuck-top appn-header,
   ::slotted([slot='header']) {
@@ -281,12 +281,12 @@ export const styles = css`
   @container scroll-state(stuck: top) {
     .stuck-top appn-header,
     ::slotted([slot='header']) {
-      background: blue;
+      background: #00F6;
     }
   }
   .stuck-top appn-header {
     @container scroll-state(stuck: top) {
-      background: blue;
+      background: #00F6;
     }
   }
 `;

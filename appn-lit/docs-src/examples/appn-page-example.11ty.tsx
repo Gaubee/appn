@@ -4,10 +4,9 @@ export default class Page {
   data() {
     return {
       layout: 'example.11ty.ts',
-      title: 'Appn ➡️ AppnPage Example',
       tags: 'example',
       name: 'AppnPage',
-      description: 'A basic example',
+      description: '<appn-page> basic usage',
     };
   }
   render(data) {

@@ -1,13 +1,12 @@
 import React from 'react';
-import {styleText} from './scroll-container.css.ts';
+import {styleText} from './css-scroll-container.css.ts';
 
 export default class Page {
   data() {
     return {
       layout: 'example.11ty.ts',
-      title: 'Appn ➡️ Classic Example',
       tags: 'example',
-      name: 'scroll-state() Example 1',
+      name: 'css `scroll-state()`',
       description: 'A shadow visual affordance to indicate scroll',
     };
   }

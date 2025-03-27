@@ -4,10 +4,9 @@ export default class Page {
   data() {
     return {
       layout: 'example.11ty.ts',
-      title: 'Appn ➡️ AppnScrollView Example',
       tags: 'example',
       name: 'AppnScrollView',
-      description: 'appn-scroll-view',
+      description: '<appn-scroll-view> basic usage',
     };
   }
   render(data) {
