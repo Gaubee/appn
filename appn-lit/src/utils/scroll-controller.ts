@@ -61,6 +61,9 @@ export class ScrollController implements ReactiveController {
     this.__scrollObserver.disconnect();
   }
   private __bindingElement?: Element;
+  get bindingElement() {
+    return this.__bindingElement;
+  }
   bindElement(ele: Element) {
     console.debug('ScrollController > bindElement');
     if (this.__bindingElement !== ele) {

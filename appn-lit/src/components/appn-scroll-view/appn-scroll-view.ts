@@ -163,16 +163,14 @@ export class AppnScrollView extends LitElement {
     }
   });
 
-  /** 这两个元素有且只在这个 ScrollController 的回调中使用，否则需要考虑 cache=false */
-  @query('.axis-y', true)
-  eleAxisY!: HTMLDivElement;
-  @query('.axis-x', true)
-  eleAxisX!: HTMLDivElement;
   private __hostScroll = new ScrollController(this, (event) => {
     if (this.__canEffectScrollEvent(event)) {
-      const {eleAxisY, eleAxisX} = this;
-      eleAxisY.scrollTop = event.target.scrollTop;
-      eleAxisX.scrollLeft = event.target.scrollLeft;
+      const eleAxisX = this.__axisXScroll.bindingElement;
+      const eleAxisY = this.__axisYScroll.bindingElement;
+      if (eleAxisX && eleAxisY) {
+        eleAxisY.scrollTop = event.target.scrollTop;
+        eleAxisX.scrollLeft = event.target.scrollLeft;
+      }
     }
   });
 
@@ -289,7 +287,7 @@ export class AppnScrollView extends LitElement {
       </style>
       <div class="scrollbar-sticky">
         ${canOverlayScrollbar
-          ? ''
+          ? null
           : html`<div class="scrollbar-wrapper">
               <div
                 part="scrollbar"
