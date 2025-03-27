@@ -47,7 +47,7 @@ import {
  * </i18n>
  */
 @customElement('appn-scroll-view')
-export class AppnScrollView extends LitElement {
+export class AppnScrollViewElement extends LitElement {
   static override styles = css`
     @property --scrollbar-color {
       syntax: '<color>';
@@ -174,26 +174,43 @@ export class AppnScrollView extends LitElement {
     return isCurrentTarget;
   }
 
-  private __axisYScroll = new ScrollController(this, (event) => {
-    if (this.__canEffectScrollEvent(event)) {
-      // this.scrollTop = event.target.scrollTop;
-      this.scrollTo({top: event.target.scrollTop, behavior: 'instant'});
+  private __axisYScroll = new ScrollController(
+    this,
+    (event) => {
+      if (this.__canEffectScrollEvent(event)) {
+        // this.scrollTop = event.target.scrollTop;
+        this.scrollTo({top: event.target.scrollTop, behavior: 'instant'});
+      }
+    },
+    {
+      init: (element) => {
+        element.scrollTop = this.scrollTop;
+      },
     }
-  });
-  private __axisXScroll = new ScrollController(this, (event) => {
-    if (this.__canEffectScrollEvent(event)) {
-      // this.scrollLeft = event.target.scrollLeft;
-      this.scrollTo({left: event.target.scrollLeft, behavior: 'instant'});
+  );
+  private __axisXScroll = new ScrollController(
+    this,
+    (event) => {
+      if (this.__canEffectScrollEvent(event)) {
+        // this.scrollLeft = event.target.scrollLeft;
+        this.scrollTo({left: event.target.scrollLeft, behavior: 'instant'});
+      }
+    },
+    {
+      init: (element) => {
+        element.scrollLeft = this.scrollLeft;
+      },
     }
-  });
+  );
 
   private __hostScroll = new ScrollController(this, (event) => {
     if (this.__canEffectScrollEvent(event)) {
       const eleAxisX = this.__axisXScroll.bindingElement;
       const eleAxisY = this.__axisYScroll.bindingElement;
       if (eleAxisX && eleAxisY) {
-        eleAxisY.scrollTop = event.target.scrollTop;
-        eleAxisX.scrollLeft = event.target.scrollLeft;
+        const host = event.target;
+        eleAxisY.scrollTop = host.scrollTop;
+        eleAxisX.scrollLeft = host.scrollLeft;
       }
     }
   });
@@ -254,7 +271,7 @@ export class AppnScrollView extends LitElement {
        * 首先隐藏最顶层的 scrollbar
        * 然后渲染自定义的 scrollbar
        */
-      if (AppnScrollView.__supportsCssScrollbar) {
+      if (AppnScrollViewElement.__supportsCssScrollbar) {
         injectCss.push(css`
           :host {
             --scrollbar-track-size: ${scrollbarSize + 4}px;

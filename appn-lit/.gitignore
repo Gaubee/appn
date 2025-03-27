@@ -6,3 +6,4 @@
 /bundle/
 custom-elements.json
 tsconfig.tsbuildinfo
+/src/react.ts

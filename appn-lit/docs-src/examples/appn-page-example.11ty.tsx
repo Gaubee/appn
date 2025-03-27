@@ -1,3 +1,4 @@
+/// <reference path='../../src/react.ts'/>
 import React from 'react';
 
 export default class Page {
@@ -47,16 +48,21 @@ export default class Page {
     return (
       <>
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
-
-        <appn-page pagetitle="Page Title" theme="ios">
-          {/* <appn-header slot="header">嘻嘻哈哈</appn-header> */}
-          {Array.from({length: 60}, (_, i) => (
-            <div className="item">This is page content. index: {i + 1}</div>
-          ))}
-          <div slot="footer" style={{textAlign: 'center'}}>
-            This is Page Footer
-          </div>
-        </appn-page>
+        <appn-ios-theme>
+          <appn-page theme="ios">
+            <appn-header slot="header" translucent>
+              <appn-top-bar>Page Title</appn-top-bar>
+            </appn-header>
+            {Array.from({length: 60}, (_, i) => (
+              <appn-view className="item">
+                This is page content. index: {i + 1}
+              </appn-view>
+            ))}
+            <appn-footer slot="footer" translucent>
+              <appn-top-bar>This is Page Footer</appn-top-bar>
+            </appn-footer>
+          </appn-page>
+        </appn-ios-theme>
       </>
     );
   }

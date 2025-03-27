@@ -6,20 +6,29 @@
 
 import {LitElement, html} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {flowColorScheme, flowScrollbarOverlay} from '../../utils/match-media';
+import {flowColorScheme} from '../../utils/match-media';
 import {ResizeController} from '../../utils/resize-controller';
 import '../appn-header/appn-header';
 import '../appn-scroll-view/appn-scroll-view';
 import {styles} from './appn-page.css';
+import {provide} from '@lit/context';
+import {
+  appnThemeContext,
+  type AppnTheme,
+} from '../appn-theme/app-theme-context';
+import {
+  unstyledDarkTheme,
+  unstyledLightTheme,
+} from '../appn-theme/unstyled-theme';
 
-export type AppnPageMode = AppnPage['mode'];
+export type AppnPageMode = AppnPageElement['mode'];
 
 /**
  *
  */
 @customElement('appn-page')
-export class AppnPage extends LitElement {
-  private static __all: readonly AppnPage[] = Object.freeze([]);
+export class AppnPageElement extends LitElement {
+  private static __all: readonly AppnPageElement[] = Object.freeze([]);
   static get all() {
     return this.__all;
   }
@@ -64,9 +73,6 @@ export class AppnPage extends LitElement {
   @property({type: String, reflect: true, attribute: 'color-scheme'})
   accessor colorScheme: 'dark' | 'light' | 'auto' = 'auto';
 
-  @property({type: String, reflect: true, attribute: true})
-  accessor theme: 'ios' | 'unstyled' = 'unstyled'; // 目前不支持 'md'
-
   private __colorSchemeFlow = flowColorScheme(this);
   get isDark() {
     return (
@@ -76,19 +82,21 @@ export class AppnPage extends LitElement {
     );
   }
 
-  // override disconnectedCallback(): void {
-  //   super.disconnectedCallback();
-  //   this.__headerEleEffectOff();
-  // }
-  @property({
-    type: String,
-    reflect: true,
-    attribute: true,
-  })
-  accessor pageTitle = '';
-
-  private __scrollbarOverlayFlow = flowScrollbarOverlay(this);
+  @provide({context: appnThemeContext})
+  private accessor __theme: AppnTheme | undefined = undefined;
+  get theme() {
+    return (
+      this.__theme ??
+      (this.__colorSchemeFlow.value === 'dark'
+        ? unstyledLightTheme
+        : unstyledDarkTheme)
+    );
+  }
   override render() {
+    const theme =
+      (this.__theme ?? this.__colorSchemeFlow.value === 'dark')
+        ? unstyledLightTheme
+        : unstyledDarkTheme;
     this.dataset.colorScheme = this.isDark ? 'dark' : 'light';
 
     return html`
@@ -97,34 +105,25 @@ export class AppnPage extends LitElement {
           --page-header-height: ${this.__headerHeight}px;
           --page-footer-height: ${this.__footerHeight}px;
         }
-        /* 在移动端，scrollbar是overlay的，这里默认提供了0.5em的padding，来让 */
-        .scrollable {
-          --_scrollbar-base: ${this.__scrollbarOverlayFlow.value
-            ? '0.5em'
-            : '0px'};
-        }
       </style>
       <dialog open=${this.open} part="layer">
-        <appn-scroll-view class="root stuck-top" part="root">
+        <appn-scroll-view class="root" part="root">
           <div
-            class="header toolbar "
+            class="header stuck-top"
             part="header"
             ${this.__headerSize.observe()}
           >
-            <slot name="header">
-              <appn-header>${this.pageTitle}</appn-header>
-            </slot>
+            <slot name="header"> </slot>
+          </div>
+          <div class="body" part="body">
+            <slot></slot>
           </div>
           <div
-            class="footer toolbar"
+            class="footer stuck-bottom"
             part="footer"
             ${this.__footerSize.observe()}
           >
             <slot name="footer"></slot>
-          </div>
-
-          <div class="body" part="body">
-            <slot></slot>
           </div>
         </appn-scroll-view>
       </dialog>
@@ -134,6 +133,6 @@ export class AppnPage extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'appn-page': AppnPage;
+    'appn-page': AppnPageElement;
   }
 }

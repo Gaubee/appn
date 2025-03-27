@@ -53,7 +53,7 @@ export class ScrollController implements ReactiveController {
   constructor(
     host: ReactiveControllerHost,
     callback: (event: AnyScrollEvent) => void,
-    options?: ResizeObserverOptions
+    options?: ScrollObserverOptions & {init?: (element: Element) => void}
   ) {
     this.__host = host;
     this.__host.addController(this); // register for lifecycle updates
@@ -95,6 +95,7 @@ export class ScrollController implements ReactiveController {
       console.debug('ScrollController > bindElement > Now observing', ele);
       this.__bindingElement = ele;
       this.__scrollObserver.observe(ele, this.__options);
+      this.__options?.init?.(ele);
     }
     return this;
   }

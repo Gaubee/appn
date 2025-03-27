@@ -74,6 +74,7 @@ export namespace CustomElementsJson {
     slots?: Slot[];
     cssParts?: CssPart[];
     cssProperties?: CssProperty[];
+    customElement?: boolean;
   }
   export interface VariableDeclaration {
     kind: 'variable';
@@ -82,6 +83,8 @@ export namespace CustomElementsJson {
   export type Declaration = ClassDeclaration | VariableDeclaration;
 
   export interface Module {
+    kind: 'javascript-module';
+    path: string;
     declarations: Declaration[];
   }
 }

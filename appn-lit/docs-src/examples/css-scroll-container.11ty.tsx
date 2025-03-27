@@ -16,6 +16,7 @@ export default class Page {
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
 
         <section id="example-1">
+          <h3>scroll-state(scrollable: top)</h3>
           <div className="scroll-container">
             <div className="scroller">
               <div className="item">One</div>
@@ -28,6 +29,29 @@ export default class Page {
               <div className="item">Eight</div>
               <div className="item">Nine</div>
               <div className="item">Ten</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="example-2">
+          <h3>scroll-state(stuck: top)</h3>
+          <div className="scroll-container">
+            <div className="stuck-top">
+              <div className="content">Stuck Top!!</div>
+            </div>
+            <div className="scroller">
+              {Array.from({length: 6}, (_, i) => (
+                <div className="item">Item 1/{i}</div>
+              ))}
+              {Array.from({length: 6}, (_, i) => (
+                <div className="item">Item 2/{i}</div>
+              ))}
+              {Array.from({length: 6}, (_, i) => (
+                <div className="item">Item 3/{i}</div>
+              ))}
+            </div>
+            <div className="stuck-bottom">
+              <div className="content">Stuck Bottom!!</div>
             </div>
           </div>
         </section>
