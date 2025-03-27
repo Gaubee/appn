@@ -26,7 +26,7 @@ export class AppnPage extends LitElement {
   static override styles = styles;
 
   @state()
-  private __headerHeight = 0;
+  private accessor __headerHeight = 0;
   private __headerSize = new ResizeController(
     this,
     (entry) => {
@@ -36,7 +36,7 @@ export class AppnPage extends LitElement {
     {box: 'border-box'}
   );
   @state()
-  private __footerHeight = 0;
+  private accessor __footerHeight = 0;
   private __footerSize = new ResizeController(
     this,
     (entry) => {
@@ -50,9 +50,9 @@ export class AppnPage extends LitElement {
    * The name to say "Hello" to.
    */
   @property({type: Boolean, reflect: true, attribute: true})
-  open = true;
+  accessor open = true;
   @property({type: String, reflect: true, attribute: true})
-  mode:
+  accessor mode:
     | 'screen'
     | 'dialog'
     | 'tooltip'
@@ -62,10 +62,10 @@ export class AppnPage extends LitElement {
     | 'rightslide' = 'screen';
 
   @property({type: String, reflect: true, attribute: 'color-scheme'})
-  colorScheme: 'dark' | 'light' | 'auto' = 'auto';
+  accessor colorScheme: 'dark' | 'light' | 'auto' = 'auto';
 
   @property({type: String, reflect: true, attribute: true})
-  theme: 'ios' | 'unstyled' = 'unstyled'; // 目前不支持 'md'
+  accessor theme: 'ios' | 'unstyled' = 'unstyled'; // 目前不支持 'md'
 
   private __colorSchemeFlow = flowColorScheme(this);
   get isDark() {
@@ -85,7 +85,7 @@ export class AppnPage extends LitElement {
     reflect: true,
     attribute: true,
   })
-  pageTitle = '';
+  accessor pageTitle = '';
 
   private __scrollbarOverlayFlow = flowScrollbarOverlay(this);
   override render() {

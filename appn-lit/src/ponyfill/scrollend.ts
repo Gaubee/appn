@@ -1,9 +1,4 @@
-import {
-  arr_get_first,
-  arr_remove_first,
-  func_lazy,
-  map_get_or_put,
-} from '@gaubee/util';
+import {arr_remove_first, func_lazy, map_get_or_put} from '@gaubee/util';
 
 const binds_offs_wm = /**@__PURE__ */ new WeakMap<
   Element,
@@ -21,20 +16,21 @@ const getAndRemoveOff = (
 ) => {
   const binds = binds_offs_wm.get(ele);
   const offs = binds?.get(handler);
-  if (offs) {
-    if (off === undefined) {
-      [off] = offs.splice(0, 1);
-      if (offs.length === 0) {
-        binds?.delete(handler);
-      }
-    } else {
-      arr_remove_first(offs, off);
-    }
-
-    return off;
+  if (null == offs) {
+    return;
   }
+  if (off === undefined) {
+    [off] = offs.splice(0, 1);
+    if (offs.length === 0) {
+      binds?.delete(handler);
+    }
+  } else {
+    arr_remove_first(offs, off);
+  }
+
+  return off;
 };
-const caniuseScrollEnd =
+export const caniuseScrollEnd =
   typeof window == 'undefined' ? true : 'onscrollend' in window;
 export const removeScrollendEventListener = func_lazy<
   (ele: Element, handler: EventListener) => void

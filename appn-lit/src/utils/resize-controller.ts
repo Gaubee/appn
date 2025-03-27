@@ -32,22 +32,28 @@ class ResizeDirective extends Directive {
 
 const resizeDirective = directive(ResizeDirective);
 
-export interface ResizeSize {
-  blockSize: number;
-  inlineSize: number;
-}
+/**
+ * Observer Element Resize Reactive Controller
+ *
+ * <i18n lang="zh-cn">
+ * 监测元素尺寸变动的 响应式控制器
+ * </i18n>
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Resize_Observer_API}
+ */
 export class ResizeController implements ReactiveController {
-  __resizeObserver: ResizeObserver;
-  __options;
-  __host;
+  private __resizeObserver: ResizeObserver;
+  private __options;
+  private __host;
 
-  __callback;
+  private __callback;
   constructor(
     host: ReactiveControllerHost,
     callback: (entry: ResizeObserverEntry) => void,
     options?: ResizeObserverOptions
   ) {
-    (this.__host = host).addController(this); // register for lifecycle updates
+    this.__host = host;
+    this.__host.addController(this); // register for lifecycle updates
     this.__callback = callback;
     this.__options = options;
     this.__resizeObserver = new ResizeObserver((entries) => {
@@ -64,6 +70,16 @@ export class ResizeController implements ReactiveController {
     this.__resizeObserver.disconnect();
   }
   private __bindingElement?: Element;
+  /**
+   * 当前绑定的元素
+   */
+  get bindingElement() {
+    return this.__bindingElement;
+  }
+  /**
+   * 解除绑定
+   * @returns this，方便进行链式调用
+   */
   bindElement(ele: Element) {
     console.debug('ResizeController > bindElement');
     if (this.__bindingElement !== ele) {
@@ -80,7 +96,29 @@ export class ResizeController implements ReactiveController {
     }
     return this;
   }
+  /**
+   * 解除元素绑定
+   * @param ele 所要解绑的元素
+   * @returns 当前 bindingElement == null
+   */
+  unbindElement(ele = this.__bindingElement) {
+    if (this.__bindingElement === ele && this.__bindingElement) {
+      if (this.__bindingElement != null) {
+        console.debug(
+          'ResizeController > unbindElement',
+          this.__bindingElement
+        );
+        this.__resizeObserver.unobserve(this.__bindingElement);
+        this.__bindingElement = undefined;
+      }
+    }
+    return this.__bindingElement == null;
+  }
 
+  /**
+   * 响应式绑定
+   * @returns 用于挂载在 htmlTemplate-attribute 中的指令
+   */
   observe() {
     // Pass a reference to the controller so the directive can
     // notify the controller on size changes.

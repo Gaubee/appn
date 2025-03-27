@@ -35,17 +35,28 @@ class ScrollDirective extends Directive {
 }
 
 const scrollDirective = directive(ScrollDirective);
+/**
+ * Listen Element ScrollEvent/ScrollEndEvent Reactive Controller
+ *
+ * <i18n lang="zh-cn">
+ * 监听元素 ScrollEvent/ScrollEndEvent 事件的 响应式控制器
+ * </i18n>
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Element/scroll_event}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollend_event}
+ */
 export class ScrollController implements ReactiveController {
-  __scrollObserver: ScrollObserver;
-  __host;
-  __callback;
-  __options;
+  private __scrollObserver: ScrollObserver;
+  private __host;
+  private __callback;
+  private __options;
   constructor(
     host: ReactiveControllerHost,
     callback: (event: AnyScrollEvent) => void,
     options?: ResizeObserverOptions
   ) {
-    (this.__host = host).addController(this); // register for lifecycle updates
+    this.__host = host;
+    this.__host.addController(this); // register for lifecycle updates
     this.__callback = callback;
     this.__options = options;
     this.__scrollObserver = new ScrollObserver(this.__callback);
@@ -61,9 +72,16 @@ export class ScrollController implements ReactiveController {
     this.__scrollObserver.disconnect();
   }
   private __bindingElement?: Element;
+  /**
+   * 当前绑定的元素
+   */
   get bindingElement() {
     return this.__bindingElement;
   }
+  /**
+   * 解除绑定
+   * @returns this，方便进行链式调用
+   */
   bindElement(ele: Element) {
     console.debug('ScrollController > bindElement');
     if (this.__bindingElement !== ele) {
@@ -80,6 +98,11 @@ export class ScrollController implements ReactiveController {
     }
     return this;
   }
+  /**
+   * 解除元素绑定
+   * @param ele 所要解绑的元素
+   * @returns 当前 bindingElement == null
+   */
   unbindElement(ele = this.__bindingElement) {
     if (this.__bindingElement === ele && this.__bindingElement) {
       if (this.__bindingElement != null) {
@@ -91,7 +114,12 @@ export class ScrollController implements ReactiveController {
         this.__bindingElement = undefined;
       }
     }
+    return this.__bindingElement == null;
   }
+  /**
+   * 响应式绑定
+   * @returns 用于挂载在 htmlTemplate-attribute 中的指令
+   */
   observe() {
     // Pass a reference to the controller so the directive can
     // notify the controller on size changes.
@@ -135,12 +163,12 @@ class ScrollObserver {
 }
 interface ScrollObserverOptions {}
 
-interface ScrollEvent extends Event {
+export interface ScrollEvent extends Event {
   type: 'scroll';
   target: HTMLElement;
 }
-interface ScrollEndEvent extends Event {
+export interface ScrollEndEvent extends Event {
   type: 'scrollend';
   target: HTMLElement;
 }
-type AnyScrollEvent = ScrollEvent | ScrollEndEvent;
+export type AnyScrollEvent = ScrollEvent | ScrollEndEvent;

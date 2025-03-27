@@ -18,6 +18,9 @@ export const flowColorScheme = func_lazy(() => {
     return flow;
   };
 });
+/**
+ * @hideconstructor
+ */
 class ScrollbarTracker extends HTMLElement {
   constructor(
     readonly flow: StateFlow<boolean>,

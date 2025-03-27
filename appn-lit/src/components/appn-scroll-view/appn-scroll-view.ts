@@ -3,29 +3,49 @@
  * Copyright 2025 Gaubee
  * SPDX-License-Identifier: MIT
  */
-import {LitElement, html, css, CSSResult, unsafeCSS} from 'lit';
-import {customElement, property, query, state} from 'lit/decorators.js';
+import {css, CSSResult, html, LitElement, unsafeCSS} from 'lit';
+import {customElement, property, state} from 'lit/decorators.js';
+import {flowScrollbarOverlay} from '../../utils/match-media';
 import {ResizeController} from '../../utils/resize-controller';
 import {ScrollController} from '../../utils/scroll-controller';
-import {flowScrollbarOverlay} from '../../utils/match-media';
+import {
+  propertyEvent,
+  type PropertyEventListener,
+} from '../../utils/property-event';
+import {accessor} from '@gaubee/util';
 
 /**
- * A scroll-view element of the style 'overflow: overlay'
- * Very lightweight components that maximize the use of native capabilities:
- * - On mobile, use native support, so there is no extra overhead
- * - On the desktop, use the native scroll bar (which means you can't do too much customization)
- * - Follows the standard specifications of css scrollbar
+ * A scroll-view element of the style 'overflow: overlay'.
+ * lightweight components that maximize the use of native capabilities.
  *
- * ## 🌍 zh-cn
+ * Core features:
+ * - Mobile: Zero-overhead native scrolling
+ * - Desktop: Native scrollbars (limited styling)
+ * - CSS Scrollbars specification compliant
+ *
+ * @fires scrollend - Provides polyfill for browsers without native scrollend support
+ * @slot default - Scrollable content container
+ * @csspart scrollbar - Scrollbar track
+ * @csspart axis-y - Vertical scrollbar track
+ * @csspart axis-x - Horizontal scrollbar track
+ * @csspart content - Content container
+ *
+ * <i18n lang="zh-cn">
  * 一个样式为 `overflow: overlay` 的滚动元素
- * 非常轻量的组件，最大化地使用了原生的能力：
- * - 在移动端上，使用原生的支持，因此不会有额外的开销
- * - 在桌面端，使用原生的滚动条来（这也就意味着你不能做太多的自定义）
- * - 遵循 css scrollbar 的标准规范
+ * 非常轻量的组件，最大化地使用了原生的能力.
  *
- * @fires count-changed - Indicates when the count changes
- * @slot - This element has a slot
- * @csspart button - The button
+ * 核心特性：
+ * - 移动端：无额外开销的原生滚动
+ * - 桌面端：原生滚动条（样式定制受限）
+ * - 符合 CSS 滚动条标准规范
+ *
+ * @fires scrollend - 为不支持原生scrollend事件的浏览器提供垫片
+ * @slot default - 滚动内容容器
+ * @csspart scrollbar - 滚动条轨道
+ * @csspart axis-y - 垂直滚动条轨道
+ * @csspart axis-x - 水平滚动条轨道
+ * @csspart content - 内容容器
+ * </i18n>
  */
 @customElement('appn-scroll-view')
 export class AppnScrollView extends LitElement {
@@ -108,13 +128,18 @@ export class AppnScrollView extends LitElement {
     reflect: true,
     attribute: 'scrollbar-size',
   })
-  scrollbarSize: 'auto' | 'thin' | 'none' = 'auto';
+  accessor scrollbarSize: 'auto' | 'thin' | 'none' = 'auto';
+
+  @propertyEvent()
+  override accessor onscrollend!: PropertyEventListener;
+  @propertyEvent()
+  override accessor onscroll!: PropertyEventListener;
 
   @state()
-  private __contentWidth = 0;
+  private accessor __contentWidth = 0;
 
   @state()
-  private __contentHeight = 0;
+  private accessor __contentHeight = 0;
 
   private __contentSize = new ResizeController(this, (entry) => {
     const borderBox = entry.borderBoxSize[0];
@@ -123,10 +148,10 @@ export class AppnScrollView extends LitElement {
   });
 
   @state()
-  private __hostWidth = 0;
+  private accessor __hostWidth = 0;
 
   @state()
-  private __hostHeight = 0;
+  private accessor __hostHeight = 0;
   private __hostSize = new ResizeController(this, (entry) => {
     const borderBox = entry.borderBoxSize[0];
     this.__hostWidth = borderBox.inlineSize;
@@ -290,14 +315,14 @@ export class AppnScrollView extends LitElement {
           ? null
           : html`<div class="scrollbar-wrapper">
               <div
-                part="scrollbar"
+                part="scrollbar axis-y"
                 class="scrollbar axis-y"
                 ${this.__axisYScroll.observe()}
               >
                 <div class="mock-content"></div>
               </div>
               <div
-                part="scrollbar"
+                part="scrollbar axis-x"
                 class="scrollbar axis-x"
                 ${this.__axisXScroll.observe()}
               >

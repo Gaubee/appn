@@ -59,13 +59,13 @@ export class AppnHeader extends LitElement {
    * The name to say "Hello" to.
    */
   @property({type: String, reflect: true, attribute: true})
-  pageTitle = '';
+  accessor pageTitle = '';
 
   /**
    * The number of times the button has been clicked.
    */
   @property({type: Number, reflect: true, attribute: true})
-  lines = 1;
+  accessor lines = 1;
 
   override render() {
     return html`
