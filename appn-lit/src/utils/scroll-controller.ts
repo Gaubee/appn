@@ -1,30 +1,16 @@
-import {
-  noChange,
-  type ElementPart,
-  type ReactiveController,
-  type ReactiveControllerHost,
-} from 'lit';
+import {noChange, type ElementPart, type ReactiveController, type ReactiveControllerHost} from 'lit';
 import {Directive, type PartInfo, PartType, directive} from 'lit/directive.js';
-import {
-  addScrollendEventListener,
-  removeScrollendEventListener,
-} from '../ponyfill/scrollend';
+import {addScrollendEventListener, removeScrollendEventListener} from '../ponyfill/scrollend';
 
 class ScrollDirective extends Directive {
   constructor(partInfo: PartInfo) {
     super(partInfo);
-    console.debug('ScrollDirective created', partInfo);
     if (partInfo.type !== PartType.ELEMENT) {
-      throw new Error(
-        'The `scrollDirective` directive must be used on property of Element or SVGElement.'
-      );
+      throw new Error('The `scrollDirective` directive must be used on property of Element or SVGElement.');
     }
   }
 
-  override update(
-    partInfo: ElementPart,
-    [scrollController]: [ScrollController]
-  ) {
+  override update(partInfo: ElementPart, [scrollController]: [ScrollController]) {
     scrollController.bindElement(partInfo.element);
 
     return noChange;
@@ -50,11 +36,7 @@ export class ScrollController implements ReactiveController {
   private __host;
   private __callback;
   private __options;
-  constructor(
-    host: ReactiveControllerHost,
-    callback: (event: AnyScrollEvent) => void,
-    options?: ScrollObserverOptions & {init?: (element: Element) => void}
-  ) {
+  constructor(host: ReactiveControllerHost, callback: (event: AnyScrollEvent) => void, options?: ScrollObserverOptions & {init?: (element: Element) => void}) {
     this.__host = host;
     this.__host.addController(this); // register for lifecycle updates
     this.__callback = callback;
@@ -83,16 +65,10 @@ export class ScrollController implements ReactiveController {
    * @returns this，方便进行链式调用
    */
   bindElement(ele: Element) {
-    console.debug('ScrollController > bindElement');
     if (this.__bindingElement !== ele) {
       if (this.__bindingElement != null) {
-        console.debug(
-          'ScrollController > bindElement > Unobserving',
-          this.__bindingElement
-        );
         this.__scrollObserver.unobserve(this.__bindingElement);
       }
-      console.debug('ScrollController > bindElement > Now observing', ele);
       this.__bindingElement = ele;
       this.__scrollObserver.observe(ele, this.__options);
       this.__options?.init?.(ele);
@@ -107,10 +83,6 @@ export class ScrollController implements ReactiveController {
   unbindElement(ele = this.__bindingElement) {
     if (this.__bindingElement === ele && this.__bindingElement) {
       if (this.__bindingElement != null) {
-        console.debug(
-          'ScrollController > unbindElement',
-          this.__bindingElement
-        );
         this.__scrollObserver.unobserve(this.__bindingElement);
         this.__bindingElement = undefined;
       }

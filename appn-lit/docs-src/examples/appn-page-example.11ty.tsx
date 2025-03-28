@@ -48,21 +48,19 @@ export default class Page {
     return (
       <>
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
-        <appn-ios-theme>
-          <appn-page theme="ios">
-            <appn-header slot="header" translucent>
+        <appn-theme-provider theme="ios">
+          <appn-page>
+            <appn-header slot="header">
               <appn-top-bar>Page Title</appn-top-bar>
             </appn-header>
             {Array.from({length: 60}, (_, i) => (
-              <appn-view className="item">
-                This is page content. index: {i + 1}
-              </appn-view>
+              <appn-view className="item">This is page content. index: {i + 1}</appn-view>
             ))}
-            <appn-footer slot="footer" translucent>
+            <appn-footer slot="footer">
               <appn-top-bar>This is Page Footer</appn-top-bar>
             </appn-footer>
           </appn-page>
-        </appn-ios-theme>
+        </appn-theme-provider>
       </>
     );
   }

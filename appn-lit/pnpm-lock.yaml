@@ -41,9 +41,15 @@ importers:
       '@lit/react':
         specifier: ^1.0.7
         version: 1.0.7(@types/react@19.0.12)
+      csstype:
+        specifier: ^3.1.3
+        version: 3.1.3
       lit:
         specifier: ^3.2.0
         version: 3.2.1
+      ts-deepmerge:
+        specifier: ^7.0.2
+        version: 7.0.2
     devDependencies:
       '@11ty/eleventy':
         specifier: ^3.0.0
@@ -3264,6 +3270,10 @@ packages:
     engines: {node: '>=18.12'}
     peerDependencies:
       typescript: '>=4.8.4'
+
+  ts-deepmerge@7.0.2:
+    resolution: {integrity: sha512-akcpDTPuez4xzULo5NwuoKwYRtjQJ9eoNfBACiBMaXwNAx7B1PKfe5wqUFJuW5uKzQ68YjDFwPaWHDG1KnFGsA==}
+    engines: {node: '>=14.13.1'}
 
   ts-simple-type@2.0.0-next.0:
     resolution: {integrity: sha512-A+hLX83gS+yH6DtzNAhzZbPfU+D9D8lHlTSd7GeoMRBjOt3GRylDqLTYbdmjA4biWvq2xSfpqfIDj2l0OA/BVg==}
@@ -7026,6 +7036,8 @@ snapshots:
   ts-api-utils@2.1.0(typescript@5.8.2):
     dependencies:
       typescript: 5.8.2
+
+  ts-deepmerge@7.0.2: {}
 
   ts-simple-type@2.0.0-next.0: {}
 

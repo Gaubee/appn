@@ -75,6 +75,10 @@ export namespace CustomElementsJson {
     cssParts?: CssPart[];
     cssProperties?: CssProperty[];
     customElement?: boolean;
+    superclass?: {
+      name: string;
+      package?: string;
+    };
   }
   export interface VariableDeclaration {
     kind: 'variable';
@@ -96,4 +100,4 @@ export const customElementsMetadata = _customElements as CustomElementsJson;
 export const customElementDeclarations = customElementsMetadata.modules
   .map((m) => m.declarations)
   .flat()
-  .filter((d) => d.kind === 'class');
+  .filter((d) => d.kind === 'class' && d.customElement && d.tagName.startsWith('appn-')) as CustomElementsJson.ClassDeclaration[];

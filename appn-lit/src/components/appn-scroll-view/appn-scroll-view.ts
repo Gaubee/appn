@@ -5,13 +5,12 @@
  */
 import {css, CSSResult, html, LitElement, unsafeCSS} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
+import {cache} from 'lit/directives/cache.js';
 import {flowScrollbarOverlay} from '../../utils/match-media';
 import {ResizeController} from '../../utils/resize-controller';
 import {ScrollController} from '../../utils/scroll-controller';
-import {
-  propertyEvent,
-  type PropertyEventListener,
-} from '../../utils/property-event';
+import {propertyEvent, type PropertyEventListener} from '../../utils/property-event';
+import {appnScrollViewStyle} from './appn-scroll-view.css';
 
 /**
  * A scroll-view element of the style 'overflow: overlay'.
@@ -48,86 +47,18 @@ import {
  */
 @customElement('appn-scroll-view')
 export class AppnScrollViewElement extends LitElement {
-  static override styles = css`
-    @property --scrollbar-color {
-      syntax: '<color>';
-      inherits: true;
-      initial-value: #0003;
-    }
-    @property --scrollbar-hover-color {
-      syntax: '<color>';
-      inherits: true;
-      initial-value: #0006;
-    }
-    @property --scrollbar-size {
-      syntax: '<length>';
-      inherits: true;
-      initial-value: 6px;
-    }
-
-    :host {
-      display: block;
-      overflow: auto;
-      position: relative;
-      overflow: scroll;
-      scroll-behavior: smooth;
-      container-type: size;
-      container-type: size scroll-state;
-      container-name: scrollview;
-    }
-    .content {
-      width: max-content;
-      height: max-content;
-      z-index: 1;
-      position: relative;
-      transform: translateZ(0); // 渲染成独立的层
-    }
-    .scrollbar-sticky {
-      position: sticky;
-      z-index: 2;
-      width: 0;
-      height: 0;
-      top: 0;
-      left: 0;
-      /* 原生滚动条不会被影响 */
-      pointer-events: none;
-    }
-    .scrollbar-wrapper {
-      width: var(--view-width);
-      height: var(--view-height);
-      position: relative;
-    }
-    .scrollbar {
-      // 这里禁用平滑滚动
-      scroll-behavior: auto;
-
-      -ms-overflow-style: auto;
-      position: absolute;
-      pointer-events: all;
-    }
-    .axis-y {
-      overflow-x: clip;
-      overflow-y: auto;
-      right: 0;
-      top: 0;
-      width: var(--scrollbar-track-size);
-      height: calc(100% - var(--scrollbar-track-size)); /* 为 corner 预留位置 */
-    }
-    .axis-x {
-      overflow-x: auto;
-      overflow-y: clip;
-      left: 0;
-      bottom: 0;
-      height: var(--scrollbar-track-size);
-      width: calc(100% - var(--scrollbar-track-size)); /* 为 corner 预留位置 */
-    }
-  `;
+  static override styles = appnScrollViewStyle;
   @property({
     type: String,
     reflect: true,
     attribute: 'scrollbar-size',
   })
   accessor scrollbarSize: 'auto' | 'thin' | 'none' = 'auto';
+
+  @property({
+    type: String,
+  })
+  accessor scrollbarColor: string = '';
 
   @propertyEvent()
   override accessor onscrollend!: PropertyEventListener;
@@ -162,9 +93,7 @@ export class AppnScrollViewElement extends LitElement {
    * 一旦某一个元素开始滚动，那么它将持有滚动所有权，知道scrollend触发，才会释放所有权
    */
   private __canEffectScrollEvent(event: Event) {
-    const isCurrentTarget =
-      this.__currentScrollElement == null ||
-      this.__currentScrollElement === event.target;
+    const isCurrentTarget = this.__currentScrollElement == null || this.__currentScrollElement === event.target;
 
     if (event.type === 'scrollend') {
       this.__currentScrollElement = undefined;
@@ -253,14 +182,6 @@ export class AppnScrollViewElement extends LitElement {
       injectCss.push(css`
         :host {
           --scrollbar-size: ${scrollbarSize}px;
-          --scrollbar-color: #0003;
-          --scrollbar-hover-color: #0006;
-        }
-        @media (prefers-color-scheme: dark) {
-          :host {
-            --scrollbar-color: #fff6;
-            --scrollbar-hover-color: #fff9;
-          }
         }
         .mock-content {
           width: calc(${this.__contentWidth}px - var(--scrollbar-track-size));
@@ -280,6 +201,9 @@ export class AppnScrollViewElement extends LitElement {
           .scrollbar {
             scrollbar-width: ${unsafeCSS(this.scrollbarSize)};
             scrollbar-color: var(--scrollbar-color) transparent;
+            transition-property: scrollbar-color;
+            transition-duration: 250ms;
+            transition-timing-function: ease-out;
           }
           .scrollbar:hover {
             scrollbar-color: var(--scrollbar-hover-color) transparent;
@@ -303,6 +227,7 @@ export class AppnScrollViewElement extends LitElement {
             background-color: var(--scrollbar-color);
             border-radius: ${scrollbarSize}px;
             border: 2px solid transparent;
+            /**不支持动画 */
           }
           .scrollbar:hover::-webkit-scrollbar-thumb {
             background-color: var(--scrollbar-hover-color);
@@ -327,24 +252,18 @@ export class AppnScrollViewElement extends LitElement {
         }
       </style>
       <div class="scrollbar-sticky">
-        ${canOverlayScrollbar
-          ? null
-          : html`<div class="scrollbar-wrapper">
-              <div
-                part="scrollbar axis-y"
-                class="scrollbar axis-y"
-                ${this.__axisYScroll.observe()}
-              >
-                <div class="mock-content"></div>
-              </div>
-              <div
-                part="scrollbar axis-x"
-                class="scrollbar axis-x"
-                ${this.__axisXScroll.observe()}
-              >
-                <div class="mock-content"></div>
-              </div>
-            </div>`}
+        ${cache(
+          canOverlayScrollbar
+            ? null
+            : html`<div class="scrollbar-wrapper">
+                <div part="scrollbar axis-y" class="scrollbar axis-y" ${this.__axisYScroll.observe()}>
+                  <div class="mock-content"></div>
+                </div>
+                <div part="scrollbar axis-x" class="scrollbar axis-x" ${this.__axisXScroll.observe()}>
+                  <div class="mock-content"></div>
+                </div>
+              </div>`
+        )}
       </div>
       <div part="content" class="content" ${this.__contentSize.observe()}>
         <slot></slot>

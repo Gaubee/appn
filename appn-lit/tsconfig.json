@@ -6,8 +6,8 @@
   ],
   "compilerOptions": {
     "composite": true,
-    "target": "es2021",
-    "module": "es2022",
+    "target": "es2022",
+    "module": "ESNext",
     "lib": [
       "ESNext",
       "DOM",

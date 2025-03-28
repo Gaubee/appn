@@ -9,7 +9,6 @@ import {Directive, directive, PartType, type PartInfo} from 'lit/directive.js';
 class ResizeDirective extends Directive {
   constructor(partInfo: PartInfo) {
     super(partInfo);
-    console.debug('ResizeDirective created', partInfo);
     if (partInfo.type !== PartType.ELEMENT) {
       throw new Error(
         'The `resizeDirective` directive must be used on property of Element or SVGElement.'
@@ -81,16 +80,10 @@ export class ResizeController implements ReactiveController {
    * @returns this，方便进行链式调用
    */
   bindElement(ele: Element) {
-    console.debug('ResizeController > bindElement');
     if (this.__bindingElement !== ele) {
       if (this.__bindingElement != null) {
-        console.debug(
-          'ResizeController > bindElement > Unobserving',
-          this.__bindingElement
-        );
         this.__resizeObserver.unobserve(this.__bindingElement);
       }
-      console.debug('ResizeController > bindElement > Now observing', ele);
       this.__bindingElement = ele;
       this.__resizeObserver.observe(ele, this.__options);
     }
@@ -104,10 +97,6 @@ export class ResizeController implements ReactiveController {
   unbindElement(ele = this.__bindingElement) {
     if (this.__bindingElement === ele && this.__bindingElement) {
       if (this.__bindingElement != null) {
-        console.debug(
-          'ResizeController > unbindElement',
-          this.__bindingElement
-        );
         this.__resizeObserver.unobserve(this.__bindingElement);
         this.__bindingElement = undefined;
       }

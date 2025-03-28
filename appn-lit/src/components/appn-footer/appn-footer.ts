@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
+import {consume} from '@lit/context';
 import {LitElement, css, html} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {customElement} from 'lit/decorators.js';
+import {autoBooleanProperty, type AutoBoolean} from '../../utils/auto-boolean-property-converter';
 import {translucentStyle} from '../appn-header/translucent.css';
+import {appnThemeContext, type AppnTheme} from '../appn-theme-provider/appn-theme-context';
 
 /**
  * 一个用于放置在 appn-page[slot=footer] 的元素。
@@ -18,8 +21,11 @@ import {translucentStyle} from '../appn-header/translucent.css';
  */
 @customElement('appn-footer')
 export class AppnFooterElement extends LitElement {
-  @property({type: Boolean, attribute: true, reflect: true})
-  accessor translucent = false;
+  @consume({context: appnThemeContext, subscribe: true})
+  private accessor __theme: AppnTheme | undefined;
+
+  @autoBooleanProperty()
+  accessor translucent: AutoBoolean = 'auto';
   static override styles = [
     css`
       :host {
@@ -32,6 +38,8 @@ export class AppnFooterElement extends LitElement {
   ];
 
   override render() {
+    const translucent = (this.translucent == 'auto' && this.__theme?.class.includes('ios')) ?? false;
+    this.dataset.translucent = translucent ? 'yes' : 'no';
     return html`<slot></slot>`;
   }
 }

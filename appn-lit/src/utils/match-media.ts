@@ -81,7 +81,7 @@ class ScrollbarTracker extends HTMLElement {
     this.__resizeObserver = undefined;
   }
 }
-customElements.define('appn-scrollbar-tracker', ScrollbarTracker);
+customElements.define('iappn-scrollbar-tracker', ScrollbarTracker);
 export const flowScrollbarOverlay = func_lazy(() => {
   const flow = new StateFlow(
     /// 简单根据当前的光标行为判断一下，但这种判断并不准确，比如说开发模式下，模拟移动端，打开元素选择器，pointer的行为会发生改变
