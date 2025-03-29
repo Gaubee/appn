@@ -1,33 +1,19 @@
-# LitElement TypeScript starter
+# Appn
 
-This project includes a sample component using LitElement with TypeScript.
+Appn 是一个专注于构建 WebApp 的框架，基于 WebComponent 技术与一些先进的、面向未来的 Web 标准，目的构建出高性能的 WebApp 体验。
 
-This template is generated from the `lit-starter-ts` package in [the main Lit
-repo](https://github.com/lit/lit). Issues and PRs for this template should be
-filed in that repo.
+Appn 的核心部分围绕“导航”展开。目的是提供一套现代化的 WebApp 的使用体验。
 
-## About this release
+Appn 会同时提供一些常见的“布局组件”。目的是为现代化 WebApp 提供一套开箱即用的、可参考的标准原子组件。
 
-This is a pre-release of Lit 3.0, the next major version of Lit.
-
-Lit 3.0 has very few breaking changes from Lit 2.0:
-
-- Drops support for IE11
-- Published as ES2021
-- Removes a couple of deprecated Lit 1.x APIs
-
-Lit 3.0 should require no changes to upgrade from Lit 2.0 for the vast majority of users. Once the full release is published, most apps and libraries will be able to extend their npm version ranges to include both 2.x and 3.x, like `"^2.7.0 || ^3.0.0"`.
-
-Lit 2.x and 3.0 are _interoperable_: templates, base classes, directives, decorators, etc., from one version of Lit will work with those from another.
-
-Please file any issues you find on our [issue tracker](https://github.com/lit/lit/issues).
+Appn 会提供一系列构建现代化 WebApp 所需的一些常见的工具函数，是对 WebApi 的补充。
 
 ## Setup
 
 Install dependencies:
 
 ```bash
-npm i
+pnpm i
 ```
 
 ## Build
@@ -37,13 +23,13 @@ This sample uses the TypeScript compiler to produce JavaScript that runs in mode
 To build the JavaScript version of your component:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 To watch files and rebuild when the files are modified, run the following command in a separate shell:
 
 ```bash
-npm run build:watch
+pnpm run build:watch
 ```
 
 Both the TypeScript compiler and lit-analyzer are configured to be very strict. You may want to change `tsconfig.json` to make them less strict.
@@ -58,13 +44,13 @@ more information.
 Tests can be run with the `test` script, which will run your tests against Lit's development mode (with more verbose errors) as well as against Lit's production mode:
 
 ```bash
-npm test
+pnpm test
 ```
 
 For local testing during development, the `test:dev:watch` command will run your tests in Lit's development mode (with verbose errors) on every change to your source files:
 
 ```bash
-npm test:watch
+pnpm test:watch
 ```
 
 Alternatively the `test:prod` and `test:prod:watch` commands will run your tests in Lit's production mode.
@@ -76,10 +62,10 @@ This sample uses modern-web.dev's [@web/dev-server](https://www.npmjs.com/packag
 To run the dev server and open the project in a new browser tab:
 
 ```bash
-npm run serve
+pnpm run serve
 ```
 
-There is a development HTML file located at `/dev/index.html` that you can view at http://localhost:8000/dev/index.html. Note that this command will serve your code using Lit's development mode (with more verbose errors). To serve your code against Lit's production mode, use `npm run serve:prod`.
+There is a development HTML file located at `/dev/index.html` that you can view at http://localhost:8000/dev/index.html. Note that this command will serve your code using Lit's development mode (with more verbose errors). To serve your code against Lit's production mode, use `pnpm run serve:prod`.
 
 ## Editing
 
@@ -104,7 +90,7 @@ The rules are mostly the recommended rules from each project, but some have been
 To lint the project run:
 
 ```bash
-npm run lint
+pnpm run lint
 ```
 
 ## Formatting
