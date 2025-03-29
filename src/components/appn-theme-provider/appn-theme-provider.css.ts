@@ -129,7 +129,7 @@ export const appnThemeStyles = [
       font-variation-settings: var(--font-variation-settings);
       line-height: var(--line-height);
 
-      accent-color: var(--accent-color);
+      accent-color: var(--color-accent);
     }
     :host([data-color-scheme='light']) {
       --color-scheme-light: 1;

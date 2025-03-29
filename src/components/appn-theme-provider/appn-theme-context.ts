@@ -125,6 +125,11 @@ declare global {
 export const appnThemeContext = createContext<AppnTheme | undefined>(Symbol('appn-theme'));
 const allAppnThemes = new Map<Appn.MaybeThemeClass, Set<AppnTheme>>();
 /**
+ * 获取所有的主题
+ * @returns 
+ */
+export const getAllAppnThemes = () => [...new Set([...allAppnThemes.values()].map((themes) => [...themes]).flat())];
+/**
  * 注册主题
  * @param themes
  */

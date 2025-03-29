@@ -57,13 +57,13 @@ export const unstyledLightTheme = {
     lineHeight: 'initial',
   },
 } satisfies AppnTheme;
-
+debugger
 export const unstyledDarkTheme = appnThemeMixin(unstyledLightTheme, {
   name: 'unstyled-dark',
   class: ['unstyled', 'dark'],
   colors: {
-    Canvas: '#ffffff',
-    CanvasText: '#000000',
+    Canvas: '#000000',
+    CanvasText: '#ffffff',
   },
 });
 

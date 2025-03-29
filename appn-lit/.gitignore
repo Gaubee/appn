@@ -1,9 +1,0 @@
-/node_modules/
-/docs/
-/lib/
-/test/
-/dist/
-/bundle/
-custom-elements.json
-tsconfig.tsbuildinfo
-/src/react.ts

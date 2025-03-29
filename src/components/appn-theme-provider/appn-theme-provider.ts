@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { func_remember } from '@gaubee/util';
-import { provide } from '@lit/context';
-import { LitElement, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { flowColorScheme } from '../../utils/match-media';
-import { appnThemeContext, findAppnTheme, registerAppnTheme } from './appn-theme-context';
-import { appnThemeStyles } from './appn-theme-provider.css';
-import { iosAccessibleDarkTheme, iosAccessibleLightTheme, iosDarkTheme, iosLightTheme } from './ios-theme';
+import {func_remember} from '@gaubee/util';
+import {provide} from '@lit/context';
+import {LitElement, html} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
+import {flowColorScheme} from '../../utils/match-media';
+import {appnThemeContext, findAppnTheme, getAllAppnThemes, registerAppnTheme} from './appn-theme-context';
+import {appnThemeStyles} from './appn-theme-provider.css';
+import {iosAccessibleDarkTheme, iosAccessibleLightTheme, iosDarkTheme, iosLightTheme} from './ios-theme';
 import './unstyled-theme';
-import { unstyledDarkTheme, unstyledLightTheme } from './unstyled-theme';
+import {unstyledDarkTheme, unstyledLightTheme} from './unstyled-theme';
 
 /// 将内置的主题注册到内存表
 registerAppnTheme(
@@ -36,6 +36,9 @@ registerAppnTheme(
 export class AppnThemeProviderElement extends LitElement {
   static readonly registerTheme = registerAppnTheme;
   static readonly findTheme = findAppnTheme;
+  static get allThemes() {
+    return getAllAppnThemes();
+  }
   static override styles = appnThemeStyles;
 
   /**
