@@ -1,26 +1,32 @@
-import {accessor} from '@gaubee/util';
-import {ReactiveElement, type ComplexAttributeConverter} from 'lit';
-import {property} from 'lit/decorators.js';
+import {ReactiveElement} from 'lit';
+import {enumProperty, type EnumConverter} from './enum-property-converter';
 
 export type AutoBoolean = boolean | 'auto';
-// Define the default value for the property
-const TRANSLUCENT_DEFAULT_VALUE: AutoBoolean = 'auto';
 
-// Define the custom converter based on the draggable attribute pattern
-export const autoBooleanConverter: ComplexAttributeConverter<AutoBoolean> = {
+/**
+ * an converter for attribute/property="auto | true | false"
+ */
+export const autoBooleanConverter: EnumConverter<AutoBoolean> = {
+  setProperty: (value) => {
+    if (
+      value == null ||
+      value === '' ||
+      // 这里会自动转换类型
+      /^auto$/i.test(value as string)
+    ) {
+      return 'auto';
+    }
+    return Boolean(value);
+  },
   /**
    * Converts attribute string to property value (boolean | 'auto')
    */
   fromAttribute: (value) => {
-    if (value === null) {
-      // Attribute is absent, return the default property value
-      return TRANSLUCENT_DEFAULT_VALUE;
-    }
-    const lowerCaseValue = value.toLowerCase();
-    if (lowerCaseValue === 'auto') {
+    if (value === null || value === 'auto' || /^auto$/i.test(value)) {
       return 'auto';
     }
-    if (lowerCaseValue === 'false') {
+
+    if (/^false$/i.test(value)) {
       // Explicitly set to "false"
       return false;
     }
@@ -34,35 +40,18 @@ export const autoBooleanConverter: ComplexAttributeConverter<AutoBoolean> = {
    */
   toAttribute: (value) => {
     // Explicitly reflect "true", "false", or "auto" based on property value
-    if (value === true) {
-      return 'true';
+    switch (value) {
+      case true:
+      case false:
+        return value.toString();
+      // case 'auto':
+      //   return value;
+      default:
+        return 'auto';
     }
-    if (value === false) {
-      return 'false';
-    }
-    if (value === 'auto') {
-      return 'auto';
-    }
-    // If the property is set to undefined or null, remove the attribute.
-    // This depends on desired behavior - alternatively, you could reflect the default value's attribute.
-    // Removing seems cleaner if the property is explicitly unset.
-    return 'auto';
   },
 };
 
-export const autoBooleanProperty = <C extends ReactiveElement>(isAuto = (value: unknown): boolean => value === 'auto' || value == null) => {
-  const litPropertyAccessor = property({attribute: true, reflect: true, converter: autoBooleanConverter});
-  return accessor<C, AutoBoolean>((target, context) => {
-    const litPropertyAccessorDecoratorResult = litPropertyAccessor(target, context);
-    const set = litPropertyAccessorDecoratorResult.set;
-    return {
-      ...litPropertyAccessorDecoratorResult,
-      set(value) {
-        if (!isAuto(value)) {
-          value = !!value;
-        }
-        set?.call(this as any, value);
-      },
-    };
-  });
+export const autoBooleanProperty = <C extends ReactiveElement>() => {
+  return enumProperty<C, AutoBoolean>(autoBooleanConverter);
 };
