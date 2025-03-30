@@ -1,17 +1,17 @@
 import {accessor, map_get_or_put} from '@gaubee/util';
 
-export type PropertyEventListener<
-  E extends Event = Event,
-  T = GlobalEventHandlers,
-> = ((this: T, event: E) => void) | null;
-const listeners = /**@__PURE__ */ new WeakMap<
-  object,
-  Map<string, EventListenerObject>
->();
-export const propertyEvent = <
+export type PropertyEventListener<T = GlobalEventHandlers, E extends Event = Event> = ((this: T, event: E) => void) | null;
+const listeners = /**@__PURE__ */ new WeakMap<object, Map<string, EventListenerObject>>();
+export const eventProperty = <
+  /** This */
   T extends Element,
-  P extends PropertyEventListener,
+  /** EventType */
+  E extends Event = Event,
+  P extends PropertyEventListener<T, E> = PropertyEventListener<T, E>,
 >(
+  /**
+   * 自定义eventName，否则会使用属性的名称来获得eventName，比如 onhi => "hi"
+   */
   eventName?: string,
   opts: {override?: boolean} = {}
 ) => {
@@ -23,10 +23,7 @@ export const propertyEvent = <
     if (!eventName) {
       const prop = context.name;
       const propStringify = typeof prop === 'symbol' ? prop.description : prop;
-      if (
-        typeof propStringify !== 'string' ||
-        false === propStringify.startsWith('on')
-      ) {
+      if (typeof propStringify !== 'string' || false === propStringify.startsWith('on')) {
         throw new Error(`eventName is required for property ${String(prop)}`);
       }
       eventName = propStringify.slice(2); // remove /^on/

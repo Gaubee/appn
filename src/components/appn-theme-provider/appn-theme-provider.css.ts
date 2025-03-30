@@ -44,15 +44,10 @@ const fontProperties = [
 ];
 
 for (const prop of fontProperties) {
-  try {
-    CSS.registerProperty({
-      ...prop,
-      inherits: true,
-    });
-  } catch (e) {
-    debugger;
-    console.error(e, prop);
-  }
+  CSS.registerProperty({
+    ...prop,
+    inherits: true,
+  });
 }
 //#endregion
 
@@ -70,17 +65,12 @@ for (const prop of fontProperties) {
 
 //#region --color-*
 for (const key of obj_props(unstyledLightTheme.colors)) {
-  try {
-    CSS.registerProperty({
-      name: `--color-${key.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase()).replace(/^-/, '')}`,
-      syntax: '<color>',
-      inherits: true,
-      initialValue: unstyledLightTheme.colors[key],
-    });
-  } catch (e) {
-    debugger;
-    console.error(e, key, unstyledLightTheme.colors[key]);
-  }
+  CSS.registerProperty({
+    name: `--color-${key.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase()).replace(/^-/, '')}`,
+    syntax: '<color>',
+    inherits: true,
+    initialValue: unstyledLightTheme.colors[key],
+  });
 }
 //#endregion
 

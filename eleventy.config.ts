@@ -4,11 +4,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import type {UserConfig} from '@11ty/eleventy';
 
 export default function (eleventyConfig: UserConfig) {
-  eleventyConfig.setTemplateFormats([
-    'ts|tsx|mts|cts|js|jsx|mjs|cjs'.split('|').map((ext) => `11ty.${ext}`),
-    'md',
-    'mdx',
-  ]);
+  eleventyConfig.setTemplateFormats(['ts|tsx|mts|cts|js|jsx|mjs|cjs'.split('|').map((ext) => `11ty.${ext}`), 'md', 'mdx']);
   eleventyConfig.on('importCacheReset', (paths) => {
     console.log('QAQ paths', require.cache, paths);
     for (const dep of paths) {
@@ -20,9 +16,9 @@ export default function (eleventyConfig: UserConfig) {
   eleventyConfig.setServerPassthroughCopyBehavior('passthrough');
   eleventyConfig.addPassthroughCopy('docs-src/docs.css');
   eleventyConfig.addPassthroughCopy('docs-src/.nojekyll');
-  eleventyConfig.addPassthroughCopy(
-    'node_modules/@webcomponents/webcomponentsjs'
-  );
+  eleventyConfig.addPassthroughCopy('node_modules/@webcomponents/webcomponentsjs');
+  eleventyConfig.addPassthroughCopy('node_modules/prismjs/themes');
+  eleventyConfig.addPassthroughCopy('@virtualstate/navigation/esnext');
   eleventyConfig.addPassthroughCopy('imgs');
   eleventyConfig.addPassthroughCopy('bundle');
   eleventyConfig.addPassthroughCopy('node_modules/lit/polyfill-support.js');

@@ -1,23 +1,23 @@
 // values-to-enum-converter.test.ts
 import {expect} from 'chai';
 // Adjust the import path as necessary
-import {valuesToEnumConverter, type EnumConverter} from './enum-property-converter';
+import {enumToSafeConverter, type SafeConverter} from './safe-property-converter';
 
 suite('valuesToEnumConverter (Map Optimized)', () => {
   // --- Test Initialization and Error Conditions ---
   test('Initialization and Error Handling', () => {
     it('should throw error if values array is empty', () => {
-      expect(() => valuesToEnumConverter([] as any)).to.throw('valuesToEnumConverter requires a non-empty array of possible values.');
+      expect(() => enumToSafeConverter([] as any)).to.throw('valuesToEnumConverter requires a non-empty array of possible values.');
     });
 
     it('should throw error if explicit defaultValue is not in values (string)', () => {
       const values = ['a', 'b'] as const;
-      expect(() => valuesToEnumConverter(values, {defaultValue: 'c' as any})).to.throw('The effective defaultValue (c) is not present in the provided values array.');
+      expect(() => enumToSafeConverter(values, {defaultValue: 'c' as any})).to.throw('The effective defaultValue (c) is not present in the provided values array.');
     });
 
     it('should throw error if explicit defaultValue is not in values (number)', () => {
       const values = [1, 2] as const;
-      expect(() => valuesToEnumConverter(values, {defaultValue: 3 as any})).to.throw('The effective defaultValue (3) is not present in the provided values array.');
+      expect(() => enumToSafeConverter(values, {defaultValue: 3 as any})).to.throw('The effective defaultValue (3) is not present in the provided values array.');
     });
 
     it('should throw error if explicit defaultValue is not in values (object identity)', () => {
@@ -25,7 +25,7 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
       const objB = {id: 2};
       const values = [objA, objB] as const;
       const differentObjB = {id: 2}; // Different identity
-      expect(() => valuesToEnumConverter(values, {defaultValue: differentObjB})).to.throw('The effective defaultValue ({"id":2}) is not present in the provided values array.');
+      expect(() => enumToSafeConverter(values, {defaultValue: differentObjB})).to.throw('The effective defaultValue ({"id":2}) is not present in the provided values array.');
     });
 
     // Note: Testing console warnings is harder. We test the *result* of collisions below.
@@ -35,10 +35,10 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
   describe('with simple string values (all lowercase)', () => {
     const colors = ['red', 'green', 'blue'] as const;
     type Color = (typeof colors)[number];
-    let converter: EnumConverter<Color>;
+    let converter: SafeConverter<Color>;
 
     before(() => {
-      converter = valuesToEnumConverter(colors); // Default: 'red'
+      converter = enumToSafeConverter(colors); // Default: 'red'
     });
 
     describe('setProperty (strict check)', () => {
@@ -95,11 +95,11 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
     // 'UP' and 'up' map to the same lowercase 'up'. 'up' comes last.
     const directions = ['UP', 'down', 'Left', 'up'] as const;
     type Direction = (typeof directions)[number]; // 'UP' | 'down' | 'Left' | 'up'
-    let converter: EnumConverter<Direction>;
+    let converter: SafeConverter<Direction>;
 
     before(() => {
       // Console warning expected here during init
-      converter = valuesToEnumConverter(directions); // Default: 'UP'
+      converter = enumToSafeConverter(directions); // Default: 'UP'
     });
 
     describe('setProperty (strict check)', () => {
@@ -157,10 +157,10 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
   describe('with number values', () => {
     const sizes = [0, 10, 20] as const;
     type Size = (typeof sizes)[number];
-    let converter: EnumConverter<Size>;
+    let converter: SafeConverter<Size>;
 
     before(() => {
-      converter = valuesToEnumConverter(sizes); // Default: 0
+      converter = enumToSafeConverter(sizes); // Default: 0
     });
 
     describe('setProperty (strict check)', () => {
@@ -210,10 +210,10 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
     const objB = {id: 'b'};
     const values = [objA, objB] as const;
     type Obj = (typeof values)[number];
-    let converter: EnumConverter<Obj>;
+    let converter: SafeConverter<Obj>;
 
     before(() => {
-      converter = valuesToEnumConverter(values); // Default: objA
+      converter = enumToSafeConverter(values); // Default: objA
     });
 
     describe('setProperty (identity check)', () => {
@@ -266,10 +266,10 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
   describe('with custom defaultValue', () => {
     const modes = ['read', 'write', 'admin'] as const;
     type Mode = (typeof modes)[number];
-    let converter: EnumConverter<Mode>;
+    let converter: SafeConverter<Mode>;
 
     before(() => {
-      converter = valuesToEnumConverter(modes, {defaultValue: 'write'});
+      converter = enumToSafeConverter(modes, {defaultValue: 'write'});
     });
 
     it('should use custom default for setProperty failures', () => {

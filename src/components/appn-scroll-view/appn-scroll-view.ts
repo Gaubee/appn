@@ -9,7 +9,7 @@ import {cache} from 'lit/directives/cache.js';
 import {flowScrollbarOverlay} from '../../utils/match-media';
 import {ResizeController} from '../../utils/resize-controller';
 import {ScrollController} from '../../utils/scroll-controller';
-import {propertyEvent, type PropertyEventListener} from '../../utils/property-event';
+import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {appnScrollViewStyle} from './appn-scroll-view.css';
 
 /**
@@ -60,9 +60,9 @@ export class AppnScrollViewElement extends LitElement {
   })
   accessor scrollbarColor: string = '';
 
-  @propertyEvent()
+  @eventProperty()
   override accessor onscrollend!: PropertyEventListener;
-  @propertyEvent()
+  @eventProperty()
   override accessor onscroll!: PropertyEventListener;
 
   @state()

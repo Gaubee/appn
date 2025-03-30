@@ -11,6 +11,6 @@ export * from './components/appn-view/appn-view';
 export * from './ponyfill/scrollend';
 
 export * from './utils/match-media';
-export * from './utils/property-event';
+export * from './utils/event-property';
 export * from './utils/resize-controller';
 export * from './utils/scroll-controller';

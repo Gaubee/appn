@@ -79,18 +79,21 @@
     "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-terser": "^0.4.4",
     "@types/chai": "^5.2.0",
+    "@types/dom-navigation": "^1.0.5",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.13.11",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.27.0",
     "@typescript-eslint/parser": "^8.27.0",
+    "@virtualstate/navigation": "1.0.1-alpha.209",
     "@web/dev-server": "^0.4.6",
     "@web/dev-server-legacy": "^2.1.1",
     "@web/test-runner": "^0.20.0",
     "@web/test-runner-playwright": "^0.11.0",
     "@webcomponents/webcomponentsjs": "^2.8.0",
     "chai": "^5.2.0",
+    "cross-env": "^7.0.3",
     "custom-element-solidjs-integration": "^1.9.0",
     "es-escape-html": "^0.1.1",
     "eslint": "^9.22.0",
@@ -106,6 +109,7 @@
     "typescript": "~5.8.2"
   },
   "peerDependencies": {
+    "@types/dom-navigation": "^1.0.5",
     "react": ">=18"
   },
   "customElements": "custom-elements.json"

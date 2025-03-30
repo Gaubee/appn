@@ -5,7 +5,7 @@ import {property} from 'lit/decorators.js';
 /**
  * 定义枚举转换器的接口
  */
-export interface EnumConverter<T> {
+export interface SafeConverter<T> {
   /**
    * 当通过 JavaScript property 设置值时调用。
    * 尝试将输入值转换为有效的枚举成员 T。
@@ -31,7 +31,7 @@ export interface EnumConverter<T> {
   toAttribute(propertyValue: T): string | null;
 }
 
-export const enumProperty = <C extends ReactiveElement, T>(converter: EnumConverter<T>) => {
+export const safeProperty = <C extends ReactiveElement, T>(converter: SafeConverter<T>) => {
   const litPropertyAccessor = property({attribute: true, reflect: true, converter: converter});
   return accessor<C, T>((target, context) => {
     const litPropertyAccessorDecoratorResult = litPropertyAccessor(target, context);
@@ -72,10 +72,10 @@ export interface ValuesToEnumConverterOptions<T> {
  * @returns An EnumConverter instance.
  * @template T The type of the enum values.
  */
-export function valuesToEnumConverter<T>(
+export function enumToSafeConverter<T>(
   values: readonly T[], // Use readonly for better type inference with `as const`
   options?: ValuesToEnumConverterOptions<T>
-): EnumConverter<T> {
+): SafeConverter<T> {
   if (!values || values.length === 0) {
     throw new Error('valuesToEnumConverter requires a non-empty array of possible values.');
   }

@@ -1,12 +1,12 @@
 import {ReactiveElement} from 'lit';
-import {enumProperty, type EnumConverter} from './enum-property-converter';
+import {safeProperty, type SafeConverter} from './safe-property-converter';
 
 export type AutoBoolean = boolean | 'auto';
 
 /**
  * an converter for attribute/property="auto | true | false"
  */
-export const autoBooleanConverter: EnumConverter<AutoBoolean> = {
+export const autoBooleanConverter: SafeConverter<AutoBoolean> = {
   setProperty: (value) => {
     if (
       value == null ||
@@ -53,5 +53,5 @@ export const autoBooleanConverter: EnumConverter<AutoBoolean> = {
 };
 
 export const autoBooleanProperty = <C extends ReactiveElement>() => {
-  return enumProperty<C, AutoBoolean>(autoBooleanConverter);
+  return safeProperty<C, AutoBoolean>(autoBooleanConverter);
 };
