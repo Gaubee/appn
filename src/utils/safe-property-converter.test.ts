@@ -35,11 +35,7 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
   describe('with simple string values (all lowercase)', () => {
     const colors = ['red', 'green', 'blue'] as const;
     type Color = (typeof colors)[number];
-    let converter: SafeConverter<Color>;
-
-    before(() => {
-      converter = enumToSafeConverter(colors); // Default: 'red'
-    });
+    const converter = enumToSafeConverter(colors); // Default: 'red'
 
     describe('setProperty (strict check)', () => {
       it('should return the value if it matches exactly', () => {
@@ -95,12 +91,7 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
     // 'UP' and 'up' map to the same lowercase 'up'. 'up' comes last.
     const directions = ['UP', 'down', 'Left', 'up'] as const;
     type Direction = (typeof directions)[number]; // 'UP' | 'down' | 'Left' | 'up'
-    let converter: SafeConverter<Direction>;
-
-    before(() => {
-      // Console warning expected here during init
-      converter = enumToSafeConverter(directions); // Default: 'UP'
-    });
+    const converter = enumToSafeConverter(directions); // Default: 'UP'
 
     describe('setProperty (strict check)', () => {
       it('should return value if it matches canonical exactly', () => {
@@ -157,11 +148,7 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
   describe('with number values', () => {
     const sizes = [0, 10, 20] as const;
     type Size = (typeof sizes)[number];
-    let converter: SafeConverter<Size>;
-
-    before(() => {
-      converter = enumToSafeConverter(sizes); // Default: 0
-    });
+    const converter = enumToSafeConverter(sizes); // Default: 0
 
     describe('setProperty (strict check)', () => {
       it('should return the value if it matches exactly', () => {
@@ -210,11 +197,7 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
     const objB = {id: 'b'};
     const values = [objA, objB] as const;
     type Obj = (typeof values)[number];
-    let converter: SafeConverter<Obj>;
-
-    before(() => {
-      converter = enumToSafeConverter(values); // Default: objA
-    });
+    const converter = enumToSafeConverter(values); // Default: objA
 
     describe('setProperty (identity check)', () => {
       it('should return the object if same identity', () => {
@@ -266,11 +249,7 @@ suite('valuesToEnumConverter (Map Optimized)', () => {
   describe('with custom defaultValue', () => {
     const modes = ['read', 'write', 'admin'] as const;
     type Mode = (typeof modes)[number];
-    let converter: SafeConverter<Mode>;
-
-    before(() => {
-      converter = enumToSafeConverter(modes, {defaultValue: 'write'});
-    });
+    const converter = enumToSafeConverter(modes, {defaultValue: 'write'});
 
     it('should use custom default for setProperty failures', () => {
       expect(converter.setProperty('READ')).to.equal('write'); // Case mismatch

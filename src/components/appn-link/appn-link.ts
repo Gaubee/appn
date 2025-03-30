@@ -1,7 +1,7 @@
 import {html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {safeProperty, enumToSafeConverter} from '../../utils/safe-property-converter';
-import {cache} from 'lit/directives/cache';
+import {cache} from 'lit/directives/cache.js';
 import {appnNavigationContext, type AppnNavigation} from '../appn-navigation-provider/appn-navigation-context';
 import {consume} from '@lit/context';
 
