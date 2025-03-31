@@ -15,16 +15,30 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     });
     /// 这里独立写，是为了方便调试
     this.__nav.addEventListener('navigate', (event) => {
+      if (!event.canIntercept) {
+        return;
+      }
+      event.intercept(async()=>{
+        
+      })
+      debugger;
       this.dispatchEvent(event);
+      debugger;
     });
     this.__nav.addEventListener('navigatesuccess', (event) => {
+      debugger;
       this.dispatchEvent(event);
+      debugger;
     });
     this.__nav.addEventListener('navigateerror', (event) => {
+      debugger;
       this.dispatchEvent(event);
+      debugger;
     });
     this.__nav.addEventListener('currententrychange', (event) => {
+      debugger;
       this.dispatchEvent(event);
+      debugger;
     });
   }
 

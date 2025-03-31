@@ -19,14 +19,24 @@ export class AppnLinkElement extends LitElement {
   accessor to: string = '';
 
   private __onClick = (event: Event) => {
+    debugger;
+    console.log('qaq', event);
     event.preventDefault();
     if (this.to) {
       this.__nav.navigate(this.to);
     }
   };
+  constructor() {
+    super();
+    this.addEventListener('click', this.__onClick);
+  }
 
   override render() {
-    return cache(this.type === 'button' ? html`<button type="button" @click=${this.__onClick}><slot></slot></button>` : html`<a href=${this.to}><slot></slot></a>`);
+    return cache(
+      this.type === 'button'
+        ? html`<button part="link button" type="button"><slot></slot></button>`
+        : html`<a part="link a" href=${this.to}><slot></slot></a>`
+    );
   }
 }
 

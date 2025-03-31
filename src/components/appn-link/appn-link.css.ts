@@ -13,7 +13,7 @@ export const appnLinkStyle = css`
     border-radius: 0.5em;
     cursor: pointer;
 
-    box-shadow: 0px 1px 3px -2px var(--color-canvas-text); // 1px border + 1px padding = 2p
+    box-shadow: 0px 1px 3px -2px var(--color-canvas-text);
 
     transition-property: box-shadow;
     transition-duration: 300ms;
@@ -21,15 +21,17 @@ export const appnLinkStyle = css`
   }
   button:hover,
   button:focus-within {
-    box-shadow: 0px 1px 4px -1px var(--color-canvas-text); // 1px border + 1px padding = 2p
+    transition-duration: 100ms;
+    box-shadow: 0px 1px 4px -1px var(--color-canvas-text);
+  }
+  button:active {
+    transition-duration: 100ms;
+    box-shadow: 0px 1px 2px -3px var(--color-canvas-text);
   }
 
   a {
     font: var(--font);
     color: var(--color-accent);
-    text-shadow:
-      1px 1px 2px var(--color-accent-text),
-      -1px 1px 2px var(--color-accent-text);
     text-decoration: none;
     cursor: pointer;
 
@@ -42,6 +44,7 @@ export const appnLinkStyle = css`
   }
   a:hover,
   a:target {
+    transition-duration: 100ms;
     text-decoration-color: currentColor;
     text-underline-offset: 0.1em;
   }
