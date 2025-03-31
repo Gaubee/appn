@@ -119,6 +119,9 @@ export const appnThemeStyles = [
       font-variation-settings: var(--font-variation-settings);
       line-height: var(--line-height);
 
+      --font: var(--font-style) var(--font-variant-ligatures) var(--font-variant-caps) var(--font-variant-numeric) var(--font-variant-east-asian) var(--font-weight)
+        var(--font-stretch) var(--font-size) / var(--line-height) var(--font-family);
+
       accent-color: var(--color-accent);
     }
     :host([data-color-scheme='light']) {

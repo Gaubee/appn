@@ -135,6 +135,10 @@ export class AppnThemeProviderElement extends LitElement {
           --color-brown: ${colors.Brown};
 
           --grid-unit: ${themeContext.gridUnit};
+          --grid-unit-0.5: calc(var(--grid-unit) / 2);
+          --grid-unit-2: calc(var(--grid-unit) * 2);
+          --grid-unit-3: calc(var(--grid-unit) * 3);
+          --grid-unit-4: calc(var(--grid-unit) * 4);
 
           --safe-area-inset-top: ${safeAreaInset.top};
           --safe-area-inset-bottom: ${safeAreaInset.bottom};

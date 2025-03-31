@@ -44,7 +44,9 @@ export default class Page {
                 <appn-top-bar>This is Page2</appn-top-bar>
               </appn-header>
               <appn-view>
-                <appn-link to="page1">go to page1</appn-link>
+                <appn-link to="page1" type="a">
+                  go to page1
+                </appn-link>
               </appn-view>
             </appn-page>
           </appn-theme-provider>

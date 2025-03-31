@@ -1,12 +1,14 @@
+import {consume} from '@lit/context';
 import {html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
-import {safeProperty, enumToSafeConverter} from '../../utils/safe-property-converter';
 import {cache} from 'lit/directives/cache.js';
+import {enumToSafeConverter, safeProperty} from '../../utils/safe-property-converter';
 import {appnNavigationContext, type AppnNavigation} from '../appn-navigation-provider/appn-navigation-context';
-import {consume} from '@lit/context';
+import {appnLinkStyle} from './appn-link.css';
 
 @customElement('appn-link')
 export class AppnLinkElement extends LitElement {
+  static override styles = appnLinkStyle;
   @safeProperty(enumToSafeConverter(['button', 'a', 'submit']))
   accessor type: 'button' | 'a' | 'submit' = 'button';
 

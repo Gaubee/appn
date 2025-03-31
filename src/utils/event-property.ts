@@ -75,7 +75,7 @@ export const eventProperty = <
       },
       fromAttribute(value) {
         if (value != null) {
-          const fun = Function('event', value);
+          const fun = Function('event', value) as EventListener;
           this.addEventListener(eventType, fun);
         }
         return context.access.get(this); // no change

@@ -20,6 +20,7 @@ export class AppnViewElement extends LitElement {
     :host {
       display: flex;
       flex-direction: column;
+      align-items: flex-start;
     }
   `;
 
