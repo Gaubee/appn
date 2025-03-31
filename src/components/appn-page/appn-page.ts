@@ -62,7 +62,7 @@ export class AppnPageElement extends LitElement {
           --page-footer-height: ${this.__footerHeight}px;
         }
       </style>
-      <dialog open=${this.open} part="layer">
+      <div .inert=${!this.open} class="layer" part="layer">
         <appn-scroll-view class="root" part="root">
           <div class="header stuck-top" part="header" ${this.__headerSize.observe()}>
             <slot name="header"> </slot>
@@ -74,7 +74,7 @@ export class AppnPageElement extends LitElement {
             <slot name="footer"></slot>
           </div>
         </appn-scroll-view>
-      </dialog>
+      </div>
     `;
   }
 }

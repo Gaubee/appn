@@ -18,8 +18,7 @@
    1. 比如`<appn-link>` 可以得到 `@consume({context: appnNavigationContext}) accessor nav:AppNavigation`，从而可以基于nav对象进行路由操作 `nav.navigate(this.to)`
    1. 考虑到兼容性的问题，以及容器化的设计，`interface AppNavigation`的目的是提供一套和 navigation-api 基本一致的接口，底层可能会用到 navigation-api，但考虑到兼容性，可能更多的是参考其设计而不是直接使用，市面上有相关的垫片，需要100kb左右的引入，我会在初期尝试使用 navigation-api，校验垫片在这里的合理性，但我估计我可能前期会刻意使用 history-api 来满足基础能力的开发。
       > 我会尽可能实现 navigation-api 特有的高级功能，因为我会将 ViewTransactionAPI 封装给开发者使用。这种垫片本书就是无法完全实现的，所以我才需要从html层面作出封装与限制，因此我只会针对某些常见的场景进行针对性封装。满足80%的使用需求。
-   1. `<appn-page>` 是一个视图容器，是作为导航的目标单元，它的底层是使用`<dialog>`，因此有show/showModal的能力来控制显示渲染。
-      > 使用dialog是因为它提供了一个叫做“layer”的能力，这和移动端上的导航堆栈正好契合，因此我可以认为每一个页面就是一个图层。使用dialog一定程度上替代iframe，结合我的 AppNavigation ，来实现page之间的页面切换，我觉得是一种比较可行的方案。
+   1. `<appn-page>` 是一个视图容器，是作为导航的目标单元，它的底层是使用`<div inert=${this.open}>`，因此可以控制页面关闭的时候，使其子元素完全陷入对用户不可用、对辅助工作不可见的状态。
    1. 比如说我可以这样设计 `<appn-page pathname="/books/:id">`，利用URLPattern的匹配能力，来匹配当前路由。
    1. `<appn-page>` 作为导航的目标单元，还能有各种渲染的方式，比如以弹窗的方式渲染、以bottom-sheet的方式渲染。
    1. `<appn-page>` 与 `<appn-navigation-provider>` 配合，能实现页面之间的切换，跳转等等。
