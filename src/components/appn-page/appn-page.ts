@@ -55,6 +55,7 @@ export class AppnPageElement extends LitElement {
   @consume({context: appnThemeContext, subscribe: true})
   accessor theme!: AppnTheme;
   override render() {
+    this.inert = !this.open;
     return html`
       <style>
         :host {
@@ -62,7 +63,7 @@ export class AppnPageElement extends LitElement {
           --page-footer-height: ${this.__footerHeight}px;
         }
       </style>
-      <div .inert=${!this.open} class="layer" part="layer">
+      <div class="layer" part="layer">
         <appn-scroll-view class="root" part="root">
           <div class="header stuck-top" part="header" ${this.__headerSize.observe()}>
             <slot name="header"> </slot>

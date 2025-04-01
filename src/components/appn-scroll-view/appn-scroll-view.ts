@@ -256,11 +256,11 @@ export class AppnScrollViewElement extends LitElement {
           canOverlayScrollbar
             ? null
             : html`<div class="scrollbar-wrapper">
-                <div part="scrollbar axis-y" class="scrollbar axis-y" ${this.__axisYScroll.observe()}>
-                  <div class="mock-content"></div>
+                <div part="scrollbar axis-y" class="scrollbar axis-y" role="scrollbar" ${this.__axisYScroll.observe()}>
+                  <div class="mock-content" .inert=${true}></div>
                 </div>
-                <div part="scrollbar axis-x" class="scrollbar axis-x" ${this.__axisXScroll.observe()}>
-                  <div class="mock-content"></div>
+                <div part="scrollbar axis-x" class="scrollbar axis-x" role="scrollbar" ${this.__axisXScroll.observe()}>
+                  <div class="mock-content" .inert=${true}></div>
                 </div>
               </div>`
         )}

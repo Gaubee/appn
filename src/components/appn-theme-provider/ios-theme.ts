@@ -26,7 +26,7 @@ const iosBaseTheme = {
       "'Hiragino Sans GB'" /* 冬青黑体 (旧版 macOS 中文回退) */,
       "'Microsoft YaHei'" /* 微软雅黑 (Windows 中文适配) */,
       'sans-serif' /* 通用无衬线兜底 */,
-    ].join(' '),
+    ].join(', '),
   },
 } satisfies AppnThemePartial;
 

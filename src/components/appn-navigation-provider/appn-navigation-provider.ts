@@ -18,9 +18,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       if (!event.canIntercept) {
         return;
       }
-      event.intercept(async()=>{
-        
-      })
+      event.intercept({handler: async () => {}});
       debugger;
       this.dispatchEvent(event);
       debugger;

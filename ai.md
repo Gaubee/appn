@@ -23,42 +23,9 @@
    1. `<appn-page>` 作为导航的目标单元，还能有各种渲染的方式，比如以弹窗的方式渲染、以bottom-sheet的方式渲染。
    1. `<appn-page>` 与 `<appn-navigation-provider>` 配合，能实现页面之间的切换，跳转等等。
    1. `<appn-link>` 目前设想上就相对简单，主要就是一个 a 元素或者 button 元素的样式，使用 `AppNavigation` 来进行跳转
-
-   > 目前我有一个疑惑点，我有考虑这样设计: `<a is="appn-link">`/`<button is="appn-link">`，这样能尽可能服用HTML元素，让 appn-link 专注于功能，而不是样式。但我不知道在lit中，这应该如何实现。
-   > 不过我看safari不支持对内置元素的扩展，所以目前也许只能继续保持使用 `<appn-link>` 这样的设计。但我对这个设计还是不够满意，因为它和 a/butotn 标签元素的职责重叠了，这不是我想看到的。我希望它保持导航的纯粹性。
-   > 但是如果太纯粹，在开发的时候，这样嵌套感觉很笨拙:`<appn-link to="/other"><a href="">go to other page</a></appn-link>`
-
-   1. 目前的设计是通过一个 type 属性，来决定了`<appn-link>`渲染出来的样式，以下是大概的源代码：
-
-      ```ts
-      @customElement('appn-link')
-      export class AppnLinkElement extends LitElement {
-        @safeProperty(enumToSafeConverter(['button', 'a', 'submit']))
-        accessor type: 'button' | 'a' | 'submit' = 'button';
-        @consume({context: appnNavigationContext})
-        accessor __nav!: AppnNavigation;
-
-        @property({type: String, attribute: true, reflect: true})
-        accessor to: string = '';
-
-        private __onClick = (event: Event) => {
-          debugger;
-          console.log('qaq', event);
-          event.preventDefault();
-          if (this.to) {
-            this.__nav.navigate(this.to);
-          }
-        };
-        constructor() {
-          super();
-          this.addEventListener('click', this.__onClick);
-        }
-
-        override render() {
-          return cache(this.type === 'button' ? html`<button part="link button" type="button"><slot></slot></button>` : html`<a part="link a" href=${this.to}><slot></slot></a>`);
-        }
-      }
-      ```
+      1. `<appn-link>`的定位其实类似于`<a>`，但是它不大一样，`<a>`标签的href是基于当前的document.baseURI。而因此`<appn-page>`有自己的路径，因此`<appn-link>`能够读取`<appn-page>`的url来作为baseURI.
+      1. 也就是说如果使用`<a>`，开发者需要自己去拼接完整的url，而`<appn-link>`则可以正确使用相对路径，会更符合开发直觉。
+      1. 我有考虑这样设计: `<a is="appn-link">`/`<button is="appn-link">`，但是safari不支持对内置元素的扩展。
 
 1. **`@appn-labs/fuse`** webapp的开发中，ux是非常重要的一部分，如何构建良好的页面互操作性重来都是一个巨大的挑战。我尝试使用html替代了js+html+css在交互上的表达。一方面因为css存在兼容性问题，同时css的target有限，只有`:hover`等简单的能力，而缺乏“有状态”的交互能力。因此有了这个项目，因为html元素本事就是有状态的，可操作的，有记忆的，因此基于html实现ux的声明式开发，是一种探索。
 
