@@ -54,6 +54,15 @@ export class AppnPageElement extends LitElement {
 
   @consume({context: appnThemeContext, subscribe: true})
   accessor theme!: AppnTheme;
+
+  @property({type: String, reflect: true, attribute: true})
+  accessor pathname = '*';
+
+  @property({type: String, reflect: true, attribute: true})
+  accessor search = '*';
+
+  @property({type: String, reflect: true, attribute: true})
+  accessor hash = '*';
   override render() {
     this.inert = !this.open;
     return html`

@@ -12,6 +12,9 @@ for (const area of ['header', 'footer']) {
 
 export const appnPageStyles = [
   css`
+    :host {
+      display: contents;
+    }
     .layer {
       margin: 0;
       border: 0;

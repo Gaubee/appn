@@ -1,11 +1,19 @@
 import {ContextProvider} from '@lit/context';
-import {html, LitElement} from 'lit';
-import {customElement} from 'lit/decorators.js';
+import {css, html, LitElement, type CSSResultGroup, type PropertyValues} from 'lit';
+import {customElement, property, query, queryAssignedElements} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {appnNavigationContext, type AppnNavigation} from './appn-navigation-context';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
+import type {AppnPageElement} from '../appn-page/appn-page';
+import {appnNavigationStyle} from './appn-navigation.css';
+import {MutationController} from '../../utils/mutation-controller';
+import {URLPattern} from 'urlpattern-polyfill';
+import {baseurl_relative_parts} from '../../utils/relative-path';
+import {match} from 'ts-pattern';
+
 @customElement('appn-navigation-provider')
 export class AppnNavigationProviderElement extends LitElement implements AppnNavigation {
+  static override styles = appnNavigationStyle;
   private __nav = window.navigation;
   constructor() {
     super();
@@ -18,26 +26,31 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       if (!event.canIntercept) {
         return;
       }
-      event.intercept({handler: async () => {}});
-      debugger;
-      this.dispatchEvent(event);
-      debugger;
+      // event.preventDefault();
+      event.intercept({
+        handler: async () => {
+          return this.__effectRoute();
+        },
+      });
+      // debugger;
+      // this.dispatchEvent(event);
+      // debugger;
     });
-    this.__nav.addEventListener('navigatesuccess', (event) => {
-      debugger;
-      this.dispatchEvent(event);
-      debugger;
-    });
-    this.__nav.addEventListener('navigateerror', (event) => {
-      debugger;
-      this.dispatchEvent(event);
-      debugger;
-    });
-    this.__nav.addEventListener('currententrychange', (event) => {
-      debugger;
-      this.dispatchEvent(event);
-      debugger;
-    });
+    // this.__nav.addEventListener('navigatesuccess', (event) => {
+    //   debugger;
+    //   this.dispatchEvent(event);
+    //   debugger;
+    // });
+    // this.__nav.addEventListener('navigateerror', (event) => {
+    //   debugger;
+    //   this.dispatchEvent(event);
+    //   debugger;
+    // });
+    // this.__nav.addEventListener('currententrychange', (event) => {
+    //   debugger;
+    //   this.dispatchEvent(event);
+    //   debugger;
+    // });
   }
 
   /** Returns a snapshot of the joint session history entries. */
@@ -111,14 +124,104 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   @eventProperty<AppnNavigationProviderElement, NavigationCurrentEntryChangeEvent>()
   accessor oncurrententrychange!: PropertyEventListener<AppnNavigationProviderElement, NavigationCurrentEntryChangeEvent>;
 
-  private __html = cache(html`<slot></slot>`);
+  @property({type: String, reflect: true, attribute: 'base-uri'})
+  override accessor baseURI = location.href;
+
+  @queryAssignedElements({slot: 'router', flatten: true})
+  accessor routersElements!: HTMLTemplateElement[];
+
+  /**
+   * @TODO 将 NavigationHistoryEntry[] 映射到元素里
+   */
+  private __effectRoute = () => {
+    console.log('QAQ routersElements', this.routersElements);
+    const current_url = this.__nav.currentEntry?.url;
+    if (!current_url) {
+      return;
+    }
+    const relative_parts = baseurl_relative_parts(current_url, this.baseURI);
+    if (!relative_parts) {
+      return;
+    }
+    console.log('QAQ relative_parts', relative_parts);
+    for (let routerElement of this.routersElements) {
+      if (!(routerElement instanceof HTMLTemplateElement)) {
+        continue;
+      }
+      const {pathname = '*', search = '*', hash = '*'} = routerElement.dataset;
+      const p = new URLPattern({pathname, search, hash});
+      const matchResult = p.exec(relative_parts);
+      console.log('QAQ', {pathname, search, hash});
+      if (matchResult) {
+        console.log('QAQ matchResult', matchResult);
+        const templateElement = routerElement.dataset.target
+          ? match(routerElement.ownerDocument.getElementById(routerElement.dataset.target))
+              .when(
+                (ele) => ele instanceof HTMLTemplateElement,
+                (ele) => ele
+              )
+              .otherwise(() => null)
+          : routerElement;
+        if (templateElement) {
+          const oldNavHistoryEntryNode = this.querySelector<AppnNavigationHistoryEntryElement>(
+            `appn-navigation-history-entry[pathname=${JSON.stringify(pathname)}][search=${JSON.stringify(search)}]`
+          );
+          if (oldNavHistoryEntryNode) {
+            if (oldNavHistoryEntryNode.templateEle !== templateElement) {
+              oldNavHistoryEntryNode.templateEle = templateElement;
+              oldNavHistoryEntryNode.hash = relative_parts.hash;
+              oldNavHistoryEntryNode.innerHTML = '';
+              oldNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
+            }
+          } else {
+            const newNavHistoryEntryNode = new AppnNavigationHistoryEntryElement();
+            newNavHistoryEntryNode.templateEle = templateElement;
+            newNavHistoryEntryNode.pathname = relative_parts.pathname;
+            newNavHistoryEntryNode.search = relative_parts.search;
+            newNavHistoryEntryNode.hash = relative_parts.hash;
+            newNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
+            this.appendChild(newNavHistoryEntryNode);
+          }
+        }
+        break;
+      }
+    }
+  };
+
   override render() {
     return this.__html;
+  }
+  private __html = cache(html`
+    <slot name="router" @slotchange=${this.__effectRoute}></slot>
+    <slot></slot>
+  `);
+}
+
+@customElement('appn-navigation-history-entry')
+export class AppnNavigationHistoryEntryElement extends LitElement {
+  static override styles = [
+    css`
+      :host {
+        display: grid;
+      }
+    `,
+  ];
+  @property({type: String, reflect: true, attribute: true})
+  accessor pathname!: string;
+  @property({type: String, reflect: true, attribute: true})
+  accessor search!: string;
+  @property({type: String, reflect: true, attribute: true})
+  accessor hash!: string;
+  @property({type: Object})
+  accessor templateEle: HTMLTemplateElement | undefined = undefined;
+  override render() {
+    return html`<slot></slot> `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
     'appn-navigation-provider': AppnNavigationProviderElement;
+    'appn-navigation-history-entry': AppnNavigationHistoryEntryElement;
   }
 }
