@@ -1,12 +1,12 @@
 import {ReactiveElement} from 'lit';
-import {safeProperty, type SafeConverter} from './safe-property-converter';
+import {safeProperty, type SafePropertyConverter} from './safe-property-converter';
 
 export type AutoBoolean = boolean | 'auto';
 
 /**
  * an converter for attribute/property="auto | true | false"
  */
-export const autoBooleanConverter: SafeConverter<AutoBoolean> = {
+export const autoBooleanConverter: SafePropertyConverter<AutoBoolean> = {
   setProperty: (value) => {
     if (
       value == null ||

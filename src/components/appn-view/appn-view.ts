@@ -21,6 +21,7 @@ export class AppnViewElement extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+      gap: var(--grid-unit);
     }
   `;
 

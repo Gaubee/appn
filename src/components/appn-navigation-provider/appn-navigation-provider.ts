@@ -1,15 +1,15 @@
-import {ContextProvider} from '@lit/context';
+import {ContextProvider, provide} from '@lit/context';
 import {css, html, LitElement, type CSSResultGroup, type PropertyValues} from 'lit';
 import {customElement, property, query, queryAssignedElements} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
-import {appnNavigationContext, type AppnNavigation} from './appn-navigation-context';
+import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from './appn-navigation-context';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import type {AppnPageElement} from '../appn-page/appn-page';
 import {appnNavigationStyle} from './appn-navigation.css';
 import {MutationController} from '../../utils/mutation-controller';
 import {URLPattern} from 'urlpattern-polyfill';
 import {baseurl_relative_parts} from '../../utils/relative-path';
-import {match} from 'ts-pattern';
+import {match, Pattern} from 'ts-pattern';
 
 @customElement('appn-navigation-provider')
 export class AppnNavigationProviderElement extends LitElement implements AppnNavigation {
@@ -28,9 +28,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       }
       // event.preventDefault();
       event.intercept({
-        handler: async () => {
-          return this.__effectRoute();
-        },
+        handler: this.__effectRoutes,
       });
       // debugger;
       // this.dispatchEvent(event);
@@ -46,22 +44,35 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     //   this.dispatchEvent(event);
     //   debugger;
     // });
-    // this.__nav.addEventListener('currententrychange', (event) => {
-    //   debugger;
-    //   this.dispatchEvent(event);
-    //   debugger;
-    // });
+    debugger;
+    this.__nav.addEventListener('currententrychange', (event) => {
+      debugger;
+      this.currentEntry = this.__nav.currentEntry;
+    });
   }
 
   /** Returns a snapshot of the joint session history entries. */
-  entries(): NavigationHistoryEntry[] {
+  async entries(): Promise<NavigationHistoryEntry[]> {
     return this.__nav.entries();
   }
 
-  /** The current NavigationHistoryEntry. */
-  get currentEntry() {
-    return this.__nav.currentEntry;
+  async findEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>) {
+    for (const entry of this.__nav.entries()) {
+      const found = match(entry)
+        .with(pattern, (entry) => entry)
+        .otherwise(() => null);
+      if (found) return found;
+    }
+    return null;
   }
+
+  // /** The current NavigationHistoryEntry. */
+  // get currentEntry() {
+  //   return this.__nav.currentEntry;
+  // }
+
+  @provide({context: appnNavigationHistoryEntryContext})
+  accessor currentEntry: NavigationHistoryEntry | null = this.__nav.currentEntry;
 
   /** Updates the state object of the current NavigationHistoryEntry. */
   updateCurrentEntry(options: NavigationUpdateCurrentEntryOptions): void {
@@ -131,11 +142,17 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   accessor routersElements!: HTMLTemplateElement[];
 
   /**
-   * @TODO 将 NavigationHistoryEntry[] 映射到元素里
+   * 将 NavigationHistoryEntry[] 映射到元素里
    */
-  private __effectRoute = () => {
-    console.log('QAQ routersElements', this.routersElements);
-    const current_url = this.__nav.currentEntry?.url;
+  private __effectRoutes = async () => {
+    const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
+    console.log('QAQ routersElements', routersElements);
+    for (const navEntry of await this.entries()) {
+      this.__effectRoute(navEntry, routersElements);
+    }
+  };
+  private __effectRoute = (navEntry: NavigationHistoryEntry, routersElements: HTMLTemplateElement[]) => {
+    const current_url = navEntry.url;
     if (!current_url) {
       return;
     }
@@ -144,10 +161,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       return;
     }
     console.log('QAQ relative_parts', relative_parts);
-    for (let routerElement of this.routersElements) {
-      if (!(routerElement instanceof HTMLTemplateElement)) {
-        continue;
-      }
+    for (const routerElement of routersElements) {
       const {pathname = '*', search = '*', hash = '*'} = routerElement.dataset;
       const p = new URLPattern({pathname, search, hash});
       const matchResult = p.exec(relative_parts);
@@ -167,14 +181,17 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
             `appn-navigation-history-entry[pathname=${JSON.stringify(pathname)}][search=${JSON.stringify(search)}]`
           );
           if (oldNavHistoryEntryNode) {
+            oldNavHistoryEntryNode.navigationEntry = navEntry;
             if (oldNavHistoryEntryNode.templateEle !== templateElement) {
               oldNavHistoryEntryNode.templateEle = templateElement;
               oldNavHistoryEntryNode.hash = relative_parts.hash;
               oldNavHistoryEntryNode.innerHTML = '';
               oldNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
             }
+            this.appendChild(oldNavHistoryEntryNode);
           } else {
             const newNavHistoryEntryNode = new AppnNavigationHistoryEntryElement();
+            newNavHistoryEntryNode.navigationEntry = navEntry;
             newNavHistoryEntryNode.templateEle = templateElement;
             newNavHistoryEntryNode.pathname = relative_parts.pathname;
             newNavHistoryEntryNode.search = relative_parts.search;
@@ -192,7 +209,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     return this.__html;
   }
   private __html = cache(html`
-    <slot name="router" @slotchange=${this.__effectRoute}></slot>
+    <slot name="router" @slotchange=${this.__effectRoutes}></slot>
     <slot></slot>
   `);
 }
@@ -214,6 +231,9 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
   accessor hash!: string;
   @property({type: Object})
   accessor templateEle: HTMLTemplateElement | undefined = undefined;
+
+  @provide({context: appnNavigationHistoryEntryContext})
+  accessor navigationEntry: NavigationHistoryEntry | null = null;
   override render() {
     return html`<slot></slot> `;
   }

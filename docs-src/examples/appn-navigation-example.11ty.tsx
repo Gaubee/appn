@@ -31,29 +31,30 @@ export default class Page {
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
         <appn-theme-provider theme="ios">
           <appn-navigation-provider>
-            <template slot="router" data-pathname="" data-target="page1-template" />
-            <template slot="router" data-pathname="page1" id="page1-template">
-              <appn-page id="page1">
+            <template slot="router" data-pathname="" data-hash="">
+              <appn-page>
                 <appn-header>
-                  <appn-top-bar>This is Page1</appn-top-bar>
+                  <appn-top-bar>This is Home Page</appn-top-bar>
                 </appn-header>
                 <appn-view>
-                  <appn-link to="page2">go to page2</appn-link>
-                </appn-view>
-              </appn-page>
-            </template>
-            <template slot="router" data-pathname="page2">
-              <appn-page id="page2">
-                <appn-header>
-                  <appn-top-bar>This is Page2</appn-top-bar>
-                </appn-header>
-                <appn-view>
-                  <appn-link to="page1" type="a">
-                    go to page1
+                  <appn-link to="#page1">go to page1</appn-link>
+                  <appn-link to="#page2" type="a">
+                    go to page2
                   </appn-link>
                 </appn-view>
               </appn-page>
             </template>
+            <template slot="router" data-hash="page1" id="page-template">
+              <appn-page onactivated="this.querySelector('appn-top-bar').innerHTML =`This is ${new URL(event.detail.url).hash.replace(/^#/,'')}!!`">
+                <appn-header>
+                  <appn-top-bar>This is Some Page...</appn-top-bar>
+                </appn-header>
+                <appn-view>
+                  <appn-link to="page2">go back</appn-link>
+                </appn-view>
+              </appn-page>
+            </template>
+            <template slot="router" data-hash="page2" data-target="page-template"></template>
           </appn-navigation-provider>
         </appn-theme-provider>
       </>

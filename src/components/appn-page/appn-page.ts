@@ -4,13 +4,15 @@
  * SPDX-License-Identifier: MIT
  */
 
-import {LitElement, html} from 'lit';
+import {LitElement, html, type PropertyValues} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {ResizeController} from '../../utils/resize-controller';
 import '../appn-scroll-view/appn-scroll-view';
 import {appnPageStyles} from './appn-page.css';
 import {consume} from '@lit/context';
 import {appnThemeContext, type AppnTheme} from '../appn-theme-provider/appn-theme-context';
+import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
+import {appnNavigationHistoryEntryContext} from '../appn-navigation-provider/appn-navigation-context';
 
 export type AppnPageMode = AppnPageElement['mode'];
 
@@ -63,6 +65,26 @@ export class AppnPageElement extends LitElement {
 
   @property({type: String, reflect: true, attribute: true})
   accessor hash = '*';
+
+  @consume({context: appnNavigationHistoryEntryContext, subscribe: true})
+  accessor navigationEntry: NavigationHistoryEntry | null = null;
+
+  @eventProperty<AppnPageElement, AppnPageActivatedEvent>()
+  accessor onactivated!: PropertyEventListener<AppnPageElement, AppnPageActivatedEvent>;
+  private __activatedNavigationEntry?: unknown;
+
+  protected override firstUpdated(_changedProperties: PropertyValues): void {
+    super.firstUpdated(_changedProperties);
+    const {navigationEntry} = this;
+    if (navigationEntry != this.__activatedNavigationEntry) {
+      this.__activatedNavigationEntry = navigationEntry;
+      if (navigationEntry) {
+        console.log('activated', navigationEntry);
+        this.dispatchEvent(new AppnPageActivatedEvent(navigationEntry));
+      }
+    }
+  }
+
   override render() {
     this.inert = !this.open;
     return html`
@@ -86,6 +108,14 @@ export class AppnPageElement extends LitElement {
         </appn-scroll-view>
       </div>
     `;
+  }
+}
+
+export class AppnPageActivatedEvent extends CustomEvent<NavigationHistoryEntry> {
+  constructor(entry: NavigationHistoryEntry) {
+    super('activated', {
+      detail: entry,
+    });
   }
 }
 

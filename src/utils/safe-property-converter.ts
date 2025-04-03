@@ -5,14 +5,14 @@ import {property} from 'lit/decorators.js';
 /**
  * 定义枚举转换器的接口
  */
-export type SafeConverter<T, C = unknown> = SafeReflectConverter<T, C> | SafeNoReflectConverter<T, C>;
-export type SafeNoReflectConverter<T, C = unknown> = Omit<SafeReflectConverter<T, C>, 'toAttribute'> & {
+export type SafePropertyConverter<T, C = unknown> = SafeReflectPropertyConverter<T, C> | SafeNoReflectPropertyConverter<T, C>;
+export type SafeNoReflectPropertyConverter<T, C = unknown> = Omit<SafeReflectPropertyConverter<T, C>, 'toAttribute'> & {
   /**
    * 当该值为false时，关闭 property => attribute 的反射。
    */
   toAttribute: false;
 };
-export interface SafeReflectConverter<T, C = unknown> {
+export interface SafeReflectPropertyConverter<T, C = unknown> {
   /**
    * 当通过 JavaScript property 设置值时调用。
    * 尝试将输入值转换为有效的枚举成员 T。
@@ -39,7 +39,7 @@ export interface SafeReflectConverter<T, C = unknown> {
   toAttribute: (this: C, propertyValue: T) => string | null;
 }
 
-export const safeProperty = <C extends ReactiveElement, T>(safeConverter: SafeConverter<T, C>) => {
+export const safeProperty = <C extends ReactiveElement, T>(safeConverter: SafePropertyConverter<T, C>) => {
   const {setProperty, getProperty} = safeConverter;
   let {fromAttribute: fromAttribute, toAttribute: toAttribute} = safeConverter;
   let reflect: boolean = !!toAttribute;
@@ -121,7 +121,7 @@ export interface ValuesToEnumConverterOptions<T> {
 export function enumToSafeConverter<T>(
   values: readonly T[], // Use readonly for better type inference with `as const`
   options?: ValuesToEnumConverterOptions<T>
-): SafeReflectConverter<T> {
+): SafeReflectPropertyConverter<T> {
   if (!values || values.length === 0) {
     throw new Error('valuesToEnumConverter requires a non-empty array of possible values.');
   }

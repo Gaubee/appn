@@ -2,10 +2,14 @@
 
 import {createContext} from '@lit/context';
 import type {AppnNavigationProviderElement} from './appn-navigation-provider';
+import type {Pattern} from 'ts-pattern';
 
 export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationProviderElement> {
+  readonly baseURI: string;
   /** Returns a snapshot of the joint session history entries. */
-  entries(): NavigationHistoryEntry[];
+  entries(): Promise<NavigationHistoryEntry[]>;
+
+  findEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>): Promise<NavigationHistoryEntry | null>;
 
   /** The current NavigationHistoryEntry. */
   readonly currentEntry: NavigationHistoryEntry | null;
@@ -55,3 +59,5 @@ export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationPr
  * ```
  */
 export const appnNavigationContext = createContext<AppnNavigation<AppnNavigationProviderElement>>(Symbol('appn-navigation'));
+
+export const appnNavigationHistoryEntryContext = createContext<NavigationHistoryEntry | null>(Symbol('appn-navigation-history-entry'));

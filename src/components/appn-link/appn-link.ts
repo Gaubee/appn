@@ -17,13 +17,52 @@ export class AppnLinkElement extends LitElement {
   accessor __nav!: AppnNavigation;
 
   @property({type: String, attribute: true, reflect: true})
-  accessor to: string = '';
+  accessor to: string | null = null;
+  @property({type: Object, attribute: true, reflect: true})
+  accessor state: object | null = null;
+  @safeProperty(enumToSafeConverter(['forward', 'back', 'replace', 'back-or-forward']))
+  accessor mode: 'forward' | 'back' | 'replace' | 'back-or-forward' = 'forward';
 
-  private __onClick = (event: Event) => {
+  private __onClick = async (event: Event) => {
     event.preventDefault();
-    if (this.to) {
-      this.__nav.navigate(this.to);
-    }
+
+    const {to, __nav: nav} = this;
+    const to_url = to && new URL(to, this.__nav.baseURI).href;
+
+    await match(this.mode)
+      .with('forward', () => {
+        if (to_url != null) {
+          nav.navigate(to_url);
+        } else if (nav.canGoForward) {
+          nav.forward();
+        }
+      })
+      .with('back', async () => {
+        if (to_url != null) {
+          const history = await this.__nav.findEntry({url: to_url});
+          if (history) {
+            nav.traverseTo(history.key);
+          }
+        } else if (nav.canGoBack) {
+          nav.back();
+        }
+      })
+      .with('back-or-forward', async () => {
+        if (to_url != null) {
+          const history = await this.__nav.findEntry({url: to_url});
+          if (history) {
+            nav.traverseTo(history.key);
+          } else {
+            nav.navigate(to_url);
+          }
+        }
+      })
+      .with('replace', () => {
+        if (to_url != null) {
+          nav.navigate(to_url, {history: 'replace'});
+        }
+      })
+      .exhaustive();
   };
   constructor() {
     super();
