@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-import {func_remember} from '@gaubee/util';
+import {func_remember, obj_props} from '@gaubee/util';
 import {provide} from '@lit/context';
-import {LitElement, html} from 'lit';
+import {LitElement, html, unsafeCSS} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {flowColorScheme} from '../../utils/match-media';
 import {appnThemeContext, findAppnTheme, getAllAppnThemes, registerAppnTheme} from './appn-theme-context';
@@ -95,7 +95,19 @@ export class AppnThemeProviderElement extends LitElement {
     const themeContext = (this.themeContext = this.__findThemeContext(colorScheme) ?? this.themeContext);
     this.dataset.theme = themeContext.name;
 
-    const {font, colors, safeAreaInset} = themeContext;
+    const {font, colors, safeAreaInset, transition} = themeContext;
+
+    let transitionCss = '';
+    for (const key of obj_props(transition)) {
+      const tran = transition[key];
+
+      const enter = 'enter' in tran ? tran.enter : tran;
+      const leave = 'leave' in tran ? tran.leave : tran;
+      transitionCss += `--${key}-enter-ease: ${enter.ease};--${key}-enter-duration: ${enter.duration};--${key}-leave-ease: ${leave};--${key}-leave-duration: ${leave.duration};`;
+    }
+    if (transitionCss) {
+      transitionCss = `:host{${transitionCss}}`;
+    }
     return html`<style>
         :host {
           --font-style: ${font.style};
@@ -145,6 +157,7 @@ export class AppnThemeProviderElement extends LitElement {
           --safe-area-inset-left: ${safeAreaInset.left};
           --safe-area-inset-right: ${safeAreaInset.right};
         }
+        ${unsafeCSS(transitionCss)}
       </style>
       <slot></slot>`;
   }

@@ -22,6 +22,9 @@ export interface SafeReflectPropertyConverter<T, C = unknown> {
   setProperty: (this: C, value: unknown) => T;
   getProperty?: (this: C) => T;
 
+  attribute?: string;
+  state?: boolean;
+
   /**
    * 当通过 HTML attribute 设置值时调用。
    * 将 attribute 字符串值（或 null）转换为有效的枚举成员 T。
@@ -41,7 +44,7 @@ export interface SafeReflectPropertyConverter<T, C = unknown> {
 
 export const safeProperty = <C extends ReactiveElement, T>(safeConverter: SafePropertyConverter<T, C>) => {
   const {setProperty, getProperty} = safeConverter;
-  let {fromAttribute: fromAttribute, toAttribute: toAttribute} = safeConverter;
+  let {fromAttribute: fromAttribute, toAttribute: toAttribute, attribute, state} = safeConverter;
   let reflect: boolean = !!toAttribute;
 
   let self!: C;
@@ -62,9 +65,10 @@ export const safeProperty = <C extends ReactiveElement, T>(safeConverter: SafePr
         {fromAttribute, toAttribute}
       : {fromAttribute};
   const litPropertyAccessor = property({
-    attribute: true,
+    attribute: attribute ?? true,
     reflect: reflect,
     converter: converter,
+    state: state ?? true,
   });
   return accessor<C, T>((target, context) => {
     const litPropertyAccessorDecoratorResult = litPropertyAccessor(target, context);

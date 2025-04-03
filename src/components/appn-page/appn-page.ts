@@ -73,8 +73,8 @@ export class AppnPageElement extends LitElement {
   accessor onactivated!: PropertyEventListener<AppnPageElement, AppnPageActivatedEvent>;
   private __activatedNavigationEntry?: unknown;
 
-  protected override firstUpdated(_changedProperties: PropertyValues): void {
-    super.firstUpdated(_changedProperties);
+  protected override updated(_changedProperties: PropertyValues): void {
+    super.updated(_changedProperties);
     const {navigationEntry} = this;
     if (navigationEntry != this.__activatedNavigationEntry) {
       this.__activatedNavigationEntry = navigationEntry;

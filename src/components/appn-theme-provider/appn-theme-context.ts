@@ -68,6 +68,18 @@ export interface AppnTheme {
     variationSettings: Property.FontVariationSettings;
     lineHeight: Property.LineHeight;
   };
+  transition: {
+    [key in 'common' | 'page' | ({} & string)]:
+      | {
+          enter: CssTransitionConfig;
+          leave: CssTransitionConfig;
+        }
+      | CssTransitionConfig;
+  };
+}
+interface CssTransitionConfig {
+  ease: Property.TransitionTimingFunction;
+  duration: Property.TransitionDuration;
 }
 
 type DeepPartial<T> = {
@@ -126,7 +138,7 @@ export const appnThemeContext = createContext<AppnTheme | undefined>(Symbol('app
 const allAppnThemes = new Map<Appn.MaybeThemeClass, Set<AppnTheme>>();
 /**
  * 获取所有的主题
- * @returns 
+ * @returns
  */
 export const getAllAppnThemes = () => [...new Set([...allAppnThemes.values()].map((themes) => [...themes]).flat())];
 /**

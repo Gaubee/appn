@@ -56,6 +56,43 @@ export const unstyledLightTheme = {
     variationSettings: 'initial',
     lineHeight: 'initial',
   },
+  transition: {
+    common: {
+      enter: {
+        ease: 'ease-out',
+        duration: '0.28s',
+      },
+      leave: {
+        ease: 'ease-in',
+        duration: '0.2s',
+      },
+    },
+    /**
+     * @see {@link https://github.com/ionic-team/ionic-framework/blob/4317da080ca26a27575a7f7905d2703c89b685cc/core/src/utils/transition/md.transition.ts#L21-L29}
+     */
+    page: {
+      enter: {
+        ease: 'cubic-bezier(0.36,0.66,0.04,1)',
+        duration: '0.28s',
+      },
+      leave: {
+        ease: 'cubic-bezier(0.47,0,0.745,0.715)',
+        duration: '0.2s',
+      },
+    },
+    /**
+     * use material-design
+     * @see {@link https://github.com/ionic-team/ionic-framework/blob/4317da080ca26a27575a7f7905d2703c89b685cc/core/src/components/toast/animations/md.enter.ts#L35}
+     * @see {@link https://github.com/ionic-team/ionic-framework/blob/4317da080ca26a27575a7f7905d2703c89b685cc/core/src/components/action-sheet/animations/md.enter.ts#L27}
+     * @see {@link https://github.com/ionic-team/ionic-framework/blob/4317da080ca26a27575a7f7905d2703c89b685cc/core/src/components/menu/menu.tsx#L20-L23}
+     */
+    toast: {ease: 'cubic-bezier(.36,.66,.04,1)', duration: '0.4s'},
+    actionSheet: {ease: 'cubic-bezier(.36,.66,.04,1)', duration: '0.4s'},
+    menu: {
+      enter: {ease: 'cubic-bezier(0.0,0.0,0.2,1)', duration: '0.28s'},
+      leave: {ease: 'cubic-bezier(0.4, 0, 0.6, 1)', duration: '0.2s'},
+    },
+  },
 } satisfies AppnTheme;
 
 export const unstyledDarkTheme = appnThemeMixin(unstyledLightTheme, {

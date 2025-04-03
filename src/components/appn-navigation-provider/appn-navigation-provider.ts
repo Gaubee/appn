@@ -1,19 +1,20 @@
 import {ContextProvider, provide} from '@lit/context';
-import {css, html, LitElement, type CSSResultGroup, type PropertyValues} from 'lit';
-import {customElement, property, query, queryAssignedElements} from 'lit/decorators.js';
+import {html, LitElement} from 'lit';
+import {customElement, property, queryAssignedElements} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
-import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from './appn-navigation-context';
-import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
-import type {AppnPageElement} from '../appn-page/appn-page';
-import {appnNavigationStyle} from './appn-navigation.css';
-import {MutationController} from '../../utils/mutation-controller';
-import {URLPattern} from 'urlpattern-polyfill';
-import {baseurl_relative_parts} from '../../utils/relative-path';
 import {match, Pattern} from 'ts-pattern';
+import {URLPattern} from 'urlpattern-polyfill';
+import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
+import {baseurl_relative_parts} from '../../utils/relative-path';
+import {enumToSafeConverter, safeProperty} from '../../utils/safe-property-converter';
+import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from './appn-navigation-context';
+import {appnNavigationHistoryEntryStyle, appnNavigationStyle} from './appn-navigation.css';
 
 @customElement('appn-navigation-provider')
 export class AppnNavigationProviderElement extends LitElement implements AppnNavigation {
   static override styles = appnNavigationStyle;
+
+  //#region AppnNavigation
   private __nav = window.navigation;
   constructor() {
     super();
@@ -23,6 +24,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     });
     /// 这里独立写，是为了方便调试
     this.__nav.addEventListener('navigate', (event) => {
+      console.log('QAQ navigate');
       if (!event.canIntercept) {
         return;
       }
@@ -44,13 +46,14 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     //   this.dispatchEvent(event);
     //   debugger;
     // });
-    debugger;
-    this.__nav.addEventListener('currententrychange', (event) => {
-      debugger;
+    this.__nav.addEventListener('currententrychange', (_event) => {
       this.currentEntry = this.__nav.currentEntry;
+      console.log('QAQ currententrychange');
     });
   }
 
+  @property({type: String, reflect: true, attribute: 'base-uri'})
+  override accessor baseURI = location.href;
   /** Returns a snapshot of the joint session history entries. */
   async entries(): Promise<NavigationHistoryEntry[]> {
     return this.__nav.entries();
@@ -151,8 +154,21 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   @eventProperty<AppnNavigationProviderElement, NavigationCurrentEntryChangeEvent>()
   accessor oncurrententrychange!: PropertyEventListener<AppnNavigationProviderElement, NavigationCurrentEntryChangeEvent>;
 
-  @property({type: String, reflect: true, attribute: 'base-uri'})
-  override accessor baseURI = location.href;
+  //#endregion
+
+  //#region stack render
+  @property({type: Boolean, reflect: true, attribute: true})
+  accessor stack = true;
+
+  @safeProperty({...enumToSafeConverter(['vertical', 'horizontal'] as const), attribute: 'stack-direction'})
+  accessor stackDirection: 'vertical' | 'horizontal' = 'vertical';
+
+  // 相机控制方法
+  setCamera(x: number, y: number, z: number) {
+    this.style.setProperty('--x', `${x}`);
+    this.style.setProperty('--y', `${y}`);
+    this.style.setProperty('--z', `${z}`);
+  }
 
   @queryAssignedElements({slot: 'router', flatten: true})
   accessor routersElements!: HTMLTemplateElement[];
@@ -162,12 +178,22 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
    */
   private __effectRoutes = async () => {
     const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
-    console.log('QAQ routersElements', routersElements);
-    for (const navEntry of await this.entries()) {
-      this.__effectRoute(navEntry, routersElements);
+    const allEntries = this.__nav.entries();
+    const currentEntry = this.__nav.currentEntry;
+    const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
+    for (const navEntry of allEntries) {
+      this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex});
     }
   };
-  private __effectRoute = (navEntry: NavigationHistoryEntry, routersElements: HTMLTemplateElement[]) => {
+  private __effectRoute = (
+    navEntry: NavigationHistoryEntry,
+    routersElements: HTMLTemplateElement[],
+    context: {
+      allEntries: NavigationHistoryEntry[];
+      currentEntry: NavigationHistoryEntry | null;
+      currentEntryIndex: number;
+    }
+  ) => {
     const current_url = navEntry.url;
     if (!current_url) {
       return;
@@ -176,14 +202,11 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     if (!relative_parts) {
       return;
     }
-    console.log('QAQ relative_parts', relative_parts);
     for (const routerElement of routersElements) {
       const {pathname = '*', search = '*', hash = '*'} = routerElement.dataset;
       const p = new URLPattern({pathname, search, hash});
       const matchResult = p.exec(relative_parts);
-      console.log('QAQ', {pathname, search, hash});
       if (matchResult) {
-        console.log('QAQ matchResult', matchResult);
         const templateElement = routerElement.dataset.target
           ? match(routerElement.ownerDocument.getElementById(routerElement.dataset.target))
               .when(
@@ -193,9 +216,9 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
               .otherwise(() => null)
           : routerElement;
         if (templateElement) {
-          const oldNavHistoryEntryNode = this.querySelector<AppnNavigationHistoryEntryElement>(
-            `appn-navigation-history-entry[pathname=${JSON.stringify(pathname)}][search=${JSON.stringify(search)}]`
-          );
+          const oldNavHistoryEntryNode = this.querySelector<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`);
+          let navHistoryEntryNode: AppnNavigationHistoryEntryElement;
+
           if (oldNavHistoryEntryNode) {
             oldNavHistoryEntryNode.navigationEntry = navEntry;
             if (oldNavHistoryEntryNode.templateEle !== templateElement) {
@@ -204,7 +227,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
               oldNavHistoryEntryNode.innerHTML = '';
               oldNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
             }
-            this.appendChild(oldNavHistoryEntryNode);
+            navHistoryEntryNode = oldNavHistoryEntryNode;
           } else {
             const newNavHistoryEntryNode = new AppnNavigationHistoryEntryElement();
             newNavHistoryEntryNode.navigationEntry = navEntry;
@@ -213,13 +236,16 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
             newNavHistoryEntryNode.search = relative_parts.search;
             newNavHistoryEntryNode.hash = relative_parts.hash;
             newNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
-            this.appendChild(newNavHistoryEntryNode);
+            navHistoryEntryNode = newNavHistoryEntryNode;
+            this.appendChild(navHistoryEntryNode);
           }
+          navHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
         }
         break;
       }
     }
   };
+  //#endregion
 
   override render() {
     return this.__html;
@@ -230,15 +256,12 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   `);
 }
 
+const navigation_history_entry_tense = [undefined, 'past', 'present', 'future'] as const;
+type NavigationHistoryEntryTense = (typeof navigation_history_entry_tense)[number];
+
 @customElement('appn-navigation-history-entry')
 export class AppnNavigationHistoryEntryElement extends LitElement {
-  static override styles = [
-    css`
-      :host {
-        display: grid;
-      }
-    `,
-  ];
+  static override styles = appnNavigationHistoryEntryStyle;
   @property({type: String, reflect: true, attribute: true})
   accessor pathname!: string;
   @property({type: String, reflect: true, attribute: true})
@@ -248,10 +271,24 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
   @property({type: Object})
   accessor templateEle: HTMLTemplateElement | undefined = undefined;
 
+  @property({type: Number, reflect: true, attribute: true})
+  accessor presentEntryIndex: number = -1;
+
   @provide({context: appnNavigationHistoryEntryContext})
   accessor navigationEntry: NavigationHistoryEntry | null = null;
   override render() {
-    return html`<slot></slot> `;
+    const index = this.navigationEntry?.index ?? -1;
+    this.style.setProperty('--index', (this.dataset.index = `${index}`));
+    this.style.setProperty('--present-index', `${this.presentEntryIndex}`);
+    const tense: NavigationHistoryEntryTense = (this.dataset.tense =
+      this.presentEntryIndex === -1
+        ? undefined
+        : match(index)
+            .with(this.presentEntryIndex, () => 'present' as const)
+            .otherwise((v) => (v < this.presentEntryIndex ? 'past' : 'future')));
+    this.inert = tense !== 'present';
+
+    return html`<slot></slot>`;
   }
 }
 

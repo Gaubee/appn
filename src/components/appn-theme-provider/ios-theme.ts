@@ -1,6 +1,6 @@
-import { obj_props } from '@gaubee/util';
-import { appnThemeMixin, type AppnTheme, type AppnThemePartial } from './appn-theme-context';
-import { unstyledDarkTheme, unstyledLightTheme } from './unstyled-theme';
+import {obj_props} from '@gaubee/util';
+import {appnThemeMixin, type AppnTheme, type AppnThemePartial} from './appn-theme-context';
+import {unstyledDarkTheme, unstyledLightTheme} from './unstyled-theme';
 
 const iosBaseTheme = {
   gridUnit: '8px',
@@ -27,6 +27,48 @@ const iosBaseTheme = {
       "'Microsoft YaHei'" /* 微软雅黑 (Windows 中文适配) */,
       'sans-serif' /* 通用无衬线兜底 */,
     ].join(', '),
+  },
+  transition: {
+    common: {
+      enter: {
+        ease: 'ease-out',
+        duration: '0.3s',
+      },
+      leave: {
+        ease: 'ease-in',
+        duration: '0.3s',
+      },
+    },
+    /**
+     * @see {@link https://github.com/ionic-team/ionic-framework/blob/4317da080ca26a27575a7f7905d2703c89b685cc/core/src/utils/transition/ios.transition.ts#L498C21-L498C48}
+     */
+    page: {
+      enter: {
+        ease: 'cubic-bezier(0.32,0.72,0,1)',
+        duration: '0.54s',
+      },
+      leave: {
+        ease: 'cubic-bezier(0.32,0.72,0,1)',
+        duration: '0.54s',
+      },
+    },
+    /**
+     * @see {@link https://github.com/ionic-team/ionic-framework/blob/4317da080ca26a27575a7f7905d2703c89b685cc/core/src/components/toast/animations/ios.enter.ts#L35}
+     * @see {@link https://github.com/ionic-team/ionic-framework/blob/4317da080ca26a27575a7f7905d2703c89b685cc/core/src/components/action-sheet/animations/ios.enter.ts#L27}
+     * @see {@link https://github.com/ionic-team/ionic-framework/blob/4317da080ca26a27575a7f7905d2703c89b685cc/core/src/components/menu/menu.tsx#L20-L23}
+     */
+    toast: {
+      enter: {ease: 'cubic-bezier(.155,1.105,.295,1.12)', duration: '0.4s'},
+      leave: {ease: 'cubic-bezier(.36,.66,.04,1)', duration: '0.3s'},
+    },
+    actionSheet: {
+      enter: {ease: 'cubic-bezier(.36,.66,.04,1)', duration: '0.4s'},
+      leave: {ease: 'cubic-bezier(.36,.66,.04,1)', duration: '0.45s'},
+    },
+    menu: {
+      enter: {ease: 'cubic-bezier(0.32,0.72,0,1)', duration: '0.4s'},
+      leave: {ease: 'cubic-bezier(1, 0, 0.68, 0.28)', duration: '0.45s'},
+    },
   },
 } satisfies AppnThemePartial;
 
