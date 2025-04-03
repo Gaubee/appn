@@ -9,7 +9,8 @@ export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationPr
   /** Returns a snapshot of the joint session history entries. */
   entries(): Promise<NavigationHistoryEntry[]>;
 
-  findEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>): Promise<NavigationHistoryEntry | null>;
+  findFirstEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null): Promise<NavigationHistoryEntry | null>;
+  findLastEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null): Promise<NavigationHistoryEntry | null>;
 
   /** The current NavigationHistoryEntry. */
   readonly currentEntry: NavigationHistoryEntry | null;

@@ -50,7 +50,7 @@ export default class Page {
                   <appn-top-bar>This is Some Page...</appn-top-bar>
                 </appn-header>
                 <appn-view>
-                  <appn-link to="page2">go back</appn-link>
+                  <appn-link mode="back">go back</appn-link>
                 </appn-view>
               </appn-page>
             </template>

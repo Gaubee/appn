@@ -56,8 +56,24 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     return this.__nav.entries();
   }
 
-  async findEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>) {
-    for (const entry of this.__nav.entries()) {
+  async findFirstEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null) {
+    const entries = this.__nav.entries();
+    const startIndex = fromEntry ? entries.indexOf(fromEntry) : 0;
+    for (let i = startIndex > 0 ? startIndex : 0; i < entries.length; i++) {
+      const entry = entries[i];
+      const found = match(entry)
+        .with(pattern, (entry) => entry)
+        .otherwise(() => null);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  async findLastEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null) {
+    const entries = this.__nav.entries();
+    const startIndex = fromEntry ? entries.indexOf(fromEntry) : entries.length - 1;
+    for (let i = startIndex < entries.length ? startIndex : entries.length - 1; i >= 0; i--) {
+      const entry = entries[i];
       const found = match(entry)
         .with(pattern, (entry) => entry)
         .otherwise(() => null);
@@ -117,7 +133,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
 
   /** Navigates back one entry in the joint session history. */
   back(options?: NavigationOptions): NavigationResult {
-    return this.back(options);
+    return this.__nav.back(options);
   }
 
   /** Navigates forward one entry in the joint session history. */
