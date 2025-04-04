@@ -1,5 +1,6 @@
 /// <reference path='../../src/react.ts'/>
 import React from 'react';
+import type {} from '../../src/react'
 
 export default class Page {
   data() {
@@ -61,3 +62,4 @@ export default class Page {
     );
   }
 }
+

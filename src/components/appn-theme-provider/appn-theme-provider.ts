@@ -9,7 +9,7 @@ import {provide} from '@lit/context';
 import {LitElement, html, unsafeCSS} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {flowColorScheme} from '../../utils/match-media';
-import {appnThemeContext, findAppnTheme, getAllAppnThemes, registerAppnTheme} from './appn-theme-context';
+import {appnThemeContext, findAppnTheme, getAllAppnThemes, registerAppnTheme, type AppnTheme} from './appn-theme-context';
 import {appnThemeStyles} from './appn-theme-provider.css';
 import {iosAccessibleDarkTheme, iosAccessibleLightTheme, iosDarkTheme, iosLightTheme} from './ios-theme';
 import './unstyled-theme';
@@ -59,7 +59,7 @@ export class AppnThemeProviderElement extends LitElement {
     return this.colorScheme === 'auto' ? this.__colorSchemeFlow.value : this.colorScheme;
   }
 
-  get isDark() {
+  get isDark(): boolean {
     return this.__colorSchemeResult === 'dark';
   }
 
@@ -86,13 +86,16 @@ export class AppnThemeProviderElement extends LitElement {
     (colorScheme) => this.theme + colorScheme + this.accessible
   );
   @provide({context: appnThemeContext})
-  accessor themeContext = this.__findThemeContext(this.__colorSchemeResult) ?? unstyledLightTheme;
+  private accessor __themeContext: AppnTheme = this.__findThemeContext(this.__colorSchemeResult) ?? unstyledLightTheme;
+  get themeContext() {
+    return this.__themeContext;
+  }
 
   override render() {
     const colorScheme = this.isDark ? 'dark' : 'light';
     this.dataset.colorScheme = colorScheme;
 
-    const themeContext = (this.themeContext = this.__findThemeContext(colorScheme) ?? this.themeContext);
+    const themeContext = (this.__themeContext = this.__findThemeContext(colorScheme) ?? this.__themeContext);
     this.dataset.theme = themeContext.name;
 
     const {font, colors, safeAreaInset, transition} = themeContext;

@@ -32,8 +32,11 @@ export namespace CustomElementsJson {
     name: string;
     attribute?: string;
     description?: string;
-    type: TypeInfo;
+    type?: TypeInfo;
     default?: string;
+    privacy?: 'private' | 'protected';
+    static?: boolean;
+    readonly?: boolean;
   }
 
   export interface Attribute {
@@ -46,6 +49,7 @@ export namespace CustomElementsJson {
   export interface Event {
     name: string;
     description?: string;
+    type?: {text: string};
   }
 
   export interface Slot {
@@ -93,9 +97,14 @@ export namespace CustomElementsJson {
   }
 }
 
+import fs from 'node:fs';
+import path from 'node:path';
+export const readCustomElements = () => {
+  const customElementsMetadata = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, '../custom-elements.json'), 'utf-8')) as CustomElementsJson;
+  return customElementsMetadata;
+};
 // Export a type-safe customElements object
-import _customElements from '../custom-elements.json' with {type: 'json'};
-export const customElementsMetadata = _customElements as CustomElementsJson;
+export const customElementsMetadata = readCustomElements();
 
 export const customElementDeclarations = customElementsMetadata.modules
   .map((m) => m.declarations)

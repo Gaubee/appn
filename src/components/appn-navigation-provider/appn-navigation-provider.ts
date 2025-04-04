@@ -53,7 +53,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   }
 
   @property({type: String, reflect: true, attribute: 'base-uri'})
-  override accessor baseURI = location.href;
+  override accessor baseURI: string = location.href;
   /** Returns a snapshot of the joint session history entries. */
   async entries(): Promise<NavigationHistoryEntry[]> {
     return this.__nav.entries();

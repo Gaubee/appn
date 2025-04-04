@@ -2,11 +2,11 @@ import {consume} from '@lit/context';
 import {html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
+import {ifDefined} from 'lit/directives/if-defined.js';
+import {match} from 'ts-pattern';
 import {enumToSafeConverter, safeProperty} from '../../utils/safe-property-converter';
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from '../appn-navigation-provider/appn-navigation-context';
 import {appnLinkStyle} from './appn-link.css';
-import {match} from 'ts-pattern';
-import {ifDefined} from 'lit/directives/if-defined.js';
 
 const APP_LINK_MODE_ENUM_VALUES = ['push', 'replace', 'forward', 'back', 'back-or-push', 'forward-or-push'] as const;
 export type AppLinkMode = (typeof APP_LINK_MODE_ENUM_VALUES)[number];

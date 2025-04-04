@@ -164,7 +164,7 @@ export class AppnScrollViewElement extends LitElement {
     CSS.supports('scrollbar-color: currentColor transparent');
 
   private __scrollbarOverlayFlow = flowScrollbarOverlay(this);
-  get canOverlayScrollbar() {
+  get canOverlayScrollbar(): boolean {
     return this.__scrollbarOverlayFlow.value;
   }
 
