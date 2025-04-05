@@ -35,7 +35,7 @@ export default class Page {
             <template slot="router" data-pathname="" data-hash="">
               <appn-page>
                 <appn-header>
-                  <appn-top-bar>This is Home Page</appn-top-bar>
+                  <appn-top-bar pageTitle="Home">This is Home Page</appn-top-bar>
                 </appn-header>
                 <appn-view>
                   <appn-link to="#page1">go to page1</appn-link>
@@ -48,7 +48,7 @@ export default class Page {
             <template slot="router" data-hash="page1" id="page-template">
               <appn-page onactivated="this.querySelector('appn-top-bar').innerHTML =`This is ${new URL(event.detail.url).hash.replace(/^#/,'')}!!`">
                 <appn-header>
-                  <appn-top-bar>This is Some Page...</appn-top-bar>
+                  <appn-top-bar pageTitle='Some'>This is Some Page...</appn-top-bar>
                 </appn-header>
                 <appn-view>
                   <appn-link mode="back">go back</appn-link>

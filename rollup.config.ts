@@ -26,7 +26,6 @@ const inputFiles = fs
   .map((filepath) => {
     return path.relative(import.meta.dirname, filepath);
   });
-console.log('QAQ inputFiles', inputFiles);
 export default defineConfig({
   input: inputFiles,
   output: {

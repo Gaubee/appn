@@ -68,14 +68,14 @@ export interface AppnTheme {
     variationSettings: Property.FontVariationSettings;
     lineHeight: Property.LineHeight;
   };
-  transition: {
-    [key in 'common' | 'page' | ({} & string)]:
-      | {
-          enter: CssTransitionConfig;
-          leave: CssTransitionConfig;
-        }
-      | CssTransitionConfig;
-  };
+  transition: Record<
+    'common' | 'page' | ({} & string),
+    | {
+        enter: CssTransitionConfig;
+        leave: CssTransitionConfig;
+      }
+    | CssTransitionConfig
+  >;
 }
 interface CssTransitionConfig {
   ease: Property.TransitionTimingFunction;
@@ -130,6 +130,7 @@ declare global {
     }
     type ThemeClass = keyof iThemeClass;
     type MaybeThemeClass = ThemeClass | (string & {});
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface iTheme {}
     type ThemeName = keyof iTheme;
   }
@@ -158,7 +159,7 @@ export const registerAppnTheme = (...themes: AppnTheme[]) => {
  * @param prefersClass
  * @returns
  */
-export const findAppnTheme = (prefersClass: Array<Appn.MaybeThemeClass>) => {
+export const findAppnTheme = (prefersClass: Appn.MaybeThemeClass[]) => {
   let founds: Set<AppnTheme> | undefined;
   for (const className of prefersClass) {
     const themes = allAppnThemes.get(className);

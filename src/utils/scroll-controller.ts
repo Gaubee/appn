@@ -134,6 +134,7 @@ class ScrollObserver {
     }
   }
 }
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface ScrollObserverOptions {}
 
 export interface ScrollEvent extends Event {

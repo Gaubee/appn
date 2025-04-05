@@ -58,7 +58,7 @@ export class AppnScrollViewElement extends LitElement {
   @property({
     type: String,
   })
-  accessor scrollbarColor: string = '';
+  accessor scrollbarColor = '';
 
   @eventProperty()
   override accessor onscrollend!: PropertyEventListener;

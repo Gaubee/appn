@@ -2,7 +2,7 @@ import {arr_remove_first, func_lazy, map_get_or_put} from '@gaubee/util';
 
 const binds_offs_wm = /**@__PURE__ */ new WeakMap<
   Element,
-  WeakMap<EventListener, Array<() => void>>
+  WeakMap<EventListener, (() => void)[]>
 >();
 const addOff = (ele: Element, handler: EventListener, off: () => void) => {
   const binds = map_get_or_put(binds_offs_wm, ele, () => new WeakMap());
@@ -62,7 +62,7 @@ export const addScrollendEventListener = func_lazy<
   document.addEventListener(
     'touchstart',
     (e) => {
-      for (let touch of e.changedTouches) pointers.add(touch.identifier);
+      for (const touch of e.changedTouches) pointers.add(touch.identifier);
     },
     {passive: true}
   );
@@ -70,7 +70,7 @@ export const addScrollendEventListener = func_lazy<
   document.addEventListener(
     'touchend',
     (e) => {
-      for (let touch of e.changedTouches) pointers.delete(touch.identifier);
+      for (const touch of e.changedTouches) pointers.delete(touch.identifier);
     },
     {passive: true}
   );
@@ -78,7 +78,7 @@ export const addScrollendEventListener = func_lazy<
   document.addEventListener(
     'touchcancel',
     (e) => {
-      for (let touch of e.changedTouches) pointers.delete(touch.identifier);
+      for (const touch of e.changedTouches) pointers.delete(touch.identifier);
     },
     {passive: true}
   );

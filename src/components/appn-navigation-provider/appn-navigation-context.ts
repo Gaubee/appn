@@ -1,8 +1,8 @@
 /// <reference types="@types/dom-navigation"/>
 
 import {createContext} from '@lit/context';
-import type {AppnNavigationProviderElement} from './appn-navigation-provider';
 import type {Pattern} from 'ts-pattern';
+import type {AppnNavigationProviderElement} from './appn-navigation-provider';
 
 export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationProviderElement> {
   readonly baseURI: string;
@@ -46,10 +46,10 @@ export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationPr
   forward(options?: NavigationOptions): NavigationResult;
 
   // Event Handlers (using specific event types is better if available)
-  onnavigate: ((this: T, ev: NavigateEvent) => any) | null;
-  onnavigatesuccess: ((this: T, ev: Event) => any) | null; // Replace Event with specific success event type if known
-  onnavigateerror: ((this: T, ev: ErrorEvent) => any) | null; // Replace ErrorEvent with specific error event type if known
-  oncurrententrychange: ((this: T, ev: NavigationCurrentEntryChangeEvent) => any) | null;
+  onnavigate: ((this: T, ev: NavigateEvent) => void) | null;
+  onnavigatesuccess: ((this: T, ev: Event) => void) | null; // Replace Event with specific success event type if known
+  onnavigateerror: ((this: T, ev: ErrorEvent) => void) | null; // Replace ErrorEvent with specific error event type if known
+  oncurrententrychange: ((this: T, ev: NavigationCurrentEntryChangeEvent) => void) | null;
 }
 
 /**
@@ -59,6 +59,6 @@ export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationPr
  * import "@virtualstate/navigation/polyfill";
  * ```
  */
-export const appnNavigationContext = createContext<AppnNavigation<AppnNavigationProviderElement>>(Symbol('appn-navigation'));
+export const appnNavigationContext = createContext<AppnNavigation<AppnNavigationProviderElement> | null>(Symbol('appn-navigation'));
 
 export const appnNavigationHistoryEntryContext = createContext<NavigationHistoryEntry | null>(Symbol('appn-navigation-history-entry'));

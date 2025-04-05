@@ -97,7 +97,7 @@ export class AppnPageElement extends LitElement {
       <div class="layer" part="layer">
         <appn-scroll-view class="root" part="root">
           <div class="header stuck-top" part="header" ${this.__headerSize.observe()}>
-            <slot name="header"> </slot>
+            <slot name="header"></slot>
           </div>
           <div class="body" part="body">
             <slot></slot>

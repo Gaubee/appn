@@ -11,6 +11,11 @@ export const appnLinkStyle = css`
   :host {
     display: contents;
   }
+  .link {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: baseline;
+  }
   button {
     font: var(--font);
     color: var(--color-accent);
@@ -76,17 +81,29 @@ export const appnLinkStyle = css`
     text-decoration: none;
     cursor: pointer;
 
+    transition-property: all;
+    transition-duration: var(--common-leave-duration);
+    transition-timing-function: var(--common-leave-ease);
+  }
+  .a {
     text-decoration: underline 1px transparent;
     text-underline-offset: 0.3em;
 
-    transition-property: text-decoration-color, text-underline-offset;
-    transition-duration: 300ms;
-    transition-timing-function: ease-out;
+    /* transition-property: text-decoration-color, text-underline-offset;
+    transition-duration: var(--common-leave-duration);
+    transition-timing-function: var(--common-leave-ease); */
   }
-  a:hover,
-  a:target {
+  .a:hover,
+  .a:target {
     transition-duration: 100ms;
     text-decoration-color: currentColor;
     text-underline-offset: 0.1em;
+  }
+
+  .text-button:active {
+    opacity: 0.5;
+    transition-property: all;
+    transition-duration: var(--common-enter-duration);
+    transition-timing-function: var(--common-enter-ease);
   }
 `;

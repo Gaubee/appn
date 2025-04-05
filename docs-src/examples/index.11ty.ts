@@ -9,7 +9,6 @@ export default class Page {
     };
   }
   render(data: EleventyData) {
-    console.log('QAQ data.collections', data.collections);
     return page({
       ...data,
       content: renderExampleNav(data, true),

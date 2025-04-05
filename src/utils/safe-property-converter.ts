@@ -45,7 +45,7 @@ export interface SafeReflectPropertyConverter<T, C = unknown> {
 export const safeProperty = <C extends ReactiveElement, T>(safeConverter: SafePropertyConverter<T, C>) => {
   const {setProperty, getProperty} = safeConverter;
   let {fromAttribute: fromAttribute, toAttribute: toAttribute, attribute, state} = safeConverter;
-  let reflect: boolean = !!toAttribute;
+  const reflect = !!toAttribute;
 
   let self!: C;
   let needSelf = false;
@@ -59,7 +59,7 @@ export const safeProperty = <C extends ReactiveElement, T>(safeConverter: SafePr
     fromAttribute = (value: string | null) => _fromAttribute.call(self, value);
     needSelf = true;
   }
-  let converter: ComplexAttributeConverter<T> =
+  const converter: ComplexAttributeConverter<T> =
     typeof toAttribute === 'function'
       ? //
         {fromAttribute, toAttribute}

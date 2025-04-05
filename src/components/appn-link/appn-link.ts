@@ -9,30 +9,44 @@ import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavig
 import {appnLinkStyle} from './appn-link.css';
 
 const APP_LINK_MODE_ENUM_VALUES = ['push', 'replace', 'forward', 'back', 'back-or-push', 'forward-or-push'] as const;
-export type AppLinkMode = (typeof APP_LINK_MODE_ENUM_VALUES)[number];
+export type AppnLinkMode = (typeof APP_LINK_MODE_ENUM_VALUES)[number];
+
+const APP_LINK_TYPE_ENUM_VALUES = ['button', 'submit', 'a', 'text-button', 'contents'] as const;
+export type AppnLinkType = (typeof APP_LINK_TYPE_ENUM_VALUES)[number];
+
+/**
+ * @attr {string} to - The URL to navigate to.
+ * @attr {object} state - The state object to pass to the navigation.
+ * @attr {AppnLinkType} type - The type of link. Defaults to 'a'.
+ * @attr {AppLinkMode} mode - The mode of navigation. Defaults to 'push'.
+ */
 @customElement('appn-link')
 export class AppnLinkElement extends LitElement {
   static override styles = appnLinkStyle;
-  @safeProperty(enumToSafeConverter(['button', 'a', 'submit', 'contents']))
-  accessor type: 'button' | 'a' | 'submit' | 'contents' = 'button';
+  @safeProperty(enumToSafeConverter(APP_LINK_TYPE_ENUM_VALUES))
+  accessor type: AppnLinkType = 'button';
 
   @consume({context: appnNavigationContext})
-  accessor __nav!: AppnNavigation;
+  private accessor __nav: AppnNavigation | null = null;
   @consume({context: appnNavigationHistoryEntryContext, subscribe: true})
-  accessor __navigationEntry: NavigationHistoryEntry | null = null;
+  private accessor __navigationEntry: NavigationHistoryEntry | null = null;
 
   @property({type: String, attribute: true, reflect: true})
   accessor to: string | null = null;
   @property({type: Object, attribute: true, reflect: true})
   accessor state: object | null = null;
   @safeProperty(enumToSafeConverter(APP_LINK_MODE_ENUM_VALUES))
-  accessor mode: AppLinkMode = 'push';
+  accessor mode: AppnLinkMode = 'push';
 
   private __onClick = async (event: Event) => {
     event.preventDefault();
 
     const {to, __nav: nav, state} = this;
-    const to_url = to && new URL(to, this.__nav.baseURI).href;
+    if (nav == null) {
+      return;
+    }
+
+    const to_url = to && new URL(to, nav.baseURI).href;
 
     const info = {
       to: to_url,
@@ -59,7 +73,7 @@ export class AppnLinkElement extends LitElement {
       })
       .with('back', async () => {
         if (to_url != null) {
-          const history = await this.__nav.findFirstEntry({url: to_url});
+          const history = await nav.findFirstEntry({url: to_url});
           if (history) {
             nav.traverseTo(history.key, {info});
           }
@@ -69,7 +83,7 @@ export class AppnLinkElement extends LitElement {
       })
       .with('back-or-push', async () => {
         if (to_url != null) {
-          const history = await this.__nav.findLastEntry({url: to_url}, this.__navigationEntry);
+          const history = await nav.findLastEntry({url: to_url}, this.__navigationEntry);
           if (history) {
             nav.traverseTo(history.key, {info});
           } else {
@@ -79,7 +93,7 @@ export class AppnLinkElement extends LitElement {
       })
       .with('forward-or-push', async () => {
         if (to_url != null) {
-          const history = await this.__nav.findFirstEntry({url: to_url}, this.__navigationEntry);
+          const history = await nav.findFirstEntry({url: to_url}, this.__navigationEntry);
           if (history) {
             nav.traverseTo(history.key, {info});
           } else {
@@ -97,8 +111,8 @@ export class AppnLinkElement extends LitElement {
   override render() {
     return cache(
       match(this.type)
-        .with('button', 'submit', (type) => html`<button part="link button" role="link" type="${type}"><slot></slot></button>`)
-        .with('a', () => html`<a part="link a" href="${ifDefined(this.to)}"><slot></slot></a>`)
+        .with('button', 'submit', (type) => html`<button part="link button" class="link ${type}" role="link" type="${type}"><slot></slot></button>`)
+        .with('a', 'text-button', (type) => html`<a part="link a" class="link ${type}" href="${ifDefined(this.to)}"><slot></slot></a>`)
         .with('contents', () => html`<slot></slot>`)
         .exhaustive()
     );

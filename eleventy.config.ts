@@ -6,7 +6,6 @@ import type {UserConfig} from '@11ty/eleventy';
 export default function (eleventyConfig: UserConfig) {
   eleventyConfig.setTemplateFormats(['ts|tsx|mts|cts|js|jsx|mjs|cjs'.split('|').map((ext) => `11ty.${ext}`), 'md', 'mdx']);
   eleventyConfig.on('importCacheReset', (paths) => {
-    console.log('QAQ paths', require.cache, paths);
     for (const dep of paths) {
       delete require.cache[require.resolve(dep)];
     }

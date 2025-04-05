@@ -71,7 +71,7 @@ export class AppnThemeProviderElement extends LitElement {
 
   private __findThemeContext = func_remember(
     (colorScheme: string) => {
-      const prefersClass: Array<Appn.MaybeThemeClass> = [
+      const prefersClass: Appn.MaybeThemeClass[] = [
         ...this.theme
           .trim()
           .split(/[\s,]+/)

@@ -69,7 +69,7 @@ const _calculateRelativePathRobustly = (fromUrl: URL, toUrl: URL, allowUpwardNav
     }
     relativeParts.push(...finalDownSegments);
 
-    let relativePath = relativeParts.join('/');
+    const relativePath = relativeParts.join('/');
 
     // If joining results in empty (e.g. from /a to /a/b -> 'b'), handle it.
     // If after all calculations relativePath is empty, it must mean the normalized paths
@@ -113,7 +113,7 @@ export const url_relative = (fromUrlOrString: string | URL, toUrlOrString: strin
 
       // Check if 'from' looks like a directory and 'to' is directly inside it
       if (fromUrlOrString.endsWith('/')) {
-        let relativePath = toUrlOrString.slice(fromLen);
+        const relativePath = toUrlOrString.slice(fromLen);
         // Basic safety: if it requires '..', this optimization is wrong.
         if (!relativePath.startsWith('..') && !relativePath.includes('/../')) {
           // Check if result is just a different trailing slash
@@ -127,7 +127,7 @@ export const url_relative = (fromUrlOrString: string | URL, toUrlOrString: strin
       }
       // Check if 'from' looks like a file and 'to' is in the same "directory" conceptually
       else if (toUrlOrString[fromLen] === '/') {
-        let relativePath = toUrlOrString.slice(fromLen + 1);
+        const relativePath = toUrlOrString.slice(fromLen + 1);
         if (!relativePath.startsWith('..') && !relativePath.includes('/../')) {
           // If 'from' is file /a/b, 'to' is /a/b/c -> relative is 'c'
           return relativePath || '.';
@@ -187,7 +187,7 @@ export const baseurl_relative_parts = (targetUrlString: string | URL, baseUrlStr
     }
 
     const targetPath = targetUrl.pathname;
-    let basePath = baseUrl.pathname;
+    const basePath = baseUrl.pathname;
 
     // 2. Check if target path starts with base path.
     // Handle base paths that might or might not end with '/' correctly.

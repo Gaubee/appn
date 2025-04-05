@@ -24,31 +24,15 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     });
     /// 这里独立写，是为了方便调试
     this.__nav.addEventListener('navigate', (event) => {
-      console.log('QAQ navigate');
       if (!event.canIntercept) {
         return;
       }
-      // event.preventDefault();
       event.intercept({
         handler: this.__effectRoutes,
       });
-      // debugger;
-      // this.dispatchEvent(event);
-      // debugger;
     });
-    // this.__nav.addEventListener('navigatesuccess', (event) => {
-    //   debugger;
-    //   this.dispatchEvent(event);
-    //   debugger;
-    // });
-    // this.__nav.addEventListener('navigateerror', (event) => {
-    //   debugger;
-    //   this.dispatchEvent(event);
-    //   debugger;
-    // });
     this.__nav.addEventListener('currententrychange', (_event) => {
       this.currentEntry = this.__nav.currentEntry;
-      console.log('QAQ currententrychange');
     });
   }
 
@@ -105,7 +89,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
 
   /** Represents the activation details if the navigation was triggered by same-origin prerendering or bfcache restoration. */
   get activation(): NavigationActivation | null {
-    //@ts-ignore
+    // @ts-expect-error
     return this.__nav.activation ?? null;
   }
 
@@ -256,8 +240,8 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   `);
 }
 
-const navigation_history_entry_tense = [undefined, 'past', 'present', 'future'] as const;
-type NavigationHistoryEntryTense = (typeof navigation_history_entry_tense)[number];
+const _navigation_history_entry_tense = /**@__PURE__ */ [undefined, 'past', 'present', 'future'] as const;
+type NavigationHistoryEntryTense = (typeof _navigation_history_entry_tense)[number];
 
 @customElement('appn-navigation-history-entry')
 export class AppnNavigationHistoryEntryElement extends LitElement {
@@ -272,7 +256,7 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
   accessor templateEle: HTMLTemplateElement | undefined = undefined;
 
   @property({type: Number, reflect: true, attribute: true})
-  accessor presentEntryIndex: number = -1;
+  accessor presentEntryIndex = -1;
 
   @provide({context: appnNavigationHistoryEntryContext})
   accessor navigationEntry: NavigationHistoryEntry | null = null;

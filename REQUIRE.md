@@ -20,3 +20,15 @@
    - 有垫片
    - chrome 114+
    - safari 未支持
+1. [`popover`](https://caniuse.com/mdn-api_htmlelement_popover)
+   - 无垫片
+   - chrome 114+
+   - safari 17.0+
+1. [`Navigation API`](https://caniuse.com/mdn-api_navigation)
+   - 无垫片
+   - chrome 102+
+   - safari 未支持
+1. [`URLPattern API`](https://caniuse.com/mdn-api_urlpattern)
+   - 无垫片
+   - chrome 95+
+   - safari 未支持
