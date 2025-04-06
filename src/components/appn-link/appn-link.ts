@@ -33,6 +33,8 @@ export class AppnLinkElement extends LitElement {
 
   @property({type: String, attribute: true, reflect: true})
   accessor to: string | null = null;
+  @property({type: String, attribute: 'to-key', reflect: true})
+  accessor toKey: string | null = null;
   @property({type: Object, attribute: true, reflect: true})
   accessor state: object | null = null;
   @safeProperty(enumToSafeConverter(APP_LINK_MODE_ENUM_VALUES))
@@ -41,7 +43,7 @@ export class AppnLinkElement extends LitElement {
   private __onClick = async (event: Event) => {
     event.preventDefault();
 
-    const {to, __nav: nav, state} = this;
+    const {to, toKey, __nav: nav, state} = this;
     if (nav == null) {
       return;
     }
@@ -55,25 +57,25 @@ export class AppnLinkElement extends LitElement {
 
     await match(this.mode)
       .with('push', () => {
-        if (to_url != null) {
+        if (to_url) {
           nav.navigate(to_url, {state, info});
         }
       })
       .with('replace', () => {
-        if (to_url != null) {
+        if (to_url) {
           nav.navigate(to_url, {history: 'replace', state, info});
         }
       })
       .with('forward', () => {
-        if (to_url != null) {
+        if (to_url) {
           nav.navigate(to_url, {state, info});
         } else if (nav.canGoForward) {
           nav.forward({info});
         }
       })
       .with('back', async () => {
-        if (to_url != null) {
-          const history = await nav.findFirstEntry({url: to_url});
+        if (to_url || toKey) {
+          const history = await nav.findFirstEntry(toKey ? {key: toKey} : {url: to_url});
           if (history) {
             nav.traverseTo(history.key, {info});
           }
@@ -82,21 +84,21 @@ export class AppnLinkElement extends LitElement {
         }
       })
       .with('back-or-push', async () => {
-        if (to_url != null) {
-          const history = await nav.findLastEntry({url: to_url}, this.__navigationEntry);
+        if (to_url || toKey) {
+          const history = await nav.findLastEntry(toKey ? {key: toKey} : {url: to_url}, this.__navigationEntry);
           if (history) {
             nav.traverseTo(history.key, {info});
-          } else {
+          } else if (to_url) {
             nav.navigate(to_url, {state, info});
           }
         }
       })
       .with('forward-or-push', async () => {
-        if (to_url != null) {
-          const history = await nav.findFirstEntry({url: to_url}, this.__navigationEntry);
+        if (to_url || toKey) {
+          const history = await nav.findFirstEntry(toKey ? {key: toKey} : {url: to_url}, this.__navigationEntry);
           if (history) {
             nav.traverseTo(history.key, {info});
-          } else {
+          } else if (to_url) {
             nav.navigate(to_url, {state, info});
           }
         }

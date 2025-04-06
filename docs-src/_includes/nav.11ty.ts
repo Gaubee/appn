@@ -16,38 +16,23 @@ export default function ({page}: EleventyData): string {
       }
       .nav {
         display: grid;
-        grid-template-columns: repeat(auto-fit, 240px);
+        grid-template-columns: repeat(auto-fit, 180px);
         justify-content: center;
+        gap: 24px;
       }
 
       .nav > a {
         display: block;
         flex: 1;
         font-size: 18px;
-        padding: 20px;
+        padding: 16px;
         text-align: center;
       }
     </style>
     <nav class="nav">
-      <a
-        class="${first_schema === 'index' ? 'target' : ''}"
-        href="${relative(page.url, '/')}"
-        >Home</a
-      >
-      <a
-        class="${first_schema === 'examples' ? 'target' : ''}"
-        href="${relative(page.url, '/examples/')}"
-        >Examples</a
-      >
-      <a
-        class="${first_schema === 'api' ? 'target' : ''}"
-        href="${relative(page.url, '/api/')}"
-        >API</a
-      >
-      <a
-        class="${first_schema === 'install' ? 'target' : ''}"
-        href="${relative(page.url, '/install/')}"
-        >Install</a
-      >
+      <a class="${first_schema === 'index' ? 'target' : ''}" href="${relative(page.url, '/')}">Home</a>
+      <a class="${first_schema === 'examples' ? 'target' : ''}" href="${relative(page.url, '/examples/')}">Examples</a>
+      <a class="${first_schema === 'api' ? 'target' : ''}" href="${relative(page.url, '/api/')}">API</a>
+      <a class="${first_schema === 'install' ? 'target' : ''}" href="${relative(page.url, '/install/')}">Install</a>
     </nav>`;
 }

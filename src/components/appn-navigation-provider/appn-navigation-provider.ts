@@ -40,11 +40,13 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   override accessor baseURI: string = location.href;
   /** Returns a snapshot of the joint session history entries. */
   async entries(): Promise<NavigationHistoryEntry[]> {
-    return this.__nav.entries();
+    const entries = this.__nav.entries();
+    const match_entries = entries.filter((entry) => (entry.url ? baseurl_relative_parts(entry.url, this.baseURI) : false));
+    return match_entries;
   }
 
   async findFirstEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null) {
-    const entries = this.__nav.entries();
+    const entries = await this.entries();
     const startIndex = fromEntry ? entries.indexOf(fromEntry) : 0;
     for (let i = startIndex > 0 ? startIndex : 0; i < entries.length; i++) {
       const entry = entries[i];
@@ -57,7 +59,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   }
 
   async findLastEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null) {
-    const entries = this.__nav.entries();
+    const entries = await this.entries();
     const startIndex = fromEntry ? entries.indexOf(fromEntry) : entries.length - 1;
     for (let i = startIndex < entries.length ? startIndex : entries.length - 1; i >= 0; i--) {
       const entry = entries[i];

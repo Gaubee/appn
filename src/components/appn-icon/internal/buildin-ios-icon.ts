@@ -15,14 +15,14 @@ appnIconDefine('chevron.backward', {
   ],
   variants: [
     {
-      selector: ':host(:dir(rtl))',
+      selector: ':dir(rtl)',
       type: 'style',
       style: {
         transform: 'scaleX(-1)',
       },
     },
     {
-      selector: ':host([font-weight=bold])',
+      selector: '[data-font-weight="700"]',
       type: 'icon',
       viewBox: {minX: 0, minY: 0, width: 18.6604, height: 25.037},
       layers: [

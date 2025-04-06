@@ -1,17 +1,24 @@
+import {func_remember} from '@gaubee/util';
 import {Task} from '@lit/task';
 import {html, LitElement, svg, type ElementPart} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {directive, Directive} from 'lit/directive.js';
+import {when} from 'lit/directives/when.js';
 import {match} from 'ts-pattern';
-import {appnIconDefine, appnIconGet, appnIconSafeGet, appnIconWhenDefine} from './appn-icon-register';
+import {enumToSafeConverter, safeProperty} from '../../utils/safe-property-converter';
+import {appnIconDefine, appnIconGet, appnIconSafeGet, appnIconWhenDefine, styleToCss, type AppnIcon} from './appn-icon-register';
 import {appnIconStyle} from './appn-icon.css';
 import './internal/buildin-ios-icon';
 
+const APPN_ICON_WIDGET_ENUM_VALUES = ['normal', 'bold', 100, 200, 300, 400, 500, 600, 700, 800, 900, 'bolder', 'lighter'] as const;
+export type AppnIconWidget = (typeof APPN_ICON_WIDGET_ENUM_VALUES)[number];
+
 /**
  * @attr {string} name - The name of the icon to display.
+ * @attr {AppnIconWidget} widget - The widget of the icon to display.
  */
 @customElement('appn-icon')
-export class AppnIcon extends LitElement {
+export class AppnIconElement extends LitElement {
   static readonly define = appnIconDefine;
   static readonly get = appnIconGet;
   static readonly whenDefine = appnIconWhenDefine;
@@ -21,16 +28,64 @@ export class AppnIcon extends LitElement {
   @property({type: String, reflect: true, attribute: true})
   accessor name: string | null = null;
 
+  @safeProperty(enumToSafeConverter(APPN_ICON_WIDGET_ENUM_VALUES))
+  accessor widget: AppnIconWidget = 'normal';
+
   private __icon = new Task(this, {
     task: ([name]) => {
       return appnIconSafeGet(name ?? '');
     },
     args: () => [this.name],
   });
+
+  private __effect_widget = func_remember(
+    (widget: AppnIconWidget) => {
+      const fontWeight = match(widget)
+        .with('bolder', 'lighter', (value) => {
+          const oldFontWeight = this.style.fontWeight;
+          try {
+            this.style.fontWeight = value;
+            return +getComputedStyle(this).fontWeight;
+          } finally {
+            this.style.fontWeight = oldFontWeight;
+          }
+        })
+        .with('bold', () => 700)
+        .with('normal', () => 400)
+        .otherwise((v) => v);
+      this.dataset.fontWeight = fontWeight.toString();
+    },
+    (widget) => widget
+  );
+  private __effect_icon_style = func_remember(
+    (icon: AppnIcon) => {
+      if (icon.variants) {
+        const styleVariants = icon.variants.filter((v) => v.type === 'style'); //.map(v=>v.style);
+        const cssText = styleVariants.map(({selector, style}) => `:host(${selector}){${styleToCss(style)}}`).join('\n');
+        return cssText;
+      }
+      return;
+    },
+    (icon) => icon
+  );
   override render() {
+    this.__effect_widget(this.widget);
+
     return this.__icon.render({
-      complete: ({viewBox, layers}) => {
+      complete: (icon) => {
+        const iconVariant = icon.variants?.find((variant) => variant.type === 'icon' && this.matches(variant.selector)) as AppnIcon.VariantIcon | undefined;
+        const {viewBox, layers} = iconVariant ?? icon;
+
+        const styleCssText = this.__effect_icon_style(icon);
+
         return html`
+          ${when(
+            styleCssText,
+            () =>
+              html`<style>
+                ${styleCssText}
+              </style>`
+          )}
           <svg
             version="1.1"
             xmlns="http://www.w3.org/2000/svg"
@@ -76,6 +131,6 @@ export const spread = directive(SpreadDirective);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'appn-icon': AppnIcon;
+    'appn-icon': AppnIconElement;
   }
 }

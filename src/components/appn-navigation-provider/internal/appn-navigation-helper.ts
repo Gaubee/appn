@@ -41,7 +41,7 @@ export const nav_state_get_kv = <T = unknown>(navState: NavigationHistoryEntry |
   return;
 };
 
-export const nav_pre_history_entry = async (nav: AppnNavigation | null, currentId = nav?.currentEntry?.id): Promise<NavigationHistoryEntry | undefined> => {
+export const nav_before_history_entries = async (nav: AppnNavigation | null, currentId = nav?.currentEntry?.id): Promise<NavigationHistoryEntry[] | undefined> => {
   if (nav == null || currentId == null) {
     return;
   }
@@ -49,7 +49,7 @@ export const nav_pre_history_entry = async (nav: AppnNavigation | null, currentI
   const allEntries = await nav.entries();
   const currentIndex = allEntries.findIndex((entry) => entry.id === currentId);
   if (currentIndex > 0) {
-    return allEntries[currentIndex - 1];
+    return allEntries.slice(0, currentIndex);
   }
   return;
 };

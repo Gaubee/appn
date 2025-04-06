@@ -32,3 +32,7 @@
    - 无垫片
    - chrome 95+
    - safari 未支持
+1. [`anchor-name`](https://caniuse.com/mdn-css_properties_anchor-name) & [`position-anchor`](https://caniuse.com/mdn-css_properties_position-anchor)
+   - 无垫片
+   - chrome 125+
+   - safari 未支持
