@@ -69,7 +69,7 @@ export interface AppnTheme {
     lineHeight: Property.LineHeight;
   };
   transition: Record<
-    'common' | 'page' | ({} & string),
+    'common' | 'page' | 'menu' | ({} & string),
     | {
         enter: CssTransitionConfig;
         leave: CssTransitionConfig;

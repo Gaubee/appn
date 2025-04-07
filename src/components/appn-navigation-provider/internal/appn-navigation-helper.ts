@@ -21,7 +21,6 @@ export const nav_set_current_state_kv = (nav: AppnNavigation | null | undefined,
       ...(state ?? {}),
       [key]: value,
     };
-    console.log('QAQ updateCurrentEntry', nav.currentEntry?.id, state);
     nav.updateCurrentEntry({
       state,
     });

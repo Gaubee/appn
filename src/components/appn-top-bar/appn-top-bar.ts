@@ -12,8 +12,18 @@ import {when} from 'lit/directives/when.js';
 import '../appn-icon/appn-icon';
 import '../appn-link/appn-link';
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from '../appn-navigation-provider/appn-navigation-context';
-import {nav_before_history_entries, nav_set_current_state_kv, nav_state_get_kv} from '../appn-navigation-provider/internal/appn-navigation-helper';
+import {nav_before_history_entries} from '../appn-navigation-provider/internal/appn-navigation-helper';
 import {appnTopBarStyle} from './appn-top-bar.css';
+
+const navigation_entry_page_title_wm = new WeakMap<NavigationHistoryEntry, string>();
+const get_navigation_entry_page_title = (entry: NavigationHistoryEntry | null | undefined) => {
+  return entry ? navigation_entry_page_title_wm.get(entry) : undefined;
+};
+const set_navigation_entry_page_title = (entry: NavigationHistoryEntry | null | undefined, page_title: string) => {
+  if (entry) {
+    navigation_entry_page_title_wm.set(entry, page_title);
+  }
+};
 
 /**
  * 顶部工具栏组件，参考了 material3-top-app-bar 的标准。
@@ -42,7 +52,7 @@ export class AppnTopBarElement extends LitElement {
   @consume({context: appnNavigationContext})
   private accessor __nav: AppnNavigation | null = null;
 
-  @consume({context: appnNavigationHistoryEntryContext})
+  @consume({context: appnNavigationHistoryEntryContext, subscribe: true})
   private accessor __navigationEntry: NavigationHistoryEntry | null = null;
 
   private __preNavsTask = new Task(this, {
@@ -56,37 +66,12 @@ export class AppnTopBarElement extends LitElement {
   private accessor __navHistoryEle!: HTMLDivElement | null;
 
   override render() {
-    void nav_set_current_state_kv(this.__nav, 'pageTitle', this.pageTitle);
+    set_navigation_entry_page_title(this.__navigationEntry, this.pageTitle);
 
     return html`
       <style>
         :host {
           --title-clamp: ${this.lines};
-        }
-        appn-link {
-          user-select: none;
-        }
-        .leading {
-          anchor-name: --back-button;
-        }
-        #nav-history {
-          position-area: center;
-          position-anchor: --back-button;
-          backdrop-filter: blur(20px) contrast(0.5) brightness(max(var(--_light-brightness), var(--_dark-brightness)));
-
-          width: max-content;
-          flex-direction: column;
-          border-radius: var(--grid-unit);
-          background: unset;
-          border: unset;
-          color: var(--color-canvas-text);
-          box-shadow: 0 1px 4px -2px var(--color-canvas-text);
-        }
-        #nav-history li {
-          list-style: none;
-        }
-        #nav-history:popover-open {
-          display: flex;
         }
       </style>
       <div class="leading">
@@ -96,7 +81,7 @@ export class AppnTopBarElement extends LitElement {
               if (!preNavEntries || preNavEntries.length === 0) {
                 return;
               }
-              const prePageTitle = nav_state_get_kv<string>(preNavEntries.at(-1), 'pageTitle');
+              const prePageTitle = get_navigation_entry_page_title(preNavEntries.at(-1));
               return html`
                 <appn-link
                   class="back-button"
@@ -104,7 +89,6 @@ export class AppnTopBarElement extends LitElement {
                   type="text-button"
                   @contextmenu=${(e: Event) => {
                     e.preventDefault();
-                    console.log(e);
                     this.__navHistoryEle?.showPopover();
                   }}
                 >
@@ -118,10 +102,11 @@ export class AppnTopBarElement extends LitElement {
                       ${preNavEntries.map(
                         (entry) => html`
                           <li>
-                            <appn-link mode="back" to-key="${entry.key}" type="text-button" @click=${() => this.__navHistoryEle?.hidePopover()}>
-                              ${nav_state_get_kv(entry, 'pageTitle')}
+                            <appn-link mode="back" to-key="${entry.key}" type="text-button" actionType="pointerup" @pointerup=${() => this.__navHistoryEle?.hidePopover()}>
+                              ${get_navigation_entry_page_title(entry)}
                             </appn-link>
                           </li>
+                          <hr />
                         `
                       )}
                     </menu>`

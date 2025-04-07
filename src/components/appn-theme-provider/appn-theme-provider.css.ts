@@ -92,6 +92,12 @@ CSS.registerProperty({
   inherits: true,
   initialValue: unstyledLightTheme.gridUnit,
 });
+CSS.registerProperty({
+  name: '--dpx',
+  syntax: '<length>',
+  inherits: true,
+  initialValue: `${1 / window.devicePixelRatio}px`,
+});
 //#endregion
 
 export const appnThemeStyles = [

@@ -1,6 +1,6 @@
 /// <reference path='../../src/react.ts'/>
 import React from 'react';
-import type {} from '../../src/react'
+import type {} from '../../src/react';
 
 export default class Page {
   data() {
@@ -14,9 +14,12 @@ export default class Page {
   render(data) {
     const css = String.raw;
     const styleText = css`
+      appn-navigation-provider {
+        margin: 8px;
+      }
+
       appn-page::part(layer) {
         outline: solid 1px blue;
-        margin: 8px;
         width: 280px;
         height: 360px;
         position: relative;
@@ -48,10 +51,12 @@ export default class Page {
             <template slot="router" data-hash="page1" id="page-template">
               <appn-page onactivated="this.querySelector('appn-top-bar').innerHTML =`This is ${new URL(event.detail.url).hash.replace(/^#/,'')}!!`">
                 <appn-header>
-                  <appn-top-bar pageTitle='Some'>This is Some Page...</appn-top-bar>
+                  <appn-top-bar pageTitle="Some">This is Some Page...</appn-top-bar>
                 </appn-header>
                 <appn-view>
                   <appn-link mode="back">go back</appn-link>
+                  <appn-link to="#page1">go to page1</appn-link>
+                  <appn-link to="#page2">go to page2</appn-link>
                 </appn-view>
               </appn-page>
             </template>
@@ -62,4 +67,3 @@ export default class Page {
     );
   }
 }
-

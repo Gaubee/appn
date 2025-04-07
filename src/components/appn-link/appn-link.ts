@@ -1,5 +1,5 @@
 import {consume} from '@lit/context';
-import {html, LitElement} from 'lit';
+import {html, LitElement, type PropertyValues} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
@@ -14,11 +14,15 @@ export type AppnLinkMode = (typeof APP_LINK_MODE_ENUM_VALUES)[number];
 const APP_LINK_TYPE_ENUM_VALUES = ['button', 'submit', 'a', 'text-button', 'contents'] as const;
 export type AppnLinkType = (typeof APP_LINK_TYPE_ENUM_VALUES)[number];
 
+const APP_LINK_ACTION_TYPE_ENUM_VALUES = ['click', 'pointerup'] as const;
+export type AppnLinkActionType = (typeof APP_LINK_ACTION_TYPE_ENUM_VALUES)[number];
+
 /**
  * @attr {string} to - The URL to navigate to.
  * @attr {object} state - The state object to pass to the navigation.
  * @attr {AppnLinkType} type - The type of link. Defaults to 'a'.
  * @attr {AppLinkMode} mode - The mode of navigation. Defaults to 'push'.
+ * @attr {AppnLinkActionType} actionType - The event-name of action to take when clicked. Defaults to 'click'.
  */
 @customElement('appn-link')
 export class AppnLinkElement extends LitElement {
@@ -40,6 +44,8 @@ export class AppnLinkElement extends LitElement {
   @safeProperty(enumToSafeConverter(APP_LINK_MODE_ENUM_VALUES))
   accessor mode: AppnLinkMode = 'push';
 
+  @safeProperty(enumToSafeConverter(APP_LINK_ACTION_TYPE_ENUM_VALUES))
+  accessor actionType: AppnLinkActionType = 'click';
   private __onClick = async (event: Event) => {
     event.preventDefault();
 
@@ -107,7 +113,16 @@ export class AppnLinkElement extends LitElement {
   };
   constructor() {
     super();
-    this.addEventListener('click', this.__onClick);
+    this.addEventListener(this.actionType, this.__onClick);
+  }
+
+  protected override willUpdate(_changedProperties: PropertyValues): void {
+    const oldActionType = _changedProperties.get('actionType');
+    if (oldActionType) {
+      this.removeEventListener(oldActionType, this.__onClick);
+      this.addEventListener(this.actionType, this.__onClick);
+    }
+    super.willUpdate(_changedProperties);
   }
 
   override render() {
