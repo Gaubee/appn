@@ -10,6 +10,10 @@ export const appnIconStyle = [
       box-sizing: border-box;
       padding: 0.15em;
       align-self: center;
+      object-fit: contain;
+    }
+    svg {
+      flex: 1;
     }
   `,
 ];
