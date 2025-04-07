@@ -2,120 +2,24 @@
 
 Appn 是一个专注于构建 WebApp 的框架，基于 WebComponent 技术与一些先进的、面向未来的 Web 标准，目的构建出高性能的 WebApp 体验。
 
-Appn 的核心部分围绕“导航”展开。目的是提供一套现代化的 WebApp 的使用体验。
+Appn 由以下这三个部分组成：
 
-Appn 会同时提供一些常见的“布局组件”。目的是为现代化 WebApp 提供一套开箱即用的、可参考的标准原子组件。
+1. `<appn-*>` 这是该项目的核心，围绕“导航”展开。
+   1. `<appn-navigation>` 参考 NavigationAPI 的接口设计，提供了一套 WebComponent，将 NavigationAPI 与 DOM 进行双向关联的路由框架。
+      1. `<appn-link>` 提供 `navigation.navigate()/.back()/.forward()/.traverseTo()` 的能力
+      1. `<appn-navigation-history-entry>` 提供了 `NavigationHistoryEntry` 的能力
+      1. _etc._
+   1. `<appn-page>` 提供了应用页面的 生命周期、主题管理 等能力
+1. `<css-*>` 提供了现代高级 CSS 的兼容性支持。
+   > 不同于传统的兼容性思路（使用css兼容css，或者用js兼容css），`<css-*>`使用 html 兼容 css，目的是使用 WebComponent 的生命周期与层级结构来做 CSS 绑定，优先使用原生CSS来做实现，融合使用 JS 和 CSS 来做适配性支持。因此可以与所有的框架进行兼容（React、Vue、Angular等等）。这个方案具有高性能、高可靠的特性。
+   >
+   > > 注意：这些垫片的目的并不是100%的兼容（但是会往这个方向去努力，但这是一个平衡，因为这会导致垫片文件的体积变大）。主要目的是满足大部分需求场景，或者一些主流功能的需求。
+1. `<fuse-*` 提供了高级UX 的开发支持。
+   > 使用html的声明式绑定能力，将一些动画交互通过声明式的方式来实现（以往需要你使用专门的js代码配合css代码来实现）。
+   >
+   > 有一些 `<css-*>` 难以完成的复合型垫片，通常会在 `<fuse-*>` 这里开发一些专项型的垫片，以满足特定的交互需求。（比如一些关于滚动动画的交互）
 
-Appn 会提供一系列构建现代化 WebApp 所需的一些常见的工具函数，是对 WebApi 的补充。
-
-## Setup
-
-Install dependencies:
-
-```bash
-pnpm i
-```
-
-## Build
-
-This sample uses the TypeScript compiler to produce JavaScript that runs in modern browsers.
-
-To build the JavaScript version of your component:
-
-```bash
-pnpm run build
-```
-
-To watch files and rebuild when the files are modified, run the following command in a separate shell:
-
-```bash
-pnpm run build:watch
-```
-
-Both the TypeScript compiler and lit-analyzer are configured to be very strict. You may want to change `tsconfig.json` to make them less strict.
-
-## Testing
-
-This sample uses modern-web.dev's
-[@web/test-runner](https://www.npmjs.com/package/@web/test-runner) for testing. See the
-[modern-web.dev testing documentation](https://modern-web.dev/docs/test-runner/overview) for
-more information.
-
-Tests can be run with the `test` script, which will run your tests against Lit's development mode (with more verbose errors) as well as against Lit's production mode:
-
-```bash
-pnpm test
-```
-
-For local testing during development, the `test:dev:watch` command will run your tests in Lit's development mode (with verbose errors) on every change to your source files:
-
-```bash
-pnpm test:watch
-```
-
-Alternatively the `test:prod` and `test:prod:watch` commands will run your tests in Lit's production mode.
-
-## Dev Server
-
-This sample uses modern-web.dev's [@web/dev-server](https://www.npmjs.com/package/@web/dev-server) for previewing the project without additional build steps. Web Dev Server handles resolving Node-style "bare" import specifiers, which aren't supported in browsers. It also automatically transpiles JavaScript and adds polyfills to support older browsers. See [modern-web.dev's Web Dev Server documentation](https://modern-web.dev/docs/dev-server/overview/) for more information.
-
-To run the dev server and open the project in a new browser tab:
-
-```bash
-pnpm run serve
-```
-
-There is a development HTML file located at `/dev/index.html` that you can view at http://localhost:8000/dev/index.html. Note that this command will serve your code using Lit's development mode (with more verbose errors). To serve your code against Lit's production mode, use `pnpm run serve:prod`.
-
-## Editing
-
-If you use VS Code, we highly recommend the [lit-plugin extension](https://marketplace.visualstudio.com/items?itemName=runem.lit-plugin), which enables some extremely useful features for lit-html templates:
-
-- Syntax highlighting
-- Type-checking
-- Code completion
-- Hover-over docs
-- Jump to definition
-- Linting
-- Quick Fixes
-
-The project is setup to recommend lit-plugin to VS Code users if they don't already have it installed.
-
-## Linting
-
-Linting of TypeScript files is provided by [ESLint](eslint.org) and [TypeScript ESLint](https://github.com/typescript-eslint/typescript-eslint). In addition, [lit-analyzer](https://www.npmjs.com/package/lit-analyzer) is used to type-check and lint lit-html templates with the same engine and rules as lit-plugin.
-
-The rules are mostly the recommended rules from each project, but some have been turned off to make LitElement usage easier. The recommended rules are pretty strict, so you may want to relax them by editing `.eslintrc.json` and `tsconfig.json`.
-
-To lint the project run:
-
-```bash
-pnpm run lint
-```
-
-## Formatting
-
-[Prettier](https://prettier.io/) is used for code formatting. It has been pre-configured according to the Lit's style. You can change this in `.prettierrc.json`.
-
-Prettier has not been configured to run when committing files, but this can be added with Husky and `pretty-quick`. See the [prettier.io](https://prettier.io/) site for instructions.
-
-## Static Site
-
-This project includes a simple website generated with the [eleventy](https://11ty.dev) static site generator and the templates and pages in `/docs-src`. The site is generated to `/docs` and intended to be checked in so that GitHub pages can serve the site [from `/docs` on the main branch](https://help.github.com/en/github/working-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
-
-To enable the site go to the GitHub settings and change the GitHub Pages &quot;Source&quot; setting to &quot;main branch /docs folder&quot;.</p>
-
-To build the site, run:
-
-```bash
-pnpm run docs
-```
-
-To serve the site locally, run:
-
-```bash
-pnpm docs:serve
-```
+## Dev & Build
 
 To watch the site files, and re-build automatically, run:
 
@@ -128,16 +32,10 @@ pnpm docs:gen:watch # gen /docs/ (depends on /bundle/ and /custom-elements.json)
 
 The site will usually be served at http://localhost:8000.
 
-**Note**: The project uses Rollup to bundle and minify the source code for the docs site and not to publish to NPM. For bundling and minification, check the [Bundling and minification](#bundling-and-minification) section.
+## Linting
 
-## Bundling and minification
+To lint the project run:
 
-As stated in the [static site generation](#static-site) section, the bundling and minification setup in the Rollup configuration in this project is there specifically for the docs generation.
-
-We recommend publishing components as unoptimized JavaScript modules and performing build-time optimizations at the application level. This gives build tools the best chance to deduplicate code, remove dead code, and so on.
-
-Please check the [Publishing best practices](https://lit.dev/docs/tools/publishing/#publishing-best-practices) for information on publishing reusable Web Components, and [Build for production](https://lit.dev/docs/tools/production/) for building application projects that include LitElement components, on the Lit site.
-
-## More information
-
-See [Get started](https://lit.dev/docs/getting-started/) on the Lit site for more information.
+```bash
+pnpm lint
+```
