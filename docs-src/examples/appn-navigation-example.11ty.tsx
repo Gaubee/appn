@@ -13,52 +13,19 @@ export default class Page {
   render(data) {
     const css = String.raw;
     const styleText = css`
-      appn-navigation-provider {
+      .navigation-example {
         margin: 8px;
         outline: solid 1px blue;
         border-radius: 24px;
         width: 280px;
         height: 360px;
-        --safe-area-inset-top: 22px;
-        --safe-area-inset-bottom: 20px;
-      }
-
-      appn-page::part(layer) {
+        border: 0;
       }
     `;
     return (
       <>
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
-        <appn-theme-provider theme="ios">
-          <appn-navigation-provider>
-            <template slot="router" data-pathname="" data-hash="">
-              <appn-page>
-                <appn-header>
-                  <appn-top-bar pageTitle="Home">This is Home Page</appn-top-bar>
-                </appn-header>
-                <appn-view>
-                  <appn-link to="#page1">go to page1</appn-link>
-                  <appn-link to="#page2" type="a">
-                    go to page2
-                  </appn-link>
-                </appn-view>
-              </appn-page>
-            </template>
-            <template slot="router" data-hash="page1" id="page-template">
-              <appn-page onactivated="this.querySelector('appn-top-bar').innerHTML =`This is ${new URL(event.detail.url).hash.replace(/^#/,'')}!!`">
-                <appn-header>
-                  <appn-top-bar pageTitle="Some">This is Some Page...</appn-top-bar>
-                </appn-header>
-                <appn-view>
-                  <appn-link mode="back">go back</appn-link>
-                  <appn-link to="#page1">go to page1</appn-link>
-                  <appn-link to="#page2">go to page2</appn-link>
-                </appn-view>
-              </appn-page>
-            </template>
-            <template slot="router" data-hash="page2" data-target="page-template"></template>
-          </appn-navigation-provider>
-        </appn-theme-provider>
+        <iframe className="navigation-example" src="/examples/kitchen-sink/appn-navigation-example-1/?safe-area-inset-top=20px&safe-area-inset-bottom=22px"></iframe>
       </>
     );
   }

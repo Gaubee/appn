@@ -99,7 +99,7 @@ export class AppnTopBarElement extends LitElement {
                   preNavEntries.length > 0,
                   () =>
                     html`<menu popover id="nav-history">
-                      ${preNavEntries.map(
+                      ${preNavEntries.reverse().map(
                         (entry) => html`
                           <li>
                             <appn-link mode="back" to-key="${entry.key}" type="text-button" actionType="pointerup" @navigate=${() => this.__navHistoryEle?.hidePopover()}>

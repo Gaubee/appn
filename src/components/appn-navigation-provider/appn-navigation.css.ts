@@ -19,6 +19,7 @@ export const appnNavigationStyle = css`
     display: none;
   }
 
+  
   :host([stack]) {
     /* 基础3D场景设置 */
     perspective: calc(var(--z, 1200) * 1px);

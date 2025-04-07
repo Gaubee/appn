@@ -10,11 +10,23 @@ export default class Page {
     };
   }
   render(data) {
-    const css = String.raw;
-    const styleText = css``;
+    const injectCss = () => {
+      const searchParams = new URLSearchParams(location.search);
+      const css = String.raw;
+      const styleText = css`
+        appn-navigation-provider {
+          --safe-area-inset-top: ${searchParams.get('safe-area-inset-top') ?? '0px'};
+          --safe-area-inset-bottom: ${searchParams.get('safe-area-inset-bottom') ?? '0px'};
+          /* --safe-area-inset-left: ${searchParams.get('safe-area-inset-left') ?? '0px'};
+          --safe-area-inset-right: ${searchParams.get('safe-area-inset-right') ?? '0px'}; */
+        }
+      `;
+      document.getElementById('injectStyle')!.innerHTML = styleText;
+    };
     return (
       <>
-        <style dangerouslySetInnerHTML={{__html: styleText}}></style>
+        <style id="injectStyle"></style>
+        <script dangerouslySetInnerHTML={{__html: `(${injectCss.toString()})()`}}></script>
         <appn-theme-provider theme="ios">
           <appn-navigation-provider>
             <template slot="router" data-pathname="" data-hash="">
