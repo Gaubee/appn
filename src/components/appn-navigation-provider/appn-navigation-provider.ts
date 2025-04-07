@@ -1,3 +1,5 @@
+import '@virtualstate/navigation/polyfill';
+
 import {ContextProvider, provide} from '@lit/context';
 import {html, LitElement} from 'lit';
 import {customElement, property, queryAssignedElements} from 'lit/decorators.js';

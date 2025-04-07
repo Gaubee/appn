@@ -25,7 +25,7 @@
    - chrome 114+
    - safari 17.0+
 1. [`Navigation API`](https://caniuse.com/mdn-api_navigation)
-   - 无垫片
+   - 有垫片，但是该垫片对 Safari 的支持并不友好，且具有致命性BUG，未来将开发自己的垫片方案
    - chrome 102+
    - safari 未支持
 1. [`URLPattern API`](https://caniuse.com/mdn-api_urlpattern)
