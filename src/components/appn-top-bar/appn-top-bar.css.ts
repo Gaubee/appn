@@ -39,19 +39,23 @@ export const appnTopBarStyle = css`
     box-shadow: 0 0 calc(var(--grid-unit) * 4) 0 color-mix(in srgb, var(--color-canvas-text), transparent 80%);
 
     transition-property: all;
+    transition-behavior: allow-discrete;
     transition-duration: var(--menu-leave-duration);
     transition-timing-function: var(--menu-leave-ease);
     transform-origin: top left;
-    @starting-style {
-      scale: 0.5;
-      opacity: 0;
-    }
   }
   #nav-history li {
     list-style: none;
+    transition-duration: var(--common-leave-duration);
+    transition-timing-function: var(--common-leave-ease);
+  }
+  #nav-history li:hover {
+    transition-duration: var(--common-enter-duration);
+    transition-timing-function: var(--common-enter-ease);
+    background-color: color-mix(in srgb, var(--color-canvas), transparent 50%);
   }
   #nav-history appn-link::part(link) {
-    padding: var(--grid-unit);
+    padding: var(--grid-unit) calc(var(--grid-unit) * 1.5);
     width: 100%;
   }
   #nav-history hr {
@@ -59,7 +63,7 @@ export const appnTopBarStyle = css`
     height: var(--dpx);
     width: 100%;
     background-color: var(--color-canvas-text);
-    opacity: 0.5;
+    opacity: 0.2;
   }
   #nav-history hr:last-child {
     display: none;
@@ -68,6 +72,17 @@ export const appnTopBarStyle = css`
     display: flex;
     transition-duration: var(--menu-enter-duration);
     transition-timing-function: var(--menu-enter-ease);
+    @starting-style {
+      scale: 0.5;
+      opacity: 0.5;
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+  #nav-history:not(:popover-open) {
+    scale: 0.5;
+    opacity: 0;
+    box-shadow: 0 0 0 0 transparent;
+    pointer-events: none;
   }
 
   .title {
