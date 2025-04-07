@@ -1,31 +1,17 @@
 import React from 'react';
-import type {} from '../../src/react';
+import type {} from '../../../src/react';
 
 export default class Page {
   data() {
     return {
-      layout: 'example.11ty.ts',
-      tags: 'example',
+      layout: 'root.11ty.ts',
       name: 'AppnNavigation',
-      description: '<appn-navigation> basic usage',
+      description: 'AppnNavigation Example 1',
     };
   }
   render(data) {
     const css = String.raw;
-    const styleText = css`
-      appn-navigation-provider {
-        margin: 8px;
-        outline: solid 1px blue;
-        border-radius: 24px;
-        width: 280px;
-        height: 360px;
-        --safe-area-inset-top: 22px;
-        --safe-area-inset-bottom: 20px;
-      }
-
-      appn-page::part(layer) {
-      }
-    `;
+    const styleText = css``;
     return (
       <>
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>

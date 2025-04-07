@@ -4,6 +4,7 @@ import {customElement, property} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
 import {match} from 'ts-pattern';
+import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {enumToSafeConverter, safeProperty} from '../../utils/safe-property-converter';
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from '../appn-navigation-provider/appn-navigation-context';
 import {appnLinkStyle} from './appn-link.css';
@@ -46,6 +47,10 @@ export class AppnLinkElement extends LitElement {
 
   @safeProperty(enumToSafeConverter(APP_LINK_ACTION_TYPE_ENUM_VALUES))
   accessor actionType: AppnLinkActionType = 'click';
+
+  @eventProperty<AppnLinkElement, AppnLinkNavigateEvent>()
+  accessor onnavigate!: PropertyEventListener<AppnLinkElement, AppnLinkNavigateEvent>;
+
   private __onClick = async (event: Event) => {
     event.preventDefault();
 
@@ -64,38 +69,52 @@ export class AppnLinkElement extends LitElement {
     await match(this.mode)
       .with('push', () => {
         if (to_url) {
-          nav.navigate(to_url, {state, info});
+          const event = new AppnLinkNavigateEvent({type: 'push', url: to_url, state, info});
+          this.dispatchEvent(event);
+          event.applyNavigate(nav);
         }
       })
       .with('replace', () => {
         if (to_url) {
-          nav.navigate(to_url, {history: 'replace', state, info});
+          const event = new AppnLinkNavigateEvent({type: 'replace', url: to_url, state, info});
+          this.dispatchEvent(event);
+          event.applyNavigate(nav);
         }
       })
       .with('forward', () => {
         if (to_url) {
           nav.navigate(to_url, {state, info});
         } else if (nav.canGoForward) {
-          nav.forward({info});
+          const event = new AppnLinkNavigateEvent({type: 'forward', info});
+          this.dispatchEvent(event);
+          event.applyNavigate(nav);
         }
       })
       .with('back', async () => {
         if (to_url || toKey) {
           const history = await nav.findFirstEntry(toKey ? {key: toKey} : {url: to_url});
           if (history) {
-            nav.traverseTo(history.key, {info});
+            const event = new AppnLinkNavigateEvent({type: 'traverse', key: history.key, info});
+            this.dispatchEvent(event);
+            event.applyNavigate(nav);
           }
         } else if (nav.canGoBack) {
-          nav.back({info});
+          const event = new AppnLinkNavigateEvent({type: 'back', info});
+          this.dispatchEvent(event);
+          event.applyNavigate(nav);
         }
       })
       .with('back-or-push', async () => {
         if (to_url || toKey) {
           const history = await nav.findLastEntry(toKey ? {key: toKey} : {url: to_url}, this.__navigationEntry);
           if (history) {
-            nav.traverseTo(history.key, {info});
+            const event = new AppnLinkNavigateEvent({type: 'traverse', key: history.key, info});
+            this.dispatchEvent(event);
+            event.applyNavigate(nav);
           } else if (to_url) {
-            nav.navigate(to_url, {state, info});
+            const event = new AppnLinkNavigateEvent({type: 'push', url: to_url, state, info});
+            this.dispatchEvent(event);
+            event.applyNavigate(nav);
           }
         }
       })
@@ -103,9 +122,13 @@ export class AppnLinkElement extends LitElement {
         if (to_url || toKey) {
           const history = await nav.findFirstEntry(toKey ? {key: toKey} : {url: to_url}, this.__navigationEntry);
           if (history) {
-            nav.traverseTo(history.key, {info});
+            const event = new AppnLinkNavigateEvent({type: 'traverse', key: history.key, info});
+            this.dispatchEvent(event);
+            event.applyNavigate(nav);
           } else if (to_url) {
-            nav.navigate(to_url, {state, info});
+            const event = new AppnLinkNavigateEvent({type: 'push', url: to_url, state, info});
+            this.dispatchEvent(event);
+            event.applyNavigate(nav);
           }
         }
       })
@@ -133,6 +156,60 @@ export class AppnLinkElement extends LitElement {
         .with('contents', () => html`<slot></slot>`)
         .exhaustive()
     );
+  }
+}
+
+export namespace AppnLinkNavigateEvent {
+  interface DetailBase<T> {
+    type: T;
+  }
+  interface TraverseDetail extends DetailBase<'traverse'> {
+    key: string;
+    info?: unknown;
+  }
+  interface PushDetail extends DetailBase<'push'> {
+    url: string;
+    info?: unknown;
+    state?: unknown;
+  }
+  interface ReplaceDetail extends DetailBase<'replace'> {
+    url: string;
+    info?: unknown;
+    state?: unknown;
+  }
+  interface BackDetail extends DetailBase<'back'> {
+    info?: unknown;
+  }
+  interface ForwardDetail extends DetailBase<'forward'> {
+    info?: unknown;
+  }
+  export type Detail = TraverseDetail | PushDetail | ReplaceDetail | BackDetail | ForwardDetail;
+}
+export class AppnLinkNavigateEvent extends CustomEvent<AppnLinkNavigateEvent.Detail> {
+  constructor(detail: AppnLinkNavigateEvent.Detail) {
+    super('navigate', {
+      detail,
+      cancelable: true,
+      bubbles: true,
+      composed: true,
+    });
+  }
+  #result?: NavigationResult;
+  get result() {
+    return this.#result;
+  }
+  applyNavigate(nav: AppnNavigation) {
+    if (this.defaultPrevented) {
+      return;
+    }
+    const {detail} = this;
+    this.#result = match(detail)
+      .with({type: 'push'}, (detail) => nav.navigate(detail.url, detail))
+      .with({type: 'replace'}, (detail) => nav.navigate(detail.url, {...detail, history: 'replace'}))
+      .with({type: 'back'}, (detail) => nav.back(detail))
+      .with({type: 'traverse'}, (detail) => nav.traverseTo(detail.key, detail))
+      .with({type: 'forward'}, (detail) => nav.forward(detail))
+      .exhaustive();
   }
 }
 

@@ -74,6 +74,12 @@ export default tseslint.config([
     files: ['**/*.ts'],
   },
   {
+    files: ['**/*.ts'],
+    rules: {
+      'lit/no-nullable-attribute-binding': 'warn',
+    },
+  },
+  {
     files: ['rollup.config.js', 'web-test-runner.config.js'],
     languageOptions: {
       globals: {

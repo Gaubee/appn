@@ -66,7 +66,7 @@ const iosBaseTheme = {
       leave: {ease: 'cubic-bezier(.36,.66,.04,1)', duration: '0.45s'},
     },
     menu: {
-      enter: {ease: 'cubic-bezier(0.32,0.72,0,1)', duration: '0.4s'},
+      enter: {ease: 'cubic-bezier(0.32,0.72,0,1)', duration: '0.3s'},
       leave: {ease: 'cubic-bezier(1, 0, 0.68, 0.28)', duration: '0.45s'},
     },
   },

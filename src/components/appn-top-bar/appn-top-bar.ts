@@ -102,7 +102,7 @@ export class AppnTopBarElement extends LitElement {
                       ${preNavEntries.map(
                         (entry) => html`
                           <li>
-                            <appn-link mode="back" to-key="${entry.key}" type="text-button" actionType="pointerup" @pointerup=${() => this.__navHistoryEle?.hidePopover()}>
+                            <appn-link mode="back" to-key="${entry.key}" type="text-button" actionType="pointerup" @navigate=${() => this.__navHistoryEle?.hidePopover()}>
                               ${get_navigation_entry_page_title(entry)}
                             </appn-link>
                           </li>

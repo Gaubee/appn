@@ -28,6 +28,7 @@ export const appnTopBarStyle = css`
     backdrop-filter: blur(20px) contrast(0.5) brightness(max(var(--_light-brightness), var(--_dark-brightness)));
 
     width: max-content;
+    max-height: calc(100cqh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
     min-width: 60cqw;
     padding: 0;
     flex-direction: column;
@@ -64,6 +65,8 @@ export const appnTopBarStyle = css`
   }
   #nav-history:popover-open {
     display: flex;
+    transition-duration: var(--menu-enter-duration);
+    transition-timing-function: var(--menu-enter-ease);
   }
 
   .title {

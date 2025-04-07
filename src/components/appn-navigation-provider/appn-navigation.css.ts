@@ -7,8 +7,9 @@ export const appnNavigationStyle = css`
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     grid-template-areas: 'stack';
-    width: fit-content;
-    height: fit-content;
+    width: 100cqw;
+    height: 100cqh;
+    overflow: hidden;
   }
   ::slotted(*) {
     grid-area: stack;
@@ -42,10 +43,8 @@ export const appnNavigationStyle = css`
 
   /* 动态生成卡片堆叠偏移 */
   ::slotted(*) {
-    --translate-x: 0;
-    --translate-y: 0;
     --translate-z: calc((var(--present-index, -1) - var(--index, 0)) * -36px);
-    translate: var(--translate-x) var(--translate-y) var(--translate-z);
+    translate: var(--translate-x, 0) var(--translate-y, 0) var(--translate-z);
   }
 `;
 
@@ -53,26 +52,53 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null(
   [
     css`
       :host {
+        /** 充满grid容器 */
+        place-self: stretch;
+
         display: grid;
-        width: fit-content;
-        height: fit-content;
         transition-property: all;
         transition-behavior: allow-discrete;
-        transition-duration: var(--page-enter-duration);
-        transition-timing-function: var(--page-enter-ease);
+        transition-duration: var(--page-leave-duration);
+        transition-timing-function: var(--page-leave-ease);
+      }
+      :host([data-tense='past']) {
+        --translate-x: -38%;
+        display: none;
       }
       :host([data-tense='present']) {
         /* Example: Start transparent, fade in */
-        opacity: 1;
+        --translate-x: 0%;
+        transition-duration: var(--page-enter-duration);
+        transition-timing-function: var(--page-enter-ease);
       }
       :host([data-tense='future']) {
         /* Optionally hide future entries visually if needed beyond display:none */
-        opacity: 0;
-        scale: 1.05;
-        --translate-x: 50% !important;
-
-        transition-duration: var(--page-leave-duration);
-        transition-timing-function: var(--page-leave-ease);
+        --translate-x: 100%;
+        display: none;
+      }
+      :host([data-from-tense='past']) {
+        @starting-style {
+          --translate-x: -38%;
+        }
+      }
+      :host([data-from-tense='present']) {
+        transition-duration: var(--page-enter-duration);
+        transition-timing-function: var(--page-enter-ease);
+        @starting-style {
+          --translate-x: 0%;
+        }
+      }
+      :host([data-from-tense='future']) {
+        @starting-style {
+          --translate-x: 100%;
+        }
+      }
+      :host([data-from-tense='future'][data-index='0']) {
+        @starting-style {
+          --translate-x: 0%;
+          --translate-y: 0%;
+          opacity: 0;
+        }
       }
     `,
   ],

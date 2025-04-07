@@ -10,6 +10,12 @@ import {enumToSafeConverter, safeProperty} from '../../utils/safe-property-conve
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from './appn-navigation-context';
 import {appnNavigationHistoryEntryStyle, appnNavigationStyle} from './appn-navigation.css';
 
+const APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES = [null, 'horizontal', 'vertical'] as const;
+export type AppnNavigationStackDirection = (typeof APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES)[number];
+/**
+ * @attr {boolean} stack - enable stack view mode
+ * @attr {AppnNavigationStackDirection} stack-direction - The direction of the navigation stack.
+ */
 @customElement('appn-navigation-provider')
 export class AppnNavigationProviderElement extends LitElement implements AppnNavigation {
   static override styles = appnNavigationStyle;
@@ -144,10 +150,10 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
 
   //#region stack render
   @property({type: Boolean, reflect: true, attribute: true})
-  accessor stack = true;
+  accessor stack = false;
 
-  @safeProperty({...enumToSafeConverter(['vertical', 'horizontal'] as const), attribute: 'stack-direction'})
-  accessor stackDirection: 'vertical' | 'horizontal' = 'vertical';
+  @safeProperty({...enumToSafeConverter(APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES), attribute: 'stack-direction'})
+  accessor stackDirection: AppnNavigationStackDirection = null;
 
   // 相机控制方法
   setCamera(x: number, y: number, z: number) {
@@ -242,8 +248,8 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   `);
 }
 
-const _navigation_history_entry_tense = /**@__PURE__ */ [undefined, 'past', 'present', 'future'] as const;
-type NavigationHistoryEntryTense = (typeof _navigation_history_entry_tense)[number];
+const _NAVIGATION_HISTORY_ENTRY_TENSE_ENUM_VALUES = /**@__PURE__ */ [undefined, 'past', 'present', 'future'] as const;
+type NavigationHistoryEntryTense = (typeof _NAVIGATION_HISTORY_ENTRY_TENSE_ENUM_VALUES)[number];
 
 @customElement('appn-navigation-history-entry')
 export class AppnNavigationHistoryEntryElement extends LitElement {
@@ -266,6 +272,8 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
     const index = this.navigationEntry?.index ?? -1;
     this.style.setProperty('--index', (this.dataset.index = `${index}`));
     this.style.setProperty('--present-index', `${this.presentEntryIndex}`);
+    const fromTense = this.dataset.tense ?? 'future';
+    this.dataset.fromTense = fromTense;
     const tense: NavigationHistoryEntryTense = (this.dataset.tense =
       this.presentEntryIndex === -1
         ? undefined
