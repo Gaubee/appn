@@ -15,6 +15,8 @@ export const appnLinkStyle = css`
     display: inline-flex;
     flex-direction: row;
     align-items: baseline;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
   button {
     font: var(--font);

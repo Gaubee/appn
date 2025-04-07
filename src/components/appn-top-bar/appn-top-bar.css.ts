@@ -52,6 +52,7 @@ export const appnTopBarStyle = css`
   }
   #nav-history appn-link::part(link) {
     padding: var(--grid-unit);
+    width: 100%;
   }
   #nav-history hr {
     all: unset;

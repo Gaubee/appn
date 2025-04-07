@@ -54,7 +54,7 @@ export class AppnLinkElement extends LitElement {
   private __onClick = async (event: Event) => {
     event.preventDefault();
 
-    const {to, toKey, __nav: nav, state} = this;
+    const {to, toKey, __nav: nav, state, __navigationEntry: currentEntry} = this;
     if (nav == null) {
       return;
     }
@@ -71,14 +71,14 @@ export class AppnLinkElement extends LitElement {
         if (to_url) {
           const event = new AppnLinkNavigateEvent({type: 'push', url: to_url, state, info});
           this.dispatchEvent(event);
-          event.applyNavigate(nav);
+          event.applyNavigate(nav, currentEntry);
         }
       })
       .with('replace', () => {
         if (to_url) {
           const event = new AppnLinkNavigateEvent({type: 'replace', url: to_url, state, info});
           this.dispatchEvent(event);
-          event.applyNavigate(nav);
+          event.applyNavigate(nav, currentEntry);
         }
       })
       .with('forward', () => {
@@ -87,7 +87,7 @@ export class AppnLinkElement extends LitElement {
         } else if (nav.canGoForward) {
           const event = new AppnLinkNavigateEvent({type: 'forward', info});
           this.dispatchEvent(event);
-          event.applyNavigate(nav);
+          event.applyNavigate(nav, currentEntry);
         }
       })
       .with('back', async () => {
@@ -96,12 +96,12 @@ export class AppnLinkElement extends LitElement {
           if (history) {
             const event = new AppnLinkNavigateEvent({type: 'traverse', key: history.key, info});
             this.dispatchEvent(event);
-            event.applyNavigate(nav);
+            event.applyNavigate(nav, currentEntry);
           }
         } else if (nav.canGoBack) {
           const event = new AppnLinkNavigateEvent({type: 'back', info});
           this.dispatchEvent(event);
-          event.applyNavigate(nav);
+          event.applyNavigate(nav, currentEntry);
         }
       })
       .with('back-or-push', async () => {
@@ -110,11 +110,11 @@ export class AppnLinkElement extends LitElement {
           if (history) {
             const event = new AppnLinkNavigateEvent({type: 'traverse', key: history.key, info});
             this.dispatchEvent(event);
-            event.applyNavigate(nav);
+            event.applyNavigate(nav, currentEntry);
           } else if (to_url) {
             const event = new AppnLinkNavigateEvent({type: 'push', url: to_url, state, info});
             this.dispatchEvent(event);
-            event.applyNavigate(nav);
+            event.applyNavigate(nav, currentEntry);
           }
         }
       })
@@ -124,11 +124,11 @@ export class AppnLinkElement extends LitElement {
           if (history) {
             const event = new AppnLinkNavigateEvent({type: 'traverse', key: history.key, info});
             this.dispatchEvent(event);
-            event.applyNavigate(nav);
+            event.applyNavigate(nav, currentEntry);
           } else if (to_url) {
             const event = new AppnLinkNavigateEvent({type: 'push', url: to_url, state, info});
             this.dispatchEvent(event);
-            event.applyNavigate(nav);
+            event.applyNavigate(nav, currentEntry);
           }
         }
       })
@@ -198,18 +198,27 @@ export class AppnLinkNavigateEvent extends CustomEvent<AppnLinkNavigateEvent.Det
   get result() {
     return this.#result;
   }
-  applyNavigate(nav: AppnNavigation) {
+  applyNavigate(nav: AppnNavigation, currentEntry: NavigationHistoryEntry | null | undefined) {
     if (this.defaultPrevented) {
       return;
     }
     const {detail} = this;
-    this.#result = match(detail)
+    const result = match(detail)
       .with({type: 'push'}, (detail) => nav.navigate(detail.url, detail))
       .with({type: 'replace'}, (detail) => nav.navigate(detail.url, {...detail, history: 'replace'}))
       .with({type: 'back'}, (detail) => nav.back(detail))
       .with({type: 'traverse'}, (detail) => nav.traverseTo(detail.key, detail))
       .with({type: 'forward'}, (detail) => nav.forward(detail))
       .exhaustive();
+    if (navigator.vibrate) {
+      result.committed.then((r) => {
+        if (r.key !== currentEntry?.key) {
+          navigator.vibrate([10]);
+        }
+      });
+    }
+
+    this.#result = result;
   }
 }
 

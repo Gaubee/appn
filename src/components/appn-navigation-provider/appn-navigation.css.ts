@@ -19,7 +19,6 @@ export const appnNavigationStyle = css`
     display: none;
   }
 
-  
   :host([stack]) {
     /* 基础3D场景设置 */
     perspective: calc(var(--z, 1200) * 1px);
@@ -40,6 +39,7 @@ export const appnNavigationStyle = css`
   ::slotted(*) {
     /* 基础3D变换设置 */
     transform-style: preserve-3d;
+    user-select: none;
   }
 
   /* 动态生成卡片堆叠偏移 */
