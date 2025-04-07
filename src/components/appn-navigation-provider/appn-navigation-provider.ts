@@ -1,11 +1,11 @@
 import '@virtualstate/navigation/polyfill';
+import 'urlpattern-polyfill';
 
 import {ContextProvider, provide} from '@lit/context';
 import {html, LitElement} from 'lit';
 import {customElement, property, queryAssignedElements} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {match, Pattern} from 'ts-pattern';
-import {URLPattern} from 'urlpattern-polyfill';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {baseurl_relative_parts} from '../../utils/relative-path';
 import {enumToSafeConverter, safeProperty} from '../../utils/safe-property-converter';
