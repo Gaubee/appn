@@ -1,5 +1,5 @@
 import {ReactiveElement} from 'lit';
-import {safeProperty, type SafePropertyConverter} from './safe-property-converter';
+import {safeProperty, type SafePropertyConverter} from './safe-property';
 
 export type AutoBoolean = boolean | 'auto';
 

@@ -5,7 +5,8 @@ import {cache} from 'lit/directives/cache.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
 import {match} from 'ts-pattern';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
-import {enumToSafeConverter, safeProperty} from '../../utils/safe-property-converter';
+import {safeProperty} from '../../utils/safe-property';
+import { enumToSafeConverter } from '../../utils/safe-property/enum-to-safe-converter';
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from '../appn-navigation-provider/appn-navigation-context';
 import {appnLinkStyle} from './appn-link.css';
 

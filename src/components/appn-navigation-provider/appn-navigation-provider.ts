@@ -8,7 +8,8 @@ import {cache} from 'lit/directives/cache.js';
 import {match, Pattern} from 'ts-pattern';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {baseurl_relative_parts} from '../../utils/relative-path';
-import {enumToSafeConverter, safeProperty} from '../../utils/safe-property-converter';
+import {safeProperty} from '../../utils/safe-property';
+import { enumToSafeConverter } from '../../utils/safe-property/enum-to-safe-converter';
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from './appn-navigation-context';
 import {appnNavigationHistoryEntryStyle, appnNavigationStyle} from './appn-navigation.css';
 

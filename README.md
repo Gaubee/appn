@@ -39,3 +39,11 @@ To lint the project run:
 ```bash
 pnpm lint
 ```
+
+## Test
+
+To test the project run:
+
+```bash
+pnpm test:dev
+```

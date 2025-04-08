@@ -1,7 +1,7 @@
 # 兼容性报告
 
-- ⚠️ < chrome 97+ / safari 17.0+
-- ❌ < chrome 114+ / safari 17.5+
+- ⚠️ > chrome 97+ / safari 17.0+
+- ❌ > chrome 114+ / safari 17.5+
 
 1. ⚠️ 🤖 [`color-mix()`](https://caniuse.com/mdn-css_types_color_color-mix)
    - 无垫片，有非一致性的回退方案，非致命

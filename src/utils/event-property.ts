@@ -1,5 +1,5 @@
 import {accessor, map_get_or_put} from '@gaubee/util';
-import {safeProperty} from './safe-property-converter';
+import {safeProperty} from './safe-property';
 import type {ReactiveElement} from 'lit';
 
 export type PropertyEventListener<T = GlobalEventHandlers, E extends Event = Event> = ((this: T, event: E) => void) | null;
