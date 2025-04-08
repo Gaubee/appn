@@ -37,6 +37,11 @@ const buildinTypes = new Set([
   'NavigationCurrentEntryChangeEvent',
   'HTMLTemplateElement',
 ]);
+
+const buildinImportMap = new Map([
+  //
+  ['Property', 'csstype'],
+]);
 const isBuildinTypes = (type: string) => {
   return buildinTypes.has(type);
 };
@@ -52,18 +57,26 @@ const isLiteral = (type: string) => {
 const addImport = (typeOnly: boolean, typeText?: string | null, from = './index') => {
   if (typeText) {
     const types = typeText.split(/[\<,\s\|\&\>\[\]]+/).filter(Boolean);
-    for (let type of types) {
-      if (type.includes('.')) {
-        // skip namespace
-        continue;
-      }
+    for (let _type of types) {
+      const type = _type.split('.')[0];
       if (importCodes.has(type)) {
         // skip dupication
         continue;
       }
-      if (false === (isBuildinTypes(type) || isLiteral(type))) {
-        importCodes.set(type, `import ${typeOnly ? 'type' : ''} {${type}} from '${from}';`);
+      /// 内置的 import 规则
+      const importFrom = buildinImportMap.get(type);
+      if (importFrom) {
+        importCodes.set(type, `import ${typeOnly ? 'type' : ''} {${type}} from '${importFrom}';`);
       }
+
+      if (
+        _type.includes('.') || // skip namespace
+        isBuildinTypes(type) || // skip global type
+        isLiteral(type) // skip literal
+      ) {
+        continue;
+      }
+      importCodes.set(type, `import ${typeOnly ? 'type' : ''} {${type}} from '${from}';`);
     }
   }
   return typeText;
@@ -75,7 +88,7 @@ const moduleDeclarations = readCustomElements().modules.map((module) => {
     declarations: module.declarations
       .filter((dec) => dec.kind === 'class')
       .filter((dec) => {
-        return dec.customElement && dec.tagName.startsWith('appn-') && module.path.startsWith('src/components/');
+        return dec.customElement && module.path.startsWith('src/components/');
       }),
   };
 });

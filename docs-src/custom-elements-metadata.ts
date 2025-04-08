@@ -107,6 +107,12 @@ export const readCustomElements = () => {
 export const customElementsMetadata = readCustomElements();
 
 export const customElementDeclarations = customElementsMetadata.modules
+  .filter((m) => m.path.startsWith('src/components/'))
   .map((m) => m.declarations)
   .flat()
-  .filter((d) => d.kind === 'class' && d.customElement && d.tagName.startsWith('appn-')) as CustomElementsJson.ClassDeclaration[];
+  .filter((d) => d.kind === 'class' && d.customElement) as CustomElementsJson.ClassDeclaration[];
+
+console.log(
+  'all customElement tagsName',
+  customElementDeclarations.map((d) => d.tagName)
+);
