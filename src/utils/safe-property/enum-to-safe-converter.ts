@@ -65,9 +65,9 @@ export function enumToSafeConverter<T>(
       // Example: values = ['Value', 'value']
       const existingValue = attributeMap.get(lowerCaseStringValue);
       console.warn(
-        `Warning: Multiple values map to the same case-insensitive attribute string "${lowerCaseStringValue}". ` +
-        `Attribute lookup will resolve to the last encountered value ("${value}"). ` +
-        `Previous value was ("${existingValue}").`
+        `Warning: Multiple values map to the same case-insensitive attribute string: ${lowerCaseStringValue}. ` +
+        `Attribute lookup will resolve to the last encountered value (${value}). ` +
+        `Previous value was (${existingValue}).`
       );
     }
     attributeMap.set(lowerCaseStringValue, value);
