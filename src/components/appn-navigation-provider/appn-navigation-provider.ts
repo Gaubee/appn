@@ -172,13 +172,15 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
   private __effectRoutes = async () => {
-    const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
-    const allEntries = this.__nav.entries();
-    const currentEntry = this.__nav.currentEntry;
-    const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
-    for (const navEntry of allEntries) {
-      this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex});
-    }
+    document.startViewTransition(async () => {
+      const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
+      const allEntries = this.__nav.entries();
+      const currentEntry = this.__nav.currentEntry;
+      const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
+      for (const navEntry of allEntries) {
+        this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex});
+      }
+    });
   };
   private __effectRoute = (
     navEntry: NavigationHistoryEntry,
@@ -272,6 +274,7 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
   @provide({context: appnNavigationHistoryEntryContext})
   accessor navigationEntry: NavigationHistoryEntry | null = null;
   override render() {
+    this.dataset.key = this.navigationEntry?.key;
     const index = this.navigationEntry?.index ?? -1;
     this.style.setProperty('--index', (this.dataset.index = `${index}`));
     this.style.setProperty('--present-index', `${this.presentEntryIndex}`);

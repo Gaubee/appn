@@ -19,6 +19,9 @@ export const appnTopBarStyle = css`
     anchor-name: --leading;
     user-select: none;
   }
+  .back-button {
+    view-transition-name: appn-top-bar-back-button;
+  }
   #nav-history {
     position-anchor: --leading;
     left: anchor(left);
@@ -97,6 +100,7 @@ export const appnTopBarStyle = css`
     line-height: 1.8;
 
     font-weight: 600;
+    view-transition-name: appn-top-bar-title;
   }
 
   .actions {

@@ -59,49 +59,72 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null(
         display: grid;
         transition-property: all;
         transition-behavior: allow-discrete;
+      }
+      :host([data-from-tense='present']) {
         transition-duration: var(--page-leave-duration);
         transition-timing-function: var(--page-leave-ease);
       }
-      :host([data-tense='past']) {
-        --translate-x: -38%;
-        display: none;
-      }
       :host([data-tense='present']) {
-        /* Example: Start transparent, fade in */
-        --translate-x: 0%;
         transition-duration: var(--page-enter-duration);
         transition-timing-function: var(--page-enter-ease);
-      }
-      :host([data-tense='future']) {
-        /* Optionally hide future entries visually if needed beyond display:none */
-        --translate-x: 100%;
-        display: none;
-      }
-      :host([data-from-tense='past']) {
-        @starting-style {
-          --translate-x: -38%;
-        }
-      }
-      :host([data-from-tense='present']) {
-        transition-duration: var(--page-enter-duration);
-        transition-timing-function: var(--page-enter-ease);
-        @starting-style {
-          --translate-x: 0%;
-        }
-      }
-      :host([data-from-tense='future']) {
-        @starting-style {
-          --translate-x: 100%;
-        }
-      }
-      :host([data-from-tense='future'][data-index='0']) {
-        @starting-style {
-          --translate-x: 0%;
-          --translate-y: 0%;
-          opacity: 0;
-        }
       }
     `,
+    CSS.supports('view-transition-name: content')
+      ? css`
+          :host {
+            view-transition-name: attr(data-key);
+          }
+          :host([data-tense='past']) {
+            --translate-x: -38%;
+            /* display: none; */
+          }
+          :host([data-tense='present']) {
+            /* Example: Start transparent, fade in */
+            --translate-x: 0%;
+          }
+          :host([data-tense='future']) {
+            /* Optionally hide future entries visually if needed beyond display:none */
+            --translate-x: 100%;
+            /* display: none; */
+          }
+        `
+      : css`
+          :host([data-tense='past']) {
+            --translate-x: -38%;
+            display: none;
+          }
+          :host([data-tense='present']) {
+            /* Example: Start transparent, fade in */
+            --translate-x: 0%;
+          }
+          :host([data-tense='future']) {
+            /* Optionally hide future entries visually if needed beyond display:none */
+            --translate-x: 100%;
+            display: none;
+          }
+          :host([data-from-tense='past']) {
+            @starting-style {
+              --translate-x: -38%;
+            }
+          }
+          :host([data-from-tense='present']) {
+            @starting-style {
+              --translate-x: 0%;
+            }
+          }
+          :host([data-from-tense='future']) {
+            @starting-style {
+              --translate-x: 100%;
+            }
+          }
+          :host([data-from-tense='future'][data-index='0']) {
+            @starting-style {
+              --translate-x: 0%;
+              --translate-y: 0%;
+              opacity: 0;
+            }
+          }
+        `,
   ],
   (v) => v
 );

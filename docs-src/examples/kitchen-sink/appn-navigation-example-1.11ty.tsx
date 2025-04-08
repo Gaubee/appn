@@ -5,8 +5,7 @@ export default class Page {
   data() {
     return {
       layout: 'root.11ty.ts',
-      name: 'AppnNavigation',
-      description: 'AppnNavigation Example 1',
+      title: 'AppnNavigation Example 1',
     };
   }
   render(data) {
