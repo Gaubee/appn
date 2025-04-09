@@ -22,7 +22,7 @@ export default class Page {
       <>
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
 
-        <css-color-mix var="--qaq" c1={'red'} c2={'blue'}></css-color-mix>
+        <css-color-mix var="--qaq" c1={'red'} c2={'blue'} p1={0.3}></css-color-mix>
         <div className="block"></div>
       </>
     );

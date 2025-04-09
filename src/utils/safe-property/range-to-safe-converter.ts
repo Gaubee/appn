@@ -10,6 +10,8 @@ export interface RangeToSafeConverterOptions {
   defaultValue?: number | null;
   step?: RangeToSafeConverterOptions.StepParam;
   nullable?: boolean;
+  numberify?: (value: string) => number;
+  stringify?: (value: number) => string;
 }
 export namespace RangeToSafeConverterOptions {
   export type StepMode = 'ceil' | 'floor' | 'round';
@@ -54,13 +56,16 @@ function normalizeStep(stepParam: RangeToSafeConverterOptions.StepParam | undefi
   throw new Error(`Invalid step configuration: ${JSON.stringify(stepParam)}`);
 }
 
+/**
+ * @__NO_SIDE_EFFECTS__
+ */
 export const rangeToSafeConverter = ((min: number, max: number, options: RangeToSafeConverterOptions = {}) => {
   if (min > max) {
     throw new Error(`Invalid range: min (${min}) must be less than or equal to max (${max}).`);
   }
 
   const normalizedStep = normalizeStep(options.step);
-  const {nullable} = options;
+  const {nullable, numberify = Number, stringify = String} = options;
 
   // Calculate and validate default value
   const providedOrDefault = options.defaultValue === undefined ? min : options.defaultValue;
@@ -147,13 +152,15 @@ export const rangeToSafeConverter = ((min: number, max: number, options: RangeTo
       }
 
       // Handle non-numeric values
-      if (typeof value !== 'number' || !Number.isFinite(value)) {
+      const valueOfNumber = typeof value === 'number' ? value : numberify(String(value));
+
+      if (!Number.isFinite(valueOfNumber)) {
         console.warn(`Invalid input type for setProperty: ${typeof value}. Using default: ${defaultValue}`);
         return defaultValue;
       }
 
       // Process the value through stepping, validation, and clamping
-      return processValue(value);
+      return processValue(valueOfNumber);
     },
 
     fromAttribute(attributeValue: string | null): number | null {
@@ -167,7 +174,7 @@ export const rangeToSafeConverter = ((min: number, max: number, options: RangeTo
       }
 
       // Parse the attribute value
-      const parsedValue = +attributeValue;
+      const parsedValue = numberify(attributeValue);
       if (isNaN(parsedValue) || !Number.isFinite(parsedValue)) {
         console.warn(`Invalid attribute value: "${attributeValue}". Cannot parse to number. Using default: ${defaultValue}`);
         return defaultValue;
@@ -190,7 +197,20 @@ export const rangeToSafeConverter = ((min: number, max: number, options: RangeTo
       }
 
       // Convert to string
-      return String(propertyValue);
+      return propertyValue == null ? propertyValue : stringify(propertyValue);
     },
   };
 }) as RangeToSafeConverter;
+
+export const percentageToSafeConverter = rangeToSafeConverter(0, 1, {
+  nullable: true,
+  numberify(value) {
+    if (value.endsWith('%')) {
+      return +value.slice(0, -1) / 100;
+    }
+    return +value;
+  },
+  stringify(value) {
+    return `${value * 100}%`;
+  },
+});
