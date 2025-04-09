@@ -29,7 +29,7 @@ export default class Page {
       <>
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
 
-        <appn-scroll-view class="scrollview">
+        <appn-scroll-view className="scrollview">
           {/* <appn-header slot="header">嘻嘻哈哈</appn-header> */}
           {Array.from({length: 60}, (_, i) => (
             <div className="item">This is page content. index: {i + 1}</div>

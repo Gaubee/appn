@@ -52,6 +52,9 @@ importers:
       csstype:
         specifier: ^3.1.3
         version: 3.1.3
+      culori:
+        specifier: ^4.0.1
+        version: 4.0.1
       lit:
         specifier: ^3.2.1
         version: 3.2.1
@@ -95,6 +98,9 @@ importers:
       '@types/chai':
         specifier: ^5.2.0
         version: 5.2.1
+      '@types/culori':
+        specifier: ^2.1.1
+        version: 2.1.1
       '@types/dom-navigation':
         specifier: ^1.0.5
         version: 1.0.5
@@ -1296,6 +1302,9 @@ packages:
   '@types/cookies@0.9.0':
     resolution: {integrity: sha512-40Zk8qR147RABiQ7NQnBzWzDcjKzNrntB5BAmeGCb2p/MIyOE+4BVvc17wumsUqUw00bJYqoXFHYygQnEFh4/Q==}
 
+  '@types/culori@2.1.1':
+    resolution: {integrity: sha512-NzLYD0vNHLxTdPp8+RlvGbR2NfOZkwxcYGFwxNtm+WH2NuUNV8785zv1h0sulFQ5aFQ9n/jNDUuJeo3Bh7+oFA==}
+
   '@types/debounce@1.2.4':
     resolution: {integrity: sha512-jBqiORIzKDOToaF63Fm//haOCHuwQuLa2202RK4MozpA6lh93eCBc+/8+wZn5OzjJt3ySdc+74SXWXB55Ewtyw==}
 
@@ -1939,6 +1948,10 @@ packages:
 
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
+
+  culori@4.0.1:
+    resolution: {integrity: sha512-LSnjA6HuIUOlkfKVbzi2OlToZE8OjFi667JWN9qNymXVXzGDmvuP60SSgC+e92sd7B7158f7Fy3Mb6rXS5EDPw==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   custom-element-solidjs-integration@1.9.0:
     resolution: {integrity: sha512-KN/2K5qb4St4eT4eiq2YXy8XJ4EeORh/EESr0+cFx2GlJJMuOcuCRP7swV4hdG0eOTf+yn9egyt+Cc0yr4VYgg==}
@@ -5032,6 +5045,8 @@ snapshots:
       '@types/keygrip': 1.0.6
       '@types/node': 22.14.0
 
+  '@types/culori@2.1.1': {}
+
   '@types/debounce@1.2.4': {}
 
   '@types/deep-eql@4.0.2': {}
@@ -5893,6 +5908,8 @@ snapshots:
       which: 2.0.2
 
   csstype@3.1.3: {}
+
+  culori@4.0.1: {}
 
   custom-element-solidjs-integration@1.9.0(prettier@3.5.3):
     dependencies:

@@ -64,4 +64,26 @@ const css_color_mix_shim: CssColorMix = func_lazy(() => {
   };
 });
 
+// import {interpolate, modeHsl, modeRgb, useMode} from 'culori/fn';
+// const css_color_mix_shim2: CssColorMix = (colorSpace, c1, c2, p1, p2) => {
+//   const ps = match({p1, p2})
+//     .with({p1: P.nullish, p2: P.nullish}, () => ({p1: 50, p2: 50}))
+//     .with({p1: P.nullish, p2: P.number}, (ps) => {
+//       const p2 = ps.p2 * 100;
+//       return {p1: 100 - p2, p2};
+//     })
+//     .with({p1: P.number, p2: P.nullish}, (ps) => {
+//       const p1 = ps.p1 * 100;
+//       return {p1, p2: 100 - p1};
+//     })
+//     .with({p1: P.number, p2: P.number}, (ps) => ({p1: ps.p1 * 100, p2: ps.p2 * 100}))
+//     .exhaustive();
+//   const cs = match(colorSpace)
+//     .with('srgb', () => modeRgb)
+//     .with('hsl', () => modeHsl)
+//     .otherwise(() => modeRgb);
+
+//   return interpolate([c1, c2], useMode(cs));
+// };
+
 export const css_color_mix = CSS.supports('color:color-mix(in srgb,#000,#000)') ? css_color_mix_native : css_color_mix_shim;

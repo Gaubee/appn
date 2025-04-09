@@ -36,7 +36,9 @@ export class CssColorMixElement extends LitElement {
     this.appendChild(this.__styleEle);
   }
   protected override updated(_changedProperties: PropertyValues): void {
-    this.__styleEle.innerHTML = `:scope{${this.var}:${CssColorMixElement.css_color_mix(this.in, this.c1, this.c2, this.p1, this.p2)}}`;
+    this.__styleEle.innerHTML =
+      `@property ${this.in}{syntax:'<color>';inherits:false;initial-value:#000;}` +
+      `:scope{${this.var}:${CssColorMixElement.css_color_mix(this.in, this.c1, this.c2, this.p1, this.p2)}}`;
     super.updated(_changedProperties);
   }
 }
