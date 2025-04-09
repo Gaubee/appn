@@ -1,9 +1,9 @@
 import {accessor, map_get_or_put} from '@gaubee/util';
-import {safeProperty} from './safe-property';
 import type {ReactiveElement} from 'lit';
+import {safeProperty} from './safe-property';
 
 export type PropertyEventListener<T = GlobalEventHandlers, E extends Event = Event> = ((this: T, event: E) => void) | null;
-const listeners = /**@__PURE__ */ new WeakMap<object, Map<string, EventListenerObject>>();
+const listeners = /*@__PURE__*/ new WeakMap<object, Map<string, EventListenerObject>>();
 export const eventProperty = <
   /** This */
   C extends ReactiveElement,

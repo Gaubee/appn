@@ -56,7 +56,7 @@ export class AppnThemeProviderElement extends LitElement {
   accessor colorScheme: 'dark' | 'light' | 'auto' = 'auto';
   private __colorSchemeFlow = flowColorScheme(this);
   private get __colorSchemeResult() {
-    return this.colorScheme === 'auto' ? this.__colorSchemeFlow.value : this.colorScheme;
+    return this.colorScheme === 'auto' ? this.__colorSchemeFlow.get() : this.colorScheme;
   }
 
   get isDark(): boolean {

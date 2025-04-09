@@ -1,6 +1,6 @@
 import {arr_remove_first, func_lazy, map_get_or_put} from '@gaubee/util';
 
-const binds_offs_wm = /**@__PURE__ */ new WeakMap<
+const binds_offs_wm = /*@__PURE__*/ new WeakMap<
   Element,
   WeakMap<EventListener, (() => void)[]>
 >();

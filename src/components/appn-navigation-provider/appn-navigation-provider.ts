@@ -9,7 +9,7 @@ import {match, Pattern} from 'ts-pattern';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {baseurl_relative_parts} from '../../utils/relative-path';
 import {safeProperty} from '../../utils/safe-property';
-import { enumToSafeConverter } from '../../utils/safe-property/enum-to-safe-converter';
+import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from './appn-navigation-context';
 import {appnNavigationHistoryEntryStyle, appnNavigationStyle} from './appn-navigation.css';
 
@@ -253,7 +253,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   `);
 }
 
-const _NAVIGATION_HISTORY_ENTRY_TENSE_ENUM_VALUES = /**@__PURE__ */ [undefined, 'past', 'present', 'future'] as const;
+const _NAVIGATION_HISTORY_ENTRY_TENSE_ENUM_VALUES = [undefined, 'past', 'present', 'future'] as const;
 type NavigationHistoryEntryTense = (typeof _NAVIGATION_HISTORY_ENTRY_TENSE_ENUM_VALUES)[number];
 
 @customElement('appn-navigation-history-entry')

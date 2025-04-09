@@ -9,6 +9,9 @@ import replace from '@rollup/plugin-replace';
 import fs from 'node:fs';
 import path from 'node:path';
 import {defineConfig} from 'rollup';
+// import minifyHTML from 'rollup-plugin-minify-html-literals';
+// console.log("QAQ minifyHTML",minifyHTML)
+
 import summary from 'rollup-plugin-summary';
 import 'tsx';
 
@@ -53,6 +56,7 @@ export default defineConfig({
     //     },
     //   },
     // }),
+    // minifyHTML.default(),
     summary(),
     {
       name: 'generate-react-types',

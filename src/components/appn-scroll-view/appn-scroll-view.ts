@@ -6,10 +6,10 @@
 import {css, CSSResult, html, LitElement, unsafeCSS} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
+import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {flowScrollbarOverlay} from '../../utils/match-media';
 import {ResizeController} from '../../utils/resize-controller';
 import {ScrollController} from '../../utils/scroll-controller';
-import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {appnScrollViewStyle} from './appn-scroll-view.css';
 
 /**
@@ -165,7 +165,7 @@ export class AppnScrollViewElement extends LitElement {
 
   private __scrollbarOverlayFlow = flowScrollbarOverlay(this);
   get canOverlayScrollbar(): boolean {
-    return this.__scrollbarOverlayFlow.value;
+    return this.__scrollbarOverlayFlow.get();
   }
 
   protected override render() {

@@ -47,3 +47,12 @@ To test the project run:
 ```bash
 pnpm test:dev
 ```
+
+## TODO
+
+- [ ] 对架构进行拆分成monorepo项目
+  - appn
+  - @gaubee/lib
+  - @gaubee/web
+    - @gaubee/css
+  - @gaubee/fuse

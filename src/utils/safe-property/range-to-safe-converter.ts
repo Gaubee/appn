@@ -57,9 +57,10 @@ function normalizeStep(stepParam: RangeToSafeConverterOptions.StepParam | undefi
 }
 
 /**
- * @__NO_SIDE_EFFECTS__
+ * 数字范围转换器，用于将数值范围限制在给定的最小值和最大值之间，并使用指定的步长进行整数化。
  */
-export const rangeToSafeConverter = ((min: number, max: number, options: RangeToSafeConverterOptions = {}) => {
+/*@__NO_SIDE_EFFECTS__*/
+const _rangeToSafeConverter = (min: number, max: number, options: RangeToSafeConverterOptions = {}) => {
   if (min > max) {
     throw new Error(`Invalid range: min (${min}) must be less than or equal to max (${max}).`);
   }
@@ -200,7 +201,9 @@ export const rangeToSafeConverter = ((min: number, max: number, options: RangeTo
       return propertyValue == null ? propertyValue : stringify(propertyValue);
     },
   };
-}) as RangeToSafeConverter;
+};
+
+export const rangeToSafeConverter = _rangeToSafeConverter as RangeToSafeConverter;
 
 export const percentageToSafeConverter = rangeToSafeConverter(0, 1, {
   nullable: true,
