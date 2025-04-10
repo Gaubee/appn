@@ -22,6 +22,7 @@ export default function (eleventyConfig: UserConfig) {
   eleventyConfig.addPassthroughCopy('bundle');
   eleventyConfig.addPassthroughCopy('node_modules/lit/polyfill-support.js');
   eleventyConfig.addWatchTarget('./bundle');
+  eleventyConfig.addWatchTarget('./docs-src/**/*.html');
   // add support for TypeScript and JSX:
   eleventyConfig.addExtension(['11ty.jsx', '11ty.tsx'], {
     key: '11ty.js',

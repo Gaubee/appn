@@ -17,5 +17,7 @@ export * from './ponyfill/scrollend';
 export * from './utils/auto-boolean-property-converter';
 export * from './utils/event-property';
 export * from './utils/match-media-signal/color-scheme-stateify';
+export * from './utils/match-media-signal/match-media-signal';
+export * from './utils/match-media-signal/scrollbar-overlay-stateify';
 export * from './utils/resize-controller';
 export * from './utils/scroll-controller';

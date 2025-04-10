@@ -13,7 +13,7 @@ export default class Page {
   render(data) {
     const css = String.raw;
     const styleText = css`
-      .navigation-example {
+      .demo-frame {
         margin: 8px;
         outline: solid 1px blue;
         border-radius: 24px;
@@ -25,7 +25,7 @@ export default class Page {
     return (
       <>
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
-        <iframe className="navigation-example" src="/examples/kitchen-sink/appn-navigation-example-1/?safe-area-inset-top=20px&safe-area-inset-bottom=22px"></iframe>
+        <iframe className="demo-frame" src="/examples/kitchen-sink/appn-navigation-demo-1/?safe-area-inset-top=20px&safe-area-inset-bottom=22px"></iframe>
       </>
     );
   }

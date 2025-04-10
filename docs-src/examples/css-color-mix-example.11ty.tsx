@@ -12,18 +12,19 @@ export default class Page {
   render(data) {
     const css = String.raw;
     const styleText = css`
-      .block {
-        width: 100px;
-        height: 100px;
-        background: var(--qaq);
+      .demo-frame {
+        margin: 8px;
+        outline: solid 1px blue;
+        border-radius: 24px;
+        width: 650px;
+        height: 400px;
+        border: 0;
       }
     `;
     return (
       <>
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
-
-        <css-color-mix var="--qaq" c1={'red'} c2={'blue'} p1={0.3}></css-color-mix>
-        <div className="block"></div>
+        <iframe className="demo-frame" src="/examples/kitchen-sink/color-mix-demo-1"></iframe>
       </>
     );
   }
