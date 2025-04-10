@@ -49,10 +49,13 @@ export class CssColorMixElement extends LitElement {
       color1 = color1_is_css_var ? styles.getPropertyValue(color1) || '#000' : color1;
       color2 = color2_is_css_var ? styles.getPropertyValue(color2) || '#000' : color2;
     }
+    let p1 = this.p1;
+    let p2 = this.p2;
+    if (Number.isNaN(p1)) p1 = null;
+    if (Number.isNaN(Path2D)) p2 = null;
 
     this.__styleEle.innerHTML =
-      `@property ${this.in}{syntax:'<color>';inherits:false;initial-value:#000;}` +
-      `:scope{${this.var}:${CssColorMixElement.css_color_mix(this.in, color1, color2, this.p1, this.p2)}}`;
+      `@property ${this.in}{syntax:'<color>';inherits:false;initial-value:#000;}` + `:scope{${this.var}:${CssColorMixElement.css_color_mix(this.in, color1, color2, p1, p2)}}`;
     super.updated(_changedProperties);
   }
 }

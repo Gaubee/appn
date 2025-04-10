@@ -339,20 +339,20 @@
         root.style.setProperty('--color-two', colorTwo.style.getPropertyValue('background-color'));
         root.style.setProperty('--percentage-two', percentageTwo.value + '%');
 
-        const nativeColorMixResult = CssColorMixElement.css_color_mix_native(
-          colorSpace.value,
-          colorOne.style.getPropertyValue('background-color'),
-          colorTwo.style.getPropertyValue('background-color'),
-          percentageOne.value / 100 || undefined,
-          percentageTwo.value / 100 || undefined
-        );
-        const shimColorMixResult = CssColorMixElement.css_color_mix_shim(
-          colorSpace.value,
-          colorOne.style.getPropertyValue('background-color'),
-          colorTwo.style.getPropertyValue('background-color'),
-          percentageOne.value / 100 || undefined,
-          percentageTwo.value / 100 || undefined
-        );
+        const c1 = colorOne.style.getPropertyValue('background-color');
+        const c2 = colorTwo.style.getPropertyValue('background-color');
+        let p1 = percentageOne.value / 100;
+        let p2 = percentageTwo.value / 100;
+        if (Number.isNaN(p1)) {
+          p1 = undefined;
+        }
+
+        if (Number.isNaN(p2)) {
+          p2 = undefined;
+        }
+
+        const nativeColorMixResult = CssColorMixElement.css_color_mix_native(colorSpace.value, c1, c2, p1, p2);
+        const shimColorMixResult = CssColorMixElement.css_color_mix_shim(colorSpace.value, c1, c2, p1, p2);
         mixedColorNative.style.setProperty('background-color', nativeColorMixResult);
         mixedColorShim.style.setProperty('background-color', shimColorMixResult);
 
