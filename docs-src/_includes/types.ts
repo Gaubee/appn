@@ -20,7 +20,7 @@ export interface EleventyData {
 }
 
 export interface EleventyExampleData extends EleventyData {
-  tags: 'example';
+  tags: 'example' | ['example'];
   name: string;
   showNav?: boolean;
 }
