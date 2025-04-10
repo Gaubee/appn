@@ -8,7 +8,8 @@ import {func_remember, obj_props} from '@gaubee/util';
 import {provide} from '@lit/context';
 import {LitElement, html, unsafeCSS} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
-import {flowColorScheme} from '../../utils/match-media';
+import {colorSchemeStateify} from '../../utils/match-media-signal/color-scheme-stateify';
+import {effect_state} from '../../utils/signals';
 import {appnThemeContext, findAppnTheme, getAllAppnThemes, registerAppnTheme, type AppnTheme} from './appn-theme-context';
 import {appnThemeStyles} from './appn-theme-provider.css';
 import {iosAccessibleDarkTheme, iosAccessibleLightTheme, iosDarkTheme, iosLightTheme} from './ios-theme';
@@ -54,9 +55,10 @@ export class AppnThemeProviderElement extends LitElement {
    */
   @property({type: String, reflect: true, attribute: 'color-scheme'})
   accessor colorScheme: 'dark' | 'light' | 'auto' = 'auto';
-  private __colorSchemeFlow = flowColorScheme(this);
+  @effect_state()
+  private accessor __colorSchemeState = colorSchemeStateify();
   private get __colorSchemeResult() {
-    return this.colorScheme === 'auto' ? this.__colorSchemeFlow.get() : this.colorScheme;
+    return this.colorScheme === 'auto' ? this.__colorSchemeState.get() : this.colorScheme;
   }
 
   get isDark(): boolean {

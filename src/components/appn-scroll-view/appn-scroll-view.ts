@@ -7,9 +7,10 @@ import {css, CSSResult, html, LitElement, unsafeCSS} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
-import {flowScrollbarOverlay} from '../../utils/match-media';
+import {scrollbarOverlayStateify} from '../../utils/match-media-signal/scrollbar-overlay-stateify';
 import {ResizeController} from '../../utils/resize-controller';
 import {ScrollController} from '../../utils/scroll-controller';
+import {effect_state} from '../../utils/signals';
 import {appnScrollViewStyle} from './appn-scroll-view.css';
 
 /**
@@ -163,9 +164,10 @@ export class AppnScrollViewElement extends LitElement {
     // 目前 Safari 不支持 scrollbar-color
     CSS.supports('scrollbar-color: currentColor transparent');
 
-  private __scrollbarOverlayFlow = flowScrollbarOverlay(this);
+  @effect_state()
+  private accessor __scrollbarOverlayState = scrollbarOverlayStateify();
   get canOverlayScrollbar(): boolean {
-    return this.__scrollbarOverlayFlow.get();
+    return this.__scrollbarOverlayState.get();
   }
 
   protected override render() {
