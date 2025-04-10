@@ -5,9 +5,10 @@ import {customElement, property} from 'lit/decorators.js';
 import {directive, Directive} from 'lit/directive.js';
 import {when} from 'lit/directives/when.js';
 import {match} from 'ts-pattern';
+import {styleToCss} from '../../utils/css-helper';
 import {safeProperty} from '../../utils/safe-property';
-import { enumToSafeConverter } from '../../utils/safe-property/enum-to-safe-converter';
-import {appnIconDefine, appnIconGet, appnIconSafeGet, appnIconWhenDefine, styleToCss, type AppnIcon} from './appn-icon-register';
+import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
+import {appnIconDefine, appnIconGet, appnIconSafeGet, appnIconWhenDefine, type AppnIcon} from './appn-icon-register';
 import {appnIconStyle} from './appn-icon.css';
 import './internal/buildin-ios-icon';
 

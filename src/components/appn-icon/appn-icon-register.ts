@@ -1,4 +1,3 @@
-import {obj_props} from '@gaubee/util';
 import type {Properties, SvgProperties} from 'csstype';
 
 export interface AppnIcon {
@@ -120,12 +119,4 @@ export const appnIconSafeGet = async (name: string): Promise<AppnIcon> => {
     });
   }
   return icon;
-};
-export const styleToCss = (styleProperties: Properties) => {
-  let css = '';
-  for (const key of obj_props(styleProperties)) {
-    const css_property = key.replace(/[A-Z]/g, (match) => '-' + match.toLowerCase());
-    css += `${css_property}:${styleProperties[key]};`;
-  }
-  return css;
 };
