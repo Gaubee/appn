@@ -11,6 +11,8 @@ export * from './components/appn-page/appn-page';
 export * from './components/appn-scroll-view/appn-scroll-view';
 export * from './components/appn-top-bar/appn-top-bar';
 export * from './components/appn-view/appn-view';
+export * from './components/css-color-mix/css-color-mix';
+export * from './components/css-starting-style/css-starting-style';
 
 export * from './ponyfill/scrollend';
 
