@@ -11,7 +11,6 @@ import path from 'node:path';
 import {defineConfig} from 'rollup';
 // import minifyHTML from 'rollup-plugin-minify-html-literals';
 // console.log("QAQ minifyHTML",minifyHTML)
-
 import summary from 'rollup-plugin-summary';
 import 'tsx';
 
@@ -57,6 +56,12 @@ export default defineConfig({
     //   },
     // }),
     // minifyHTML.default(),
+    {
+      name: 'empty-output-dir',
+      buildStart(options) {
+        fs.rmSync(path.resolve(import.meta.dirname, './bundle'), {recursive: true, force: true});
+      },
+    },
     summary(),
     {
       name: 'generate-react-types',

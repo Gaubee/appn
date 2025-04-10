@@ -53,9 +53,11 @@ export class CssColorMixElement extends LitElement {
     let p2 = this.p2;
     if (Number.isNaN(p1)) p1 = null;
     if (Number.isNaN(Path2D)) p2 = null;
-
     this.__styleEle.innerHTML =
-      `@property ${this.in}{syntax:'<color>';inherits:false;initial-value:#000;}` + `:scope{${this.var}:${CssColorMixElement.css_color_mix(this.in, color1, color2, p1, p2)}}`;
+      // 自定义属性，不使用CSS.registry，它是永久注册。而使用css声明式是可以移除和重用的
+      `@property ${this.in}{syntax:'<color>';inherits:false;initial-value:#000;}` +
+      // 将计算结果混合配置到作用域中
+      `:scope{${this.var}:${CssColorMixElement.css_color_mix(this.in, color1, color2, p1, p2)}}`;
     super.updated(_changedProperties);
   }
 }
