@@ -50,23 +50,23 @@ export class AppnTopBarElement extends LitElement {
   @property({type: Number, reflect: true, attribute: true})
   accessor lines = 1;
   @consume({context: appnNavigationContext})
-  private accessor __nav: AppnNavigation | null = null;
+  accessor #nav: AppnNavigation | null = null;
 
   @consume({context: appnNavigationHistoryEntryContext, subscribe: true})
-  private accessor __navigationEntry: NavigationHistoryEntry | null = null;
+  accessor #navigationEntry: NavigationHistoryEntry | null = null;
 
   private __preNavsTask = new Task(this, {
     task: ([nav, currentNavEntryId]) => {
       return nav_before_history_entries(nav, currentNavEntryId);
     },
-    args: () => [this.__nav, this.__navigationEntry?.id],
+    args: () => [this.#nav, this.#navigationEntry?.id],
   });
 
   @query('#nav-history')
-  private accessor __navHistoryEle!: HTMLDivElement | null;
+  accessor #navHistoryEle!: HTMLDivElement | null;
 
   override render() {
-    set_navigation_entry_page_title(this.__navigationEntry, this.pageTitle);
+    set_navigation_entry_page_title(this.#navigationEntry, this.pageTitle);
 
     return html`
       <style>
@@ -89,7 +89,7 @@ export class AppnTopBarElement extends LitElement {
                   type="text-button"
                   @contextmenu=${(e: Event) => {
                     e.preventDefault();
-                    this.__navHistoryEle?.showPopover();
+                    this.#navHistoryEle?.showPopover();
                   }}
                 >
                   <appn-icon name="chevron.backward" widget="bold"></appn-icon>
@@ -102,7 +102,7 @@ export class AppnTopBarElement extends LitElement {
                       ${preNavEntries.reverse().map(
                         (entry) => html`
                           <li>
-                            <appn-link mode="back" to-key="${entry.key}" type="text-button" actionType="pointerup" @navigate=${() => this.__navHistoryEle?.hidePopover()}>
+                            <appn-link mode="back" to-key="${entry.key}" type="text-button" actionType="pointerup" @navigate=${() => this.#navHistoryEle?.hidePopover()}>
                               ${get_navigation_entry_page_title(entry)}
                             </appn-link>
                           </li>

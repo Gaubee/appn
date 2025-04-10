@@ -3,10 +3,11 @@
  * Copyright 2025 Gaubee
  * SPDX-License-Identifier: MIT
  */
-import {css, CSSResult, html, LitElement, unsafeCSS} from 'lit';
+import {css, CSSResult, html, LitElement} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
+import {cssLiteral} from '../../utils/lit-helper';
 import {scrollbarOverlayStateify} from '../../utils/match-media-signal/scrollbar-overlay-stateify';
 import {ResizeController} from '../../utils/resize-controller';
 import {ScrollController} from '../../utils/scroll-controller';
@@ -67,26 +68,26 @@ export class AppnScrollViewElement extends LitElement {
   override accessor onscroll!: PropertyEventListener;
 
   @state()
-  private accessor __contentWidth = 0;
+  accessor #contentWidth = 0;
 
   @state()
-  private accessor __contentHeight = 0;
+  accessor #contentHeight = 0;
 
   private __contentSize = new ResizeController(this, (entry) => {
     const borderBox = entry.borderBoxSize[0];
-    this.__contentWidth = borderBox.inlineSize;
-    this.__contentHeight = borderBox.blockSize;
+    this.#contentWidth = borderBox.inlineSize;
+    this.#contentHeight = borderBox.blockSize;
   });
 
   @state()
-  private accessor __hostWidth = 0;
+  accessor #hostWidth = 0;
 
   @state()
-  private accessor __hostHeight = 0;
+  accessor #hostHeight = 0;
   private __hostSize = new ResizeController(this, (entry) => {
     const borderBox = entry.borderBoxSize[0];
-    this.__hostWidth = borderBox.inlineSize;
-    this.__hostHeight = borderBox.blockSize;
+    this.#hostWidth = borderBox.inlineSize;
+    this.#hostHeight = borderBox.blockSize;
   });
 
   private __currentScrollElement?: Element;
@@ -165,9 +166,9 @@ export class AppnScrollViewElement extends LitElement {
     CSS.supports('scrollbar-color: currentColor transparent');
 
   @effect_state()
-  private accessor __scrollbarOverlayState = scrollbarOverlayStateify();
+  accessor #scrollbarOverlayState = scrollbarOverlayStateify();
   get canOverlayScrollbar(): boolean {
-    return this.__scrollbarOverlayState.get();
+    return this.#scrollbarOverlayState.get();
   }
 
   protected override render() {
@@ -186,8 +187,8 @@ export class AppnScrollViewElement extends LitElement {
           --scrollbar-size: ${scrollbarSize}px;
         }
         .mock-content {
-          width: calc(${this.__contentWidth}px - var(--scrollbar-track-size));
-          height: calc(${this.__contentHeight}px - var(--scrollbar-track-size));
+          width: calc(${this.#contentWidth}px - var(--scrollbar-track-size));
+          height: calc(${this.#contentHeight}px - var(--scrollbar-track-size));
         }
       `);
       /**
@@ -195,13 +196,14 @@ export class AppnScrollViewElement extends LitElement {
        * 然后渲染自定义的 scrollbar
        */
       if (AppnScrollViewElement.__supportsCssScrollbar) {
+        const scrollbarTrackSize = scrollbarSize + 4;
         injectCss.push(css`
           :host {
-            --scrollbar-track-size: ${scrollbarSize + 4}px;
             scrollbar-width: none;
+            --scrollbar-track-size: ${scrollbarTrackSize}px;
           }
           .scrollbar {
-            scrollbar-width: ${unsafeCSS(this.scrollbarSize)};
+            scrollbar-width: ${cssLiteral(this.scrollbarSize)};
             scrollbar-color: var(--scrollbar-color) transparent;
             transition-property: scrollbar-color;
             transition-duration: 250ms;
@@ -249,8 +251,8 @@ export class AppnScrollViewElement extends LitElement {
 
         /* 盒子的宽高，用于子元素计算滚动内容 */
         :host {
-          --view-width: ${this.__hostWidth}px;
-          --view-height: ${this.__hostHeight}px;
+          --view-width: ${this.#hostWidth}px;
+          --view-height: ${this.#hostHeight}px;
         }
       </style>
       <div class="scrollbar-sticky">

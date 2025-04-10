@@ -6,7 +6,7 @@ import {ifDefined} from 'lit/directives/if-defined.js';
 import {match} from 'ts-pattern';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {safeProperty} from '../../utils/safe-property';
-import { enumToSafeConverter } from '../../utils/safe-property/enum-to-safe-converter';
+import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from '../appn-navigation-provider/appn-navigation-context';
 import {appnLinkStyle} from './appn-link.css';
 
@@ -33,9 +33,9 @@ export class AppnLinkElement extends LitElement {
   accessor type: AppnLinkType = 'button';
 
   @consume({context: appnNavigationContext})
-  private accessor __nav: AppnNavigation | null = null;
+  accessor #nav: AppnNavigation | null = null;
   @consume({context: appnNavigationHistoryEntryContext, subscribe: true})
-  private accessor __navigationEntry: NavigationHistoryEntry | null = null;
+  accessor #navigationEntry: NavigationHistoryEntry | null = null;
 
   @property({type: String, attribute: true, reflect: true})
   accessor to: string | null = null;
@@ -55,7 +55,9 @@ export class AppnLinkElement extends LitElement {
   private __onClick = async (event: Event) => {
     event.preventDefault();
 
-    const {to, toKey, __nav: nav, state, __navigationEntry: currentEntry} = this;
+    const nav = this.#nav;
+    const currentEntry = this.#navigationEntry;
+    const {to, toKey, state} = this;
     if (nav == null) {
       return;
     }
@@ -107,7 +109,7 @@ export class AppnLinkElement extends LitElement {
       })
       .with('back-or-push', async () => {
         if (to_url || toKey) {
-          const history = await nav.findLastEntry(toKey ? {key: toKey} : {url: to_url}, this.__navigationEntry);
+          const history = await nav.findLastEntry(toKey ? {key: toKey} : {url: to_url}, this.#navigationEntry);
           if (history) {
             const event = new AppnLinkNavigateEvent({type: 'traverse', key: history.key, info});
             this.dispatchEvent(event);
@@ -121,7 +123,7 @@ export class AppnLinkElement extends LitElement {
       })
       .with('forward-or-push', async () => {
         if (to_url || toKey) {
-          const history = await nav.findFirstEntry(toKey ? {key: toKey} : {url: to_url}, this.__navigationEntry);
+          const history = await nav.findFirstEntry(toKey ? {key: toKey} : {url: to_url}, this.#navigationEntry);
           if (history) {
             const event = new AppnLinkNavigateEvent({type: 'traverse', key: history.key, info});
             this.dispatchEvent(event);

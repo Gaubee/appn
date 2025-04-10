@@ -6,7 +6,7 @@
 
 import {func_remember, obj_props} from '@gaubee/util';
 import {provide} from '@lit/context';
-import {LitElement, html, unsafeCSS} from 'lit';
+import {LitElement, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {colorSchemeStateify} from '../../utils/match-media-signal/color-scheme-stateify';
 import {effect_state} from '../../utils/signals';
@@ -56,9 +56,9 @@ export class AppnThemeProviderElement extends LitElement {
   @property({type: String, reflect: true, attribute: 'color-scheme'})
   accessor colorScheme: 'dark' | 'light' | 'auto' = 'auto';
   @effect_state()
-  private accessor __colorSchemeState = colorSchemeStateify();
+  accessor #colorSchemeState = colorSchemeStateify();
   private get __colorSchemeResult() {
-    return this.colorScheme === 'auto' ? this.__colorSchemeState.get() : this.colorScheme;
+    return this.colorScheme === 'auto' ? this.#colorSchemeState.get() : this.colorScheme;
   }
 
   get isDark(): boolean {
@@ -88,16 +88,25 @@ export class AppnThemeProviderElement extends LitElement {
     (colorScheme) => this.theme + colorScheme + this.accessible
   );
   @provide({context: appnThemeContext})
-  private accessor __themeContext: AppnTheme = this.__findThemeContext(this.__colorSchemeResult) ?? unstyledLightTheme;
+  accessor #themeContext: AppnTheme = this.__findThemeContext(this.__colorSchemeResult) ?? unstyledLightTheme;
   get themeContext() {
-    return this.__themeContext;
+    return this.#themeContext;
   }
+
+  private __transitionStyleSheet = func_remember(
+    (cssText: string) => {
+      const css = new CSSStyleSheet();
+      css.replaceSync(cssText);
+      return css;
+    },
+    (cssText) => cssText
+  );
 
   override render() {
     const colorScheme = this.isDark ? 'dark' : 'light';
     this.dataset.colorScheme = colorScheme;
 
-    const themeContext = (this.__themeContext = this.__findThemeContext(colorScheme) ?? this.__themeContext);
+    const themeContext = (this.#themeContext = this.__findThemeContext(colorScheme) ?? this.#themeContext);
     this.dataset.theme = themeContext.name;
 
     const {font, colors, safeAreaInset, transition} = themeContext;
@@ -108,11 +117,12 @@ export class AppnThemeProviderElement extends LitElement {
 
       const enter = 'enter' in tran ? tran.enter : tran;
       const leave = 'leave' in tran ? tran.leave : tran;
-      transitionCss += `--${key}-enter-ease: ${enter.ease};--${key}-enter-duration: ${enter.duration};--${key}-leave-ease: ${leave};--${key}-leave-duration: ${leave.duration};`;
+      transitionCss += `--${key}-enter-ease:${enter.ease};--${key}-enter-duration:${enter.duration};--${key}-leave-ease:${leave};--${key}-leave-duration:${leave.duration};`;
     }
     if (transitionCss) {
       transitionCss = `:host{${transitionCss}}`;
     }
+    const transitionStyleSheet = this.__transitionStyleSheet(transitionCss);
     return html`<style>
         :host {
           --font-style: ${font.style};
@@ -162,7 +172,7 @@ export class AppnThemeProviderElement extends LitElement {
           --safe-area-inset-left: ${safeAreaInset.left};
           --safe-area-inset-right: ${safeAreaInset.right};
         }
-        ${unsafeCSS(transitionCss)}
+        ${transitionStyleSheet}
       </style>
       <slot></slot>`;
   }

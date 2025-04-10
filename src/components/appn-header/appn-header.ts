@@ -22,7 +22,7 @@ import {translucentStyle} from './translucent.css';
 @customElement('appn-header')
 export class AppnHeaderElement extends LitElement {
   @consume({context: appnThemeContext, subscribe: true})
-  private accessor __theme: AppnTheme | undefined;
+  accessor #theme: AppnTheme | undefined;
 
   @autoBooleanProperty()
   accessor translucent: AutoBoolean = 'auto';
@@ -39,7 +39,7 @@ export class AppnHeaderElement extends LitElement {
   ];
 
   override render() {
-    const translucent = (this.translucent == 'auto' && this.__theme?.class.includes('ios')) ?? false;
+    const translucent = (this.translucent == 'auto' && this.#theme?.class.includes('ios')) ?? false;
     this.dataset.translucent = translucent ? 'yes' : 'no';
     return html`<slot></slot>`;
   }

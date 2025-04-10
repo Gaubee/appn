@@ -22,7 +22,7 @@ import {appnThemeContext, type AppnTheme} from '../appn-theme-provider/appn-them
 @customElement('appn-footer')
 export class AppnFooterElement extends LitElement {
   @consume({context: appnThemeContext, subscribe: true})
-  private accessor __theme: AppnTheme | undefined;
+  accessor #theme: AppnTheme | undefined;
 
   @autoBooleanProperty()
   accessor translucent: AutoBoolean = 'auto';
@@ -38,7 +38,7 @@ export class AppnFooterElement extends LitElement {
   ];
 
   override render() {
-    const translucent = (this.translucent == 'auto' && this.__theme?.class.includes('ios')) ?? false;
+    const translucent = (this.translucent == 'auto' && this.#theme?.class.includes('ios')) ?? false;
     this.dataset.translucent = translucent ? 'yes' : 'no';
     return html`<slot></slot>`;
   }

@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: MIT
  */
 
+import {consume} from '@lit/context';
 import {LitElement, html, type PropertyValues} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {ResizeController} from '../../utils/resize-controller';
-import '../appn-scroll-view/appn-scroll-view';
-import {appnPageStyles} from './appn-page.css';
-import {consume} from '@lit/context';
-import {appnThemeContext, type AppnTheme} from '../appn-theme-provider/appn-theme-context';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
+import {ResizeController} from '../../utils/resize-controller';
 import {appnNavigationHistoryEntryContext} from '../appn-navigation-provider/appn-navigation-context';
+import '../appn-scroll-view/appn-scroll-view';
+import {appnThemeContext, type AppnTheme} from '../appn-theme-provider/appn-theme-context';
+import {appnPageStyles} from './appn-page.css';
 
 export type AppnPageMode = AppnPageElement['mode'];
 
@@ -28,20 +28,20 @@ export class AppnPageElement extends LitElement {
   static override styles = appnPageStyles;
 
   @state()
-  private accessor __headerHeight = 0;
+  accessor #headerHeight = 0;
   private __headerSize = new ResizeController(
     this,
     (entry) => {
-      this.__headerHeight = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+      this.#headerHeight = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
     },
     {box: 'border-box'}
   );
   @state()
-  private accessor __footerHeight = 0;
+  accessor #footerHeight = 0;
   private __footerSize = new ResizeController(
     this,
     (entry) => {
-      this.__footerHeight = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+      this.#footerHeight = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
     },
     {box: 'border-box'}
   );
@@ -90,8 +90,8 @@ export class AppnPageElement extends LitElement {
     return html`
       <style>
         :host {
-          --page-header-height: ${this.__headerHeight}px;
-          --page-footer-height: ${this.__footerHeight}px;
+          --page-header-height: ${this.#headerHeight}px;
+          --page-footer-height: ${this.#footerHeight}px;
         }
       </style>
       <div class="layer" part="layer">
