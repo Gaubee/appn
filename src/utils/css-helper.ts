@@ -35,5 +35,5 @@ export const getDocument = (element: Element | Document | null): Document => {
     : (element as Document);
 };
 
-const ass_wn = new WeakMap<DocumentOrShadowRoot, CSSStyleSheet[]>();
+const ass_wn = new WeakMap<DocumentOrShadowRoot, ReturnType<typeof createAdoptedStyleSheets>>();
 export const getAdoptedStyleSheets = (root: DocumentOrShadowRoot) => map_get_or_put(ass_wn, root, createAdoptedStyleSheets);
