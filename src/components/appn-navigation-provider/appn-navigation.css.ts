@@ -1,5 +1,17 @@
 import {iter_map_not_null} from '@gaubee/util';
 import {css} from 'lit';
+CSS.registerProperty({
+  name: '--translate-x',
+  syntax: '<length-percentage>',
+  inherits: false,
+  initialValue: `0px`,
+});
+CSS.registerProperty({
+  name: '--translate-y',
+  syntax: '<length-percentage>',
+  inherits: false,
+  initialValue: `0px`,
+});
 
 export const appnNavigationStyle = css`
   :host {
@@ -55,40 +67,121 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null(
       :host {
         /** 充满grid容器 */
         place-self: stretch;
-
         display: grid;
+
         transition-property: all;
         transition-behavior: allow-discrete;
-      }
-      :host([data-from-tense='present']) {
-        transition-duration: var(--page-leave-duration);
-        transition-timing-function: var(--page-leave-ease);
-      }
-      :host([data-tense='present']) {
-        transition-duration: var(--page-enter-duration);
-        transition-timing-function: var(--page-enter-ease);
       }
     `,
     CSS.supports('view-transition-name: content')
       ? css`
           :host {
-            view-transition-name: attr(data-key);
+            animation-fill-mode: forwards;
           }
+          :host([data-tense='present'])::view-transition-group(root) {
+            animation-duration: var(--page-enter-duration);
+            animation-timing-function: var(--page-enter-ease);
+          }
+          :host([data-from-tense='present'])::view-transition-group(root) {
+            animation: var(--page-leave-duration);
+            animation-timing-function: var(--page-leave-ease);
+          }
+          @keyframes page-bootstrap {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+          @keyframes page-push-enter {
+            from {
+              --translate-x: 100%;
+            }
+            to {
+              --translate-x: 0%;
+            }
+          }
+          @keyframes page-push-leave {
+            from {
+              --translate-x: 0%;
+            }
+            to {
+              --translate-x: -38%;
+            }
+          }
+
+          @keyframes page-back-enter {
+            from {
+              --translate-x: -38%;
+            }
+            to {
+              --translate-x: 0%;
+            }
+          }
+          @keyframes page-back-leave {
+            from {
+              --translate-x: 0%;
+            }
+            to {
+              --translate-x: 100%;
+            }
+          }
+          @keyframes page-past {
+            from {
+              --translate-x: -38%;
+            }
+            to {
+              --translate-x: -38%;
+            }
+          }
+          @keyframes page-future {
+            from {
+              --translate-x: 100%;
+            }
+            to {
+              --translate-x: 100%;
+            }
+          }
+
           :host([data-tense='past']) {
             --translate-x: -38%;
             /* display: none; */
           }
-          :host([data-tense='present']) {
-            /* Example: Start transparent, fade in */
-            --translate-x: 0%;
+          :host([data-tense='present'][data-from-tense='past']) {
+            animation-name: page-back-enter;
           }
-          :host([data-tense='future']) {
-            /* Optionally hide future entries visually if needed beyond display:none */
-            --translate-x: 100%;
-            /* display: none; */
+          :host([data-tense='present'][data-from-tense='future']) {
+            animation-name: page-push-enter;
+          }
+
+          :host([data-from-tense='present'][data-tense='past']) {
+            animation-name: page-push-leave;
+          }
+          :host([data-from-tense='present'][data-tense='future']) {
+            animation-name: page-back-leave;
+          }
+
+          :host([data-tense='past'][data-from-tense='past']) {
+            animation-name: page-past;
+          }
+          :host([data-tense='future'][data-from-tense='future']) {
+            animation-name: page-future;
+          }
+          :host([data-tense='present'][data-from-tense='present']) {
+            animation-name: page-bootstrap;
           }
         `
       : css`
+          :host([data-from-tense='present']) {
+            transition-duration: var(--page-leave-duration);
+            transition-timing-function: var(--page-leave-ease);
+          }
+          :host([data-tense='present']) {
+            transition-duration: var(--page-enter-duration);
+            transition-timing-function: var(--page-enter-ease);
+          }
+
           :host([data-tense='past']) {
             --translate-x: -38%;
             display: none;
