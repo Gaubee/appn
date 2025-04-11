@@ -57,16 +57,16 @@ export default defineConfig((env) => {
       //  * This minification setup serves the static site generation.
       //  * For bundling and minification, check the README.md file.
       //  */
-      terser({
-        // ecma: 2020,
-        module: true,
-        compress: false,
-        mangle: {
-          properties: {
-            regex: /^__/,
-          },
-        },
-      }),
+      // terser({
+      //   // ecma: 2020,
+      //   module: true,
+      //   compress: false,
+      //   mangle: {
+      //     properties: {
+      //       regex: /^__/,
+      //     },
+      //   },
+      // }),
       minifyTemplateLiterals(),
       summary(),
       {

@@ -149,7 +149,7 @@
 
   <body>
     <div id="color-mixer">
-      <h3>Color mixer</h3>
+      <h3>Color mixer Native vs Shim</h3>
       <p>Click on 'color-one' and 'color-two' to select colors.</p>
 
       <label>color-one</label>
@@ -351,8 +351,8 @@
           p2 = undefined;
         }
 
-        const nativeColorMixResult = CssColorMixElement.css_color_mix_native(colorSpace.value, c1, c2, p1, p2);
-        const shimColorMixResult = CssColorMixElement.css_color_mix_shim(colorSpace.value, c1, c2, p1, p2);
+        const nativeColorMixResult = CssColorMixElement.calcColorMixNative(colorSpace.value, c1, c2, p1, p2);
+        const shimColorMixResult = CssColorMixElement.calcColorMixShim(colorSpace.value, c1, c2, p1, p2);
         mixedColorNative.style.setProperty('background-color', nativeColorMixResult);
         mixedColorShim.style.setProperty('background-color', shimColorMixResult);
 

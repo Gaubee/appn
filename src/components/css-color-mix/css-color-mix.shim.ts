@@ -13,7 +13,7 @@ export type CssColorMix = {
    */
   (colorSpace: ColorSpace, c1: string, c2: string, p1?: number | null, p2?: number | null): string;
 };
-export const css_color_mix_native: CssColorMix = (colorSpace, c1, c2, p1, p2) => {
+export const calc_color_mix_native: CssColorMix = (colorSpace, c1, c2, p1, p2) => {
   return `color-mix(in ${colorSpace}, ${c1} ${p1 != null ? p1 * 100 + '%' : ''}, ${c2} ${p2 != null ? p2 * 100 + '%' : ''})`;
 };
 
@@ -85,7 +85,7 @@ import {
   useMode,
 } from 'culori/fn';
 import type {ColorSpace} from './css-color-mix';
-export const css_color_mix_shim: CssColorMix = func_lazy(() => {
+export const calc_color_mix_shim: CssColorMix = func_lazy(() => {
   useMode(modeRgb);
   useMode(modeLrgb);
   useMode(modeHsl);
@@ -155,4 +155,4 @@ export const css_color_mix_shim: CssColorMix = func_lazy(() => {
   };
 });
 
-export const css_color_mix = CSS.supports('color:color-mix(in srgb,#000,#000)') ? css_color_mix_native : css_color_mix_shim;
+export const calc_color_mix = CSS.supports('color:color-mix(in srgb,#000,#000)') ? calc_color_mix_native : calc_color_mix_shim;

@@ -1,4 +1,5 @@
 import {map_get_or_put, obj_props} from '@gaubee/util';
+import type {AdoptedStyleSheets} from '@gaubee/web';
 import {createAdoptedStyleSheets} from '@gaubee/web';
 import type {Properties} from 'csstype';
 /**
@@ -25,7 +26,7 @@ export const styleToCss = (styleProperties: Properties) => {
 export type CssStyleProperty = {
   [key in keyof CSSStyleDeclaration]: CSSStyleDeclaration[key] extends string ? key : never;
 }[keyof CSSStyleDeclaration];
-export const getDocument = (element: Element | Document | null): Document => {
+export const getDocument = (element: Node | null): Document => {
   if (!element) {
     return document; // Default fallback
   }
@@ -34,6 +35,12 @@ export const getDocument = (element: Element | Document | null): Document => {
       (element.ownerDocument ?? document)
     : (element as Document);
 };
+const ass_wn = new WeakMap<DocumentOrShadowRoot, AdoptedStyleSheets>();
+export const getAdoptedStyleSheets = (ele: Element | DocumentOrShadowRoot) => {
+  if (!('adoptedStyleSheets' in ele)) {
+    ele = getDocument(ele);
+  }
+  return map_get_or_put(ass_wn, ele, createAdoptedStyleSheets);
+};
 
-const ass_wn = new WeakMap<DocumentOrShadowRoot, ReturnType<typeof createAdoptedStyleSheets>>();
-export const getAdoptedStyleSheets = (root: DocumentOrShadowRoot) => map_get_or_put(ass_wn, root, createAdoptedStyleSheets);
+export const isSupportCssLayer = /*@__PURE__*/ typeof CSSLayerBlockRule === 'function' && typeof CSSLayerStatementRule === 'function';

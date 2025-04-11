@@ -33,7 +33,7 @@ export default class Page {
 
       .starting-style {
         background-color: yellow;
-        transition: background-color 3s;
+        transition: background-color 3s allow-discrete;
       }
 
       .starting-style.showing {
@@ -50,10 +50,7 @@ export default class Page {
     const script = () => {
       btn.addEventListener('click', () => {
         btn.disabled = true;
-        document.body.append(tmp.content.cloneNode(true));
-        const divElem = document.createElement('div');
-        divElem.classList.add('showing');
-        canvas.appendChild(divElem);
+        canvas.append(tmp.content.cloneNode(true));
 
         setTimeout(() => {
           canvas.querySelectorAll('.showing').forEach((elem) => {
@@ -70,11 +67,10 @@ export default class Page {
     return (
       <>
         <style dangerouslySetInnerHTML={{__html: style}}></style>
+        <css-starting-style mode="shim" selector=".shim.showing" cssText="background-color: red;"></css-starting-style>
         <template id="tmp">
           <div className="native starting-style showing"></div>
-          <div className="shim starting-style showing">
-            <css-starting-style selector=".shim.showing" cssText="background-color: red!important;"></css-starting-style>
-          </div>
+          <div className="shim starting-style showing"></div>
         </template>
         <button id="btn">
           Display <code>{'<div>'}</code>'s
