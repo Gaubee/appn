@@ -36,7 +36,7 @@ export const getDocument = (element: Node | null): Document => {
     : (element as Document);
 };
 const ass_wn = new WeakMap<DocumentOrShadowRoot, AdoptedStyleSheets>();
-export const getAdoptedStyleSheets = (ele: Element | DocumentOrShadowRoot) => {
+export const getAdoptedStyleSheets = (ele: Element | DocumentOrShadowRoot): AdoptedStyleSheets => {
   if (!('adoptedStyleSheets' in ele)) {
     ele = getDocument(ele);
   }

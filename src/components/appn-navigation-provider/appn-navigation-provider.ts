@@ -172,14 +172,14 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
   private __effectRoutes = async () => {
-    const applyRoutes = () => {
+    const effectRoutes = () => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = this.__nav.entries();
       const currentEntry = this.__nav.currentEntry;
       const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
-      for (const navEntry of allEntries) {
-        this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex});
-      }
+      allEntries.forEach((navEntry) => {
+        return this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex});
+      });
     };
 
     // /// 开始动画
@@ -198,9 +198,11 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     //     node.classList.add('before-start');
     //   }
     // }
-    document.startViewTransition(async () => {
-      applyRoutes();
-    });
+
+    effectRoutes();
+    // document.startViewTransition(async () => {
+    //   effectRoutes();
+    // });
   };
   private __effectRoute = (
     navEntry: NavigationHistoryEntry,
@@ -234,7 +236,6 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           : routerElement;
         if (templateElement) {
           const oldNavHistoryEntryNode = this.querySelector<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`);
-          let navHistoryEntryNode: AppnNavigationHistoryEntryElement;
 
           if (oldNavHistoryEntryNode) {
             oldNavHistoryEntryNode.navigationEntry = navEntry;
@@ -244,7 +245,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
               oldNavHistoryEntryNode.innerHTML = '';
               oldNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
             }
-            navHistoryEntryNode = oldNavHistoryEntryNode;
+            oldNavHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
           } else {
             const newNavHistoryEntryNode = new AppnNavigationHistoryEntryElement();
             newNavHistoryEntryNode.navigationEntry = navEntry;
@@ -253,10 +254,9 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
             newNavHistoryEntryNode.search = relative_parts.search;
             newNavHistoryEntryNode.hash = relative_parts.hash;
             newNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
-            navHistoryEntryNode = newNavHistoryEntryNode;
-            this.appendChild(navHistoryEntryNode);
+            this.appendChild(newNavHistoryEntryNode);
+            newNavHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
           }
-          navHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
         }
         break;
       }
@@ -302,7 +302,35 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
     this.style.setProperty('--index', (this.dataset.index = `${selfIndex}`));
     this.style.setProperty('--present-index', `${presentIndex}`);
 
-    const fromTense = this.dataset.tense ?? 'present';
+    let fromTense = this.dataset.tense as NavigationHistoryEntryTense;
+    /**
+     * 如果 present 在最后，那么：
+     *
+     * curr:  ...past | past    | present
+     * from:  ...past | present | future
+     * diff:    -2    | -1      | 0
+     *
+     * ---
+     *
+     * 如果 present 不在最后，那么：
+     *
+     * curr:        ...past | past    | present | future  | future...
+     * from-enter:  ...past | present | future  | future  | future...
+     * diff-enter:  -2      | -1      | 0       | +1      | +2
+     *
+     * from-back:   ...past | past   | past     | present | future...
+     * diff-back:   -2      | -1     | 0        | +1      | +2
+     *
+     */
+    if (fromTense == null) {
+      if (selfIndex > presentIndex) {
+        fromTense = 'future';
+      } else if (selfIndex < presentIndex) {// presentIndex - 1
+        fromTense = 'past';
+      } else {
+        fromTense = 'present';
+      }
+    }
     this.dataset.fromTense = fromTense;
 
     const tense: NavigationHistoryEntryTense =
@@ -313,8 +341,7 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
             .otherwise(() => (selfIndex < presentIndex ? 'past' : 'future'));
     this.dataset.tense = tense;
 
-    let vtn = this.navigationEntry?.key ?? null;
-    if (vtn) vtn = 'vtn-' + vtn;
+    const vtn = `vtn-${selfIndex}`;
     this.style.setProperty('view-transition-name', vtn);
     this.inert = tense !== 'present';
 

@@ -8,6 +8,7 @@ import {func_remember, obj_props} from '@gaubee/util';
 import {provide} from '@lit/context';
 import {LitElement, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
+import {getAdoptedStyleSheets} from '../../utils/css-helper';
 import {colorSchemeStateify} from '../../utils/match-media-signal/color-scheme-stateify';
 import {effect_state} from '../../utils/signals';
 import {appnThemeContext, findAppnTheme, getAllAppnThemes, registerAppnTheme, type AppnTheme} from './appn-theme-context';
@@ -123,6 +124,8 @@ export class AppnThemeProviderElement extends LitElement {
       transitionCss = `:host{${transitionCss}}`;
     }
     const transitionStyleSheet = this.__transitionStyleSheet(transitionCss);
+    const ass = getAdoptedStyleSheets(this.shadowRoot!);
+    ass.set('transition', transitionStyleSheet);
     return html`<style>
         :host {
           --font-style: ${font.style};

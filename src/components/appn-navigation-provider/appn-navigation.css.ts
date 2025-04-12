@@ -13,6 +13,20 @@ CSS.registerProperty({
   initialValue: `0px`,
 });
 
+CSS.registerProperty({
+  name: '--page-scale-x',
+  syntax: '<percentage>',
+  inherits: false,
+  initialValue: `100%`,
+});
+
+CSS.registerProperty({
+  name: '--page-scale-y',
+  syntax: '<percentage>',
+  inherits: false,
+  initialValue: `100%`,
+});
+
 export const appnNavigationStyle = css`
   :host {
     display: grid;
@@ -22,6 +36,7 @@ export const appnNavigationStyle = css`
     width: 100cqw;
     height: 100cqh;
     overflow: hidden;
+    background-color: var(--color-canvas);
   }
   ::slotted(*) {
     grid-area: stack;
@@ -58,6 +73,7 @@ export const appnNavigationStyle = css`
   ::slotted(*) {
     --translate-z: calc((var(--present-index, -1) - var(--index, 0)) * -36px);
     translate: var(--translate-x, 0) var(--translate-y, 0) var(--translate-z);
+    scale: var(--page-scale-x, 100%) var(--page-scale-y, 100%);
   }
 `;
 
@@ -78,20 +94,24 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null(
           :host {
             animation-fill-mode: forwards;
           }
-          :host([data-tense='present'])::view-transition-group(root) {
+          :host([data-tense='present']) {
             animation-duration: var(--page-enter-duration);
             animation-timing-function: var(--page-enter-ease);
           }
-          :host([data-from-tense='present'])::view-transition-group(root) {
-            animation: var(--page-leave-duration);
+          :host([data-from-tense='present']) {
+            animation-duration: var(--page-leave-duration);
             animation-timing-function: var(--page-leave-ease);
           }
           @keyframes page-bootstrap {
             from {
               opacity: 0;
+              --page-scale-x: 90%;
+              --page-scale-y: 90%;
             }
             to {
               opacity: 1;
+              --page-scale-x: 100%;
+              --page-scale-y: 100%;
             }
           }
           @keyframes page-push-enter {
@@ -127,22 +147,6 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null(
               --translate-x: 100%;
             }
           }
-          @keyframes page-past {
-            from {
-              --translate-x: -38%;
-            }
-            to {
-              --translate-x: -38%;
-            }
-          }
-          @keyframes page-future {
-            from {
-              --translate-x: 100%;
-            }
-            to {
-              --translate-x: 100%;
-            }
-          }
 
           :host([data-tense='past']) {
             --translate-x: -38%;
@@ -151,24 +155,27 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null(
           :host([data-tense='present'][data-from-tense='past']) {
             animation-name: page-back-enter;
           }
-          :host([data-tense='present'][data-from-tense='future']) {
+          :host([data-tense='present'][data-from-tense='future']),
+          :host([data-tense='present'][data-from-tense='present']) {
             animation-name: page-push-enter;
           }
 
           :host([data-from-tense='present'][data-tense='past']) {
             animation-name: page-push-leave;
+            /* animation-direction: reverse; */
           }
           :host([data-from-tense='present'][data-tense='future']) {
             animation-name: page-back-leave;
+            /* animation-direction: reverse; */
           }
 
           :host([data-tense='past'][data-from-tense='past']) {
-            animation-name: page-past;
+            display: none;
           }
           :host([data-tense='future'][data-from-tense='future']) {
-            animation-name: page-future;
+            display: none;
           }
-          :host([data-tense='present'][data-from-tense='present']) {
+          :host([data-tense='present'][data-index='0']) {
             animation-name: page-bootstrap;
           }
         `
