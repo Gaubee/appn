@@ -175,7 +175,7 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null(
           :host([data-tense='future'][data-from-tense='future']) {
             display: none;
           }
-          :host([data-tense='present'][data-index='0']) {
+          :host([data-tense='present'][data-from-tense='present']) {
             animation-name: page-bootstrap;
           }
         `

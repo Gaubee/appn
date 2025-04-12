@@ -2,7 +2,7 @@ import '@virtualstate/navigation/polyfill';
 import 'urlpattern-polyfill';
 
 import {ContextProvider, provide} from '@lit/context';
-import {html, LitElement} from 'lit';
+import {html, LitElement, type PropertyValues} from 'lit';
 import {customElement, property, queryAssignedElements} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {match, Pattern} from 'ts-pattern';
@@ -168,6 +168,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   @queryAssignedElements({slot: 'router', flatten: true})
   accessor routersElements!: HTMLTemplateElement[];
 
+
   /**
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
@@ -182,27 +183,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       });
     };
 
-    // /// 开始动画
-    // const beforeNavHistoryEntryNodes = new Set(this.querySelectorAll<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry`));
-    // const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
-    // const allEntries = this.__nav.entries();
-    // const currentEntry = this.__nav.currentEntry;
-    // const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
-    // for (const navEntry of allEntries) {
-    //   this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex});
-    // }
-    // const afterNavHistoryEntryNodes = new Set(this.querySelectorAll<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry`));
-    // const diffNodes = afterNavHistoryEntryNodes.difference(beforeNavHistoryEntryNodes);
-    // for (const node of diffNodes) {
-    //   if (afterNavHistoryEntryNodes.has(node)) {
-    //     node.classList.add('before-start');
-    //   }
-    // }
-
     effectRoutes();
-    // document.startViewTransition(async () => {
-    //   effectRoutes();
-    // });
   };
   private __effectRoute = (
     navEntry: NavigationHistoryEntry,
@@ -291,8 +272,17 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
   @property({type: Number, reflect: true, attribute: true})
   accessor presentEntryIndex = -1;
 
+  private _preEntryIndex = -1;
+
   @provide({context: appnNavigationHistoryEntryContext})
   accessor navigationEntry: NavigationHistoryEntry | null = null;
+
+  protected override willUpdate(_changedProperties: PropertyValues): void {
+    if (_changedProperties.has('presentEntryIndex')) {
+      this._preEntryIndex = _changedProperties.get('presentEntryIndex');
+    }
+    super.willUpdate(_changedProperties);
+  }
   override render() {
     this.dataset.key = this.navigationEntry?.key;
     /** 自身 index */
@@ -306,26 +296,29 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
     /**
      * 如果 present 在最后，那么：
      *
-     * curr:  ...past | past    | present
-     * from:  ...past | present | future
+     * curr:  ...past | past    | PRESENT
+     * from:  ...past | PRESENT | future
      * diff:    -2    | -1      | 0
      *
      * ---
      *
      * 如果 present 不在最后，那么：
      *
-     * curr:        ...past | past    | present | future  | future...
-     * from-enter:  ...past | present | future  | future  | future...
+     * curr:        ...past | past    | PRESENT | future  | future...
+     * from-enter:  ...past | PRESENT | future  | future  | future...
      * diff-enter:  -2      | -1      | 0       | +1      | +2
      *
-     * from-back:   ...past | past   | past     | present | future...
+     * from-back:   ...past | past   | past     | PRESENT | future...
      * diff-back:   -2      | -1     | 0        | +1      | +2
      *
      */
     if (fromTense == null) {
-      if (selfIndex > presentIndex) {
+      const preEntryIndex = this._preEntryIndex;
+      const pos = preEntryIndex === -1 ? 0 : presentIndex - preEntryIndex;
+      if (selfIndex > presentIndex - pos) {
         fromTense = 'future';
-      } else if (selfIndex < presentIndex) {// presentIndex - 1
+      } else if (selfIndex < presentIndex - pos) {
+        // presentIndex - 1
         fromTense = 'past';
       } else {
         fromTense = 'present';
