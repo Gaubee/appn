@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animation Reverse</title>
+    <style>
+      :root {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        margin: 0;
+        padding: 1em;
+      }
+      .controllers {
+        margin: 1em 0;
+        padding: 1em;
+        display: flex;
+        flex-direction: row;
+        gap: 1em;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        border-radius: 1em;
+        background-color: color-mix(in srgb, blue 10%, canvas);
+      }
+      .controllers * {
+        font-size: 16px;
+      }
+      .controllers button {
+        padding: 0.5em;
+        background-color: color-mix(in srgb, accentColor 10%, canvas);
+        border: 2px solid accentColor;
+        border-radius: 0.5em;
+      }
+      #btnClass {
+        display: flex;
+        flex-direction: column;
+      }
+      #btnClass select {
+        height: 160px;
+      }
+
+      #block {
+        width: 200px;
+        aspect-ratio: 1;
+        background-color: blue;
+        color: white;
+      }
+      :where(#block) {
+        animation-fill-mode: forwards;
+        animation-duration: 10s;
+        animation-timing-function: linear;
+      }
+
+      .ani-name-move {
+        animation-name: move;
+      }
+      .ani-reverse {
+        animation-direction: reverse;
+      }
+      .ani-duration {
+        animation-duration: 15s;
+      }
+      .ani-timing-function {
+        animation-timing-function: ease-in-out;
+      }
+      .ani-name-normal {
+        animation-name: move-normal;
+      }
+      .ani-name-reverse {
+        animation-name: move-reverse;
+      }
+      .ani-pause {
+        animation-play-state: paused;
+      }
+      @keyframes move-normal {
+        100% {
+          translate: 200px 0;
+        }
+      }
+      @keyframes move-reverse {
+        100% {
+          translate: 0 0;
+        }
+      }
+    </style>
+    <style id="aniNormalStyle" type="text/css">
+      @keyframes move {
+        0% {
+          translate: 0 0;
+        }
+        100% {
+          translate: 200px 0;
+        }
+      }
+    </style>
+    <style id="aniReverseStyle" type="template/css">
+      @keyframes move {
+        0% {
+          translate: 200px 0;
+        }
+        100% {
+          translate: 0 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="block"></div>
+    <section class="controllers">
+      <button id="btnPause">pause</button>
+      <button id="btnClass" title="按住ctrl进行多选或者反选">
+        change className
+        <select id="aniOpts" multiple>
+          <option value="ani-name-move">name-move</option>
+          <option value="ani-name-normal">name-normal</option>
+          <option value="ani-name-reverse">name-reverse</option>
+          <option value="ani-reverse">reverse</option>
+          <option value="ani-duration">duration</option>
+          <option value="ani-timing-function">timing-function</option>
+        </select>
+      </button>
+      <button id="btnKeyframes">change move keyframe</button>
+    </section>
+  </body>
+  <script>
+    btnPause.addEventListener('click', () => {
+      block.classList.toggle('ani-pause');
+    });
+    btnClass.addEventListener('click', () => {
+      for (let i = 0; i < aniOpts.length; i++) {
+        block.classList.remove(aniOpts[i].value);
+      }
+      for (let i = 0; i < aniOpts.selectedOptions.length; i++) {
+        block.classList.add(aniOpts.selectedOptions[i].value);
+      }
+    });
+    btnKeyframes.addEventListener('click', () => {
+      if (aniNormalStyle.type === 'text/css') {
+        aniNormalStyle.type = 'template/css';
+        aniReverseStyle.type = 'text/css';
+      } else {
+        aniNormalStyle.type = 'text/css';
+        aniReverseStyle.type = 'template/css';
+      }
+    });
+    new MutationObserver(() => {
+      block.innerHTML = block.className;
+    }).observe(block, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  </script>
+</html>
