@@ -28,7 +28,7 @@ export default class Page {
         <iframe className="demo-frame" src="/examples/kitchen-sink/starting-style-demo-1/"></iframe>
         <h5>::slotted demo</h5>
         <iframe className="demo-frame" src="/examples/kitchen-sink/starting-style-demo-2/"></iframe>
-        <h5>::host demo</h5>
+        <h5>:host demo</h5>
         <iframe className="demo-frame" src="/examples/kitchen-sink/starting-style-demo-3/"></iframe>
       </>
     );
