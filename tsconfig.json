@@ -1,4 +1,5 @@
 {
+  "extends": "./tsconfig.base.json",
   "references": [
     {
       "path": "./docs-src/tsconfig.json"
@@ -6,44 +7,8 @@
   ],
   "compilerOptions": {
     "composite": true,
-    "target": "es2022",
-    "module": "ESNext",
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "noEmitOnError": false,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "inlineSources": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "verbatimModuleSyntax": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": false,
-    "useDefineForClassFields": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitOverride": true,
-    "plugins": [
-      {
-        "name": "ts-lit-plugin",
-        "strict": true
-      }
-    ],
-    "types": [
-      "dom-navigation",
-      "mocha",
-    ]
   },
   "include": [
     "src/**/*.ts",

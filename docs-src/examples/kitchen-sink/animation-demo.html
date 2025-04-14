@@ -3,36 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Animation Reverse</title>
+    <script type="module" src="/assets/components/button-group.ts"></script>
+    <link rel="stylesheet" href="/assets/css/demo-1.css" />
+    <title>Animation Demo</title>
     <style>
       :root {
-        font-family: sans-serif;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        margin: 0;
-        padding: 1em;
-      }
-      .controllers {
-        margin: 1em 0;
-        padding: 1em;
-        display: flex;
-        flex-direction: row;
-        gap: 1em;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        border-radius: 1em;
-        background-color: color-mix(in srgb, blue 10%, canvas);
-      }
-      .controllers * {
-        font-size: 16px;
-      }
-      .controllers button {
-        padding: 0.5em;
-        background-color: color-mix(in srgb, accentColor 10%, canvas);
-        border: 2px solid accentColor;
-        border-radius: 0.5em;
+        --accent-color: rgb(255, 68, 35); /* 更改强调色以示区别 */
       }
       #btnClass {
         display: flex;
@@ -45,8 +21,18 @@
       #block {
         width: 200px;
         aspect-ratio: 1;
-        background-color: blue;
+        background-color: var(--accent-color);
         color: white;
+        /* 显示当前状态 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 12px;
+        overflow-wrap: break-word;
+        padding: 5px;
+        box-sizing: border-box;
       }
       :where(#block) {
         animation-fill-mode: forwards;
@@ -110,32 +96,36 @@
   <body>
     <div id="block"></div>
     <section class="controllers">
-      <button id="btnPause">pause</button>
-      <button id="btnClass" title="按住ctrl进行多选或者反选">
-        change className
-        <select id="aniOpts" multiple>
-          <option value="ani-name-move">name-move</option>
-          <option value="ani-name-normal">name-normal</option>
-          <option value="ani-name-reverse">name-reverse</option>
-          <option value="ani-reverse">reverse</option>
-          <option value="ani-duration">duration</option>
-          <option value="ani-timing-function">timing-function</option>
-        </select>
-      </button>
-      <button id="btnKeyframes">change move keyframe</button>
+      <div>
+        <span>配置动画</span>
+        <button-group label="animation name">
+          <button data-value="ani-name-move">name-move</button>
+          <button data-value="ani-name-normal">name-normal</button>
+          <button data-value="ani-name-reverse">name-reverse</button>
+        </button-group>
+        <button-group label="animation 修饰" multiple>
+          <button data-value="ani-reverse">reverse</button>
+          <button data-value="ani-duration">duration</button>
+          <button data-value="ani-timing-function">timing-function</button>
+        </button-group>
+        <button id="btnKeyframes">change <b>move</b> keyframe</button>
+      </div>
+      <div>
+        <span>控制动画</span>
+        <button id="btnPause">pause</button>
+      </div>
     </section>
   </body>
   <script>
     btnPause.addEventListener('click', () => {
       block.classList.toggle('ani-pause');
     });
-    btnClass.addEventListener('click', () => {
-      for (let i = 0; i < aniOpts.length; i++) {
-        block.classList.remove(aniOpts[i].value);
-      }
-      for (let i = 0; i < aniOpts.selectedOptions.length; i++) {
-        block.classList.add(aniOpts.selectedOptions[i].value);
-      }
+    const allButtonGroup = [].slice.call(document.querySelectorAll('button-group'));
+    allButtonGroup.forEach((btnGroup) => {
+      btnGroup.addEventListener('change', () => {
+        block.classList.remove(...btnGroup.options);
+        block.classList.add(...btnGroup.values);
+      });
     });
     btnKeyframes.addEventListener('click', () => {
       if (aniNormalStyle.type === 'text/css') {

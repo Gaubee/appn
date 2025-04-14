@@ -64,6 +64,7 @@
     "signal-utils": "^0.21.1",
     "ts-deepmerge": "^7.0.2",
     "ts-pattern": "^5.7.0",
+    "tslib": "^2.8.1",
     "urlpattern-polyfill": "^10.0.0"
   },
   "pnpm": {
@@ -82,11 +83,13 @@
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0",
     "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
+    "@11ty/eleventy-plugin-vite": "^6.0.0",
     "@custom-elements-manifest/analyzer": "^0.10.4",
     "@open-wc/testing": "^4.0.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@types/big.js": "^6.2.2",
     "@types/chai": "^5.2.1",
     "@types/culori": "^2.1.1",
@@ -125,7 +128,8 @@
     "sinon": "^20.0.0",
     "tsx": "^4.19.3",
     "typescript": "~5.8.3",
-    "typescript-eslint": "^8.29.1"
+    "typescript-eslint": "^8.29.1",
+    "vite": "^6.2.6"
   },
   "peerDependencies": {
     "@types/dom-navigation": "^1.0.5",

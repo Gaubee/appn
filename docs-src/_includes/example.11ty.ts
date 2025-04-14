@@ -45,10 +45,7 @@ const renderExample = (data: EleventyExampleData): string => {
         }
         @container (min-width: ${layoutStyles.totalMin}px) {
           section.examples {
-            grid-template-columns: ${layoutStyles.left}px minmax(
-                ${layoutStyles.rightMin}px,
-                1f
-              );
+            grid-template-columns: ${layoutStyles.left}px minmax(${layoutStyles.rightMin}px, 1f);
           }
         }
         @container (min-width: ${layoutStyles.totalMin}px) {
@@ -82,10 +79,7 @@ const renderExample = (data: EleventyExampleData): string => {
     </section>
   `;
 };
-export const renderExampleNav = (
-  {page, collections}: EleventyData,
-  showNavDescription = false
-): string => {
+export const renderExampleNav = ({page, collections}: EleventyData, showNavDescription = false): string => {
   const html = String.raw;
   const css = String.raw;
   const style = css`
@@ -122,14 +116,10 @@ export const renderExampleNav = (
       ${collections?.example
         ?.map(
           (post) => html`
-            <li class=${post.url === page.url ? 'selected' : ''}>
+            <li class="${post.url === page.url ? 'selected' : ''}">
               <div class="example-link">
-                <a href="${relative(page.url, post.url)}">
-                  ${escapeHTML(post.data.name ?? '')}
-                </a>
-                ${showNavDescription
-                  ? html`<p>${escapeHTML(post.data.description ?? '')}</p>`
-                  : ''}
+                <a href="${relative(page.url, post.url)}"> ${escapeHTML(post.data.name ?? '')} </a>
+                ${showNavDescription ? html`<p>${escapeHTML(post.data.description ?? '')}</p>` : ''}
               </div>
             </li>
           `

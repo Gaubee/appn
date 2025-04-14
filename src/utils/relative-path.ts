@@ -182,7 +182,6 @@ export const baseurl_relative_parts = (targetUrlString: string | URL, baseUrlStr
 
     // 1. Check Origin: Must be the same for sensible relative calculation
     if (targetUrl.origin !== baseUrl.origin) {
-      console.error('Origins differ:', targetUrl.origin, baseUrl.origin);
       return null;
     }
 
@@ -210,7 +209,6 @@ export const baseurl_relative_parts = (targetUrlString: string | URL, baseUrlStr
       relativePathname = ''; // Target is the base itself (directory index)
     } else {
       // Target path doesn't start appropriately relative to base path
-      console.warn(`Target path "${targetPath}" does not start with base path "${basePath}" (considering directory context).`);
       return null;
     }
 

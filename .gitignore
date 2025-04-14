@@ -9,3 +9,4 @@
 custom-elements.json
 tsconfig.tsbuildinfo
 /src/react.ts
+/.rollup.cache

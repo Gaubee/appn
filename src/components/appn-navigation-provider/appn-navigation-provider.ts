@@ -2,7 +2,7 @@ import '@virtualstate/navigation/polyfill';
 import 'urlpattern-polyfill';
 
 import {ContextProvider, provide} from '@lit/context';
-import {html, LitElement, type PropertyValues} from 'lit';
+import {html, LitElement} from 'lit';
 import {customElement, property, queryAssignedElements} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {match, Pattern} from 'ts-pattern';
@@ -10,8 +10,17 @@ import {eventProperty, type PropertyEventListener} from '../../utils/event-prope
 import {baseurl_relative_parts} from '../../utils/relative-path';
 import {safeProperty} from '../../utils/safe-property';
 import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
+import '../css-starting-style/css-starting-style';
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from './appn-navigation-context';
-import {appnNavigationHistoryEntryStyle, appnNavigationStyle} from './appn-navigation.css';
+import {
+  appnNavigationHistoryEntryStyle,
+  appnNavigationStyle,
+  pageFutureOpacity,
+  pageFutureScaleX,
+  pageFutureScaleY,
+  pageFutureTranslateX,
+  pageFutureTranslateY,
+} from './appn-navigation.css';
 
 const APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES = [null, 'horizontal', 'vertical'] as const;
 export type AppnNavigationStackDirection = (typeof APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES)[number];
@@ -37,7 +46,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         return;
       }
       event.intercept({
-        handler: this.__effectRoutes,
+        handler: () => this.__effectRoutes(event.navigationType),
       });
     });
     this.__nav.addEventListener('currententrychange', (_event) => {
@@ -164,26 +173,28 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     this.style.setProperty('--y', `${y}`);
     this.style.setProperty('--z', `${z}`);
   }
+  //#endregion
 
   @queryAssignedElements({slot: 'router', flatten: true})
   accessor routersElements!: HTMLTemplateElement[];
 
-
   /**
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
-  private __effectRoutes = async () => {
+  private __effectRoutes = async (navigationType?: NavigationTypeString) => {
     const effectRoutes = () => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = this.__nav.entries();
       const currentEntry = this.__nav.currentEntry;
       const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
       allEntries.forEach((navEntry) => {
-        return this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex});
+        return this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex, navigationType});
       });
     };
-
-    effectRoutes();
+    document.startViewTransition(() => {
+      return effectRoutes();
+    });
+    // effectRoutes();
   };
   private __effectRoute = (
     navEntry: NavigationHistoryEntry,
@@ -192,6 +203,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       allEntries: NavigationHistoryEntry[];
       currentEntry: NavigationHistoryEntry | null;
       currentEntryIndex: number;
+      navigationType?: NavigationTypeString;
     }
   ) => {
     const current_url = navEntry.url;
@@ -235,6 +247,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
             newNavHistoryEntryNode.search = relative_parts.search;
             newNavHistoryEntryNode.hash = relative_parts.hash;
             newNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
+            newNavHistoryEntryNode.navigationType = context.navigationType ?? null;
             this.appendChild(newNavHistoryEntryNode);
             newNavHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
           }
@@ -243,7 +256,6 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       }
     }
   };
-  //#endregion
 
   override render() {
     return this.__html;
@@ -251,8 +263,15 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   private __html = cache(html`
     <slot name="router" @slotchange=${this.__effectRoutes}></slot>
     <slot></slot>
+    <css-starting-style
+      slotted=""
+      selector="appn-navigation-history-entry[data-tense='present'][data-from-tense='future']"
+      cssText="--page-translate-x: ${pageFutureTranslateX};--page-translate-y: ${pageFutureTranslateY};--page-scale-x: ${pageFutureScaleX};--page-scale-y: ${pageFutureScaleY};--page-opacity: ${pageFutureOpacity};"
+    ></css-starting-style>
   `);
 }
+
+//#region appn-navigation-history-entry
 
 const _NAVIGATION_HISTORY_ENTRY_TENSE_ENUM_VALUES = [undefined, 'past', 'present', 'future'] as const;
 type NavigationHistoryEntryTense = (typeof _NAVIGATION_HISTORY_ENTRY_TENSE_ENUM_VALUES)[number];
@@ -268,21 +287,13 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
   accessor hash!: string;
   @property({type: Object})
   accessor templateEle: HTMLTemplateElement | undefined = undefined;
-
+  @safeProperty(enumToSafeConverter([null, 'reload', 'push', 'replace', 'traverse']))
+  accessor navigationType: NavigationTypeString | null = null;
   @property({type: Number, reflect: true, attribute: true})
   accessor presentEntryIndex = -1;
-
-  private _preEntryIndex = -1;
-
   @provide({context: appnNavigationHistoryEntryContext})
   accessor navigationEntry: NavigationHistoryEntry | null = null;
 
-  protected override willUpdate(_changedProperties: PropertyValues): void {
-    if (_changedProperties.has('presentEntryIndex')) {
-      this._preEntryIndex = _changedProperties.get('presentEntryIndex');
-    }
-    super.willUpdate(_changedProperties);
-  }
   override render() {
     this.dataset.key = this.navigationEntry?.key;
     /** 自身 index */
@@ -302,7 +313,7 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
      *
      * ---
      *
-     * 如果 present 不在最后，那么：
+     * navigationType === 'push'，那么：
      *
      * curr:        ...past | past    | PRESENT | future  | future...
      * from-enter:  ...past | PRESENT | future  | future  | future...
@@ -313,8 +324,10 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
      *
      */
     if (fromTense == null) {
-      const preEntryIndex = this._preEntryIndex;
-      const pos = preEntryIndex === -1 ? 0 : presentIndex - preEntryIndex;
+      const pos = match(this.navigationType)
+        .with('push', () => 1)
+        .with('traverse', () => -1)
+        .otherwise(() => 0);
       if (selfIndex > presentIndex - pos) {
         fromTense = 'future';
       } else if (selfIndex < presentIndex - pos) {
@@ -342,9 +355,13 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
   }
 }
 
+//#endregion
+
+//#region global-type
 declare global {
   interface HTMLElementTagNameMap {
     'appn-navigation-provider': AppnNavigationProviderElement;
     'appn-navigation-history-entry': AppnNavigationHistoryEntryElement;
   }
 }
+//#endregion

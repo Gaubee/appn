@@ -1,13 +1,32 @@
 import {iter_map_not_null} from '@gaubee/util';
 import {css} from 'lit';
+import {cssLiteral} from '../../utils/lit-helper';
+export const pageFutureTranslateX = cssLiteral('100%');
+export const pageFutureTranslateY = cssLiteral('0%');
+export const pageFutureScaleX = cssLiteral('100%');
+export const pageFutureScaleY = cssLiteral('100%');
+export const pageFutureOpacity = cssLiteral('100%');
+
+export const pagePastTranslateX = cssLiteral('-38%');
+export const pagePastTranslateY = cssLiteral('0%');
+export const pagePastScaleX = cssLiteral('100%');
+export const pagePastScaleY = cssLiteral('100%');
+export const pagePastOpacity = cssLiteral('100%');
+
+export const pageBootTranslateX = cssLiteral('0%');
+export const pageBootTranslateY = cssLiteral('0%');
+export const pageBootScaleX = cssLiteral('90%');
+export const pageBootScaleY = cssLiteral('90%');
+export const pageBootOpacity = cssLiteral('50%');
+
 CSS.registerProperty({
-  name: '--translate-x',
+  name: '--page-translate-x',
   syntax: '<length-percentage>',
   inherits: false,
   initialValue: `0px`,
 });
 CSS.registerProperty({
-  name: '--translate-y',
+  name: '--page-translate-y',
   syntax: '<length-percentage>',
   inherits: false,
   initialValue: `0px`,
@@ -71,8 +90,8 @@ export const appnNavigationStyle = css`
 
   /* 动态生成卡片堆叠偏移 */
   ::slotted(*) {
-    --translate-z: calc((var(--present-index, -1) - var(--index, 0)) * -36px);
-    translate: var(--translate-x, 0) var(--translate-y, 0) var(--translate-z);
+    --page-translate-z: calc((var(--present-index, -1) - var(--index, 0)) * -36px);
+    translate: var(--page-translate-x, 0) var(--page-translate-y, 0) var(--page-translate-z);
     scale: var(--page-scale-x, 100%) var(--page-scale-y, 100%);
   }
 `;
@@ -88,143 +107,30 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null(
         transition-property: all;
         transition-behavior: allow-discrete;
       }
+      :host([data-tense='future']) {
+        --page-translate-x: ${pageFutureTranslateX};
+        --page-translate-y: ${pageFutureTranslateY};
+        --page-scale-x: ${pageFutureScaleX};
+        --page-scale-y: ${pageFutureScaleY};
+        --page-opacity: ${pageFutureOpacity};
+      }
+      :host([data-tense='past']) {
+        --page-translate-x: ${pagePastTranslateX};
+        --page-translate-y: ${pagePastTranslateY};
+        --page-scale-x: ${pagePastScaleX};
+        --page-scale-y: ${pagePastScaleY};
+        --page-opacity: ${pagePastOpacity};
+      }
+
+      :host([data-from-tense='present']) {
+        transition-duration: var(--page-leave-duration);
+        transition-timing-function: var(--page-leave-ease);
+      }
+      :host([data-tense='present']) {
+        transition-duration: var(--page-enter-duration);
+        transition-timing-function: var(--page-enter-ease);
+      }
     `,
-    CSS.supports('view-transition-name: content')
-      ? css`
-          :host {
-            animation-fill-mode: forwards;
-          }
-          :host([data-tense='present']) {
-            animation-duration: var(--page-enter-duration);
-            animation-timing-function: var(--page-enter-ease);
-          }
-          :host([data-from-tense='present']) {
-            animation-duration: var(--page-leave-duration);
-            animation-timing-function: var(--page-leave-ease);
-          }
-          @keyframes page-bootstrap {
-            from {
-              opacity: 0;
-              --page-scale-x: 90%;
-              --page-scale-y: 90%;
-            }
-            to {
-              opacity: 1;
-              --page-scale-x: 100%;
-              --page-scale-y: 100%;
-            }
-          }
-          @keyframes page-push-enter {
-            from {
-              --translate-x: 100%;
-            }
-            to {
-              --translate-x: 0%;
-            }
-          }
-          @keyframes page-push-leave {
-            from {
-              --translate-x: 0%;
-            }
-            to {
-              --translate-x: -38%;
-            }
-          }
-
-          @keyframes page-back-enter {
-            from {
-              --translate-x: -38%;
-            }
-            to {
-              --translate-x: 0%;
-            }
-          }
-          @keyframes page-back-leave {
-            from {
-              --translate-x: 0%;
-            }
-            to {
-              --translate-x: 100%;
-            }
-          }
-
-          :host([data-tense='past']) {
-            --translate-x: -38%;
-            /* display: none; */
-          }
-          :host([data-tense='present'][data-from-tense='past']) {
-            animation-name: page-back-enter;
-          }
-          :host([data-tense='present'][data-from-tense='future']),
-          :host([data-tense='present'][data-from-tense='present']) {
-            animation-name: page-push-enter;
-          }
-
-          :host([data-from-tense='present'][data-tense='past']) {
-            animation-name: page-push-leave;
-            /* animation-direction: reverse; */
-          }
-          :host([data-from-tense='present'][data-tense='future']) {
-            animation-name: page-back-leave;
-            /* animation-direction: reverse; */
-          }
-
-          :host([data-tense='past'][data-from-tense='past']) {
-            display: none;
-          }
-          :host([data-tense='future'][data-from-tense='future']) {
-            display: none;
-          }
-          :host([data-tense='present'][data-from-tense='present']) {
-            animation-name: page-bootstrap;
-          }
-        `
-      : css`
-          :host([data-from-tense='present']) {
-            transition-duration: var(--page-leave-duration);
-            transition-timing-function: var(--page-leave-ease);
-          }
-          :host([data-tense='present']) {
-            transition-duration: var(--page-enter-duration);
-            transition-timing-function: var(--page-enter-ease);
-          }
-
-          :host([data-tense='past']) {
-            --translate-x: -38%;
-            display: none;
-          }
-          :host([data-tense='present']) {
-            /* Example: Start transparent, fade in */
-            --translate-x: 0%;
-          }
-          :host([data-tense='future']) {
-            /* Optionally hide future entries visually if needed beyond display:none */
-            --translate-x: 100%;
-            display: none;
-          }
-          :host([data-from-tense='past']) {
-            @starting-style {
-              --translate-x: -38%;
-            }
-          }
-          :host([data-from-tense='present']) {
-            @starting-style {
-              --translate-x: 0%;
-            }
-          }
-          :host([data-from-tense='future']) {
-            @starting-style {
-              --translate-x: 100%;
-            }
-          }
-          :host([data-from-tense='future'][data-index='0']) {
-            @starting-style {
-              --translate-x: 0%;
-              --translate-y: 0%;
-              opacity: 0;
-            }
-          }
-        `,
   ],
   (v) => v
 );

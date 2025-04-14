@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import {customElementDeclarations} from '../custom-elements-metadata.js';
 import {relativePath as relative} from './relative-path.js';
 
@@ -9,9 +11,9 @@ export default function (data: EleventyData): string {
   const safeUrl = (url: string) => relative(page.url, url);
   const polyfill = '';
 
-  html` <link href="${safeUrl('/prism-okaidia.css')}" rel="stylesheet" />
-    <script src="${safeUrl('/node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js')}"></script>
-    <script src="${safeUrl('/node_modules/lit/polyfill-support.js')}"></script>`;
+  // html` <link href="${safeUrl('/prism-okaidia.css')}" rel="stylesheet" />
+  //   <script src="${safeUrl('/node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js')}"></script>
+  //   <script src="${safeUrl('/node_modules/lit/polyfill-support.js')}"></script>`;
   return html` <!doctype html>
     <html lang="en">
       <head>
@@ -25,16 +27,30 @@ export default function (data: EleventyData): string {
         <link rel="shortcut icon" href="${safeUrl('/imgs/logo.webp')}" />
         <link rel="stylesheet" href="${safeUrl('/docs.css')}" />
         ${polyfill}
-        ${customElementDeclarations
+        <script type="module" src="${path.resolve(import.meta.dirname, `../../src/index.ts`)}"></script>
+        <!-- ${customElementDeclarations
           .sort((a, b) => {
             const aw = a.tagName.endsWith('-provider') ? 1 : 0;
             const bw = b.tagName.endsWith('-provider') ? 1 : 0;
             return bw - aw;
           })
           .map((ele) => {
-            return html` <script type="module" src="${relative(page.url, `/bundle/${ele.tagName}.js`)}"></script> `;
+            return {...ele, filename: path.resolve(import.meta.dirname, `../../bundle/${ele.tagName}.js`)};
           })
-          .join('\n')}
+          .filter(({filename}) => fs.existsSync(filename))
+          .map((ele) => {
+            return html`
+              <script
+                type="module"
+                src="${
+                  // relative(page.url, `public/bundle/${ele.tagName}.js`)
+                  // ele.filename
+                  `/bundle/${ele.tagName}.js`
+                }"
+              ></script>
+            `;
+          })
+          .join('\n')} -->
       </head>
       <body>
         ${content}

@@ -50,10 +50,21 @@ export default class Page {
                   <appn-link mode="back">go back</appn-link>
                   <appn-link to="#page1">go to page1</appn-link>
                   <appn-link to="#page2">go to page2</appn-link>
+                  <appn-link to="#page3">go to page3</appn-link>
+                  <appn-link mode="replace" to="#page1">
+                    replace as page1
+                  </appn-link>
+                  <appn-link mode="replace" to="#page2">
+                    replace as page2
+                  </appn-link>
+                  <appn-link mode="replace" to="#page3">
+                    replace as page3
+                  </appn-link>
                 </appn-view>
               </appn-page>
             </template>
             <template slot="router" data-hash="page2" data-target="page-template"></template>
+            <template slot="router" data-hash="page3" data-target="page-template"></template>
           </appn-navigation-provider>
         </appn-theme-provider>
       </>
