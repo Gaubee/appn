@@ -7,6 +7,8 @@ export interface EleventyData {
     [key: string]: unknown;
   };
   tags?: string | string[];
+  scripts?: string[];
+  links?: string[];
   content: string;
   collections?: {
     example?: Array<{
