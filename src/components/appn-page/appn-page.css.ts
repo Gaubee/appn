@@ -85,6 +85,7 @@ export const appnPageStyles = [
       grid-area: 1 / 1 / 4 / 2;
       z-index: 1;
       box-sizing: border-box;
+      view-transition-name: body;
     }
 
     .footer {

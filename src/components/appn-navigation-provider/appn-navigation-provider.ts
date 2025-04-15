@@ -348,7 +348,7 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
     this.dataset.tense = tense;
 
     const vtn = `vtn-${selfIndex}`;
-    this.style.setProperty('view-transition-name', vtn);
+    this.style.setProperty('--view-transition-name', vtn);
     this.inert = tense !== 'present';
 
     return html`<slot></slot>`;

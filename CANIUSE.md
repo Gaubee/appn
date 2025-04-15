@@ -2,9 +2,12 @@
 
 - ⚠️ > chrome 97+ / safari 17.0+
 - ❌ > chrome 114+ / safari 17.5+
+- 🤖 Android
+- 🍎 IOS
+- 🧩 Shim Support
 
-1. ⚠️ 🤖 [`color-mix()`](https://caniuse.com/mdn-css_types_color_color-mix)
-   - 无垫片，有非一致性的回退方案，非致命
+1. ✅ 🧩 ⚠️ 🤖 [`color-mix()`](https://caniuse.com/mdn-css_types_color_color-mix)
+   - 有垫片 `<css-color-mix>`
    - chrome 111+
    - safari 16.8+
 1. ✅ [`System colors: AccentColor and AccentColorText`](https://caniuse.com/mdn-css_types_color_system-color_accentcolor_accentcolortext)
@@ -19,7 +22,7 @@
    - 无垫片
    - chrome 90+
    - safari 16.0+
-1. ✅ [`scrollend event`](https://caniuse.com/mdn-api_element_scrollend_event)
+1. ✅ 🧩 [`scrollend event`](https://caniuse.com/mdn-api_element_scrollend_event)
    - 有垫片
    - chrome 114+
    - safari 未支持
@@ -31,7 +34,7 @@
    - 有垫片，但是该垫片对 Safari 的支持并不友好，且具有致命性BUG，未来将开发自己的垫片方案
    - chrome 102+
    - safari 未支持
-1. ✅ [`URLPattern API`](https://caniuse.com/mdn-api_urlpattern)
+1. ✅ 🧩 [`URLPattern API`](https://caniuse.com/mdn-api_urlpattern)
    - 有垫片
    - chrome 95+
    - safari 未支持
@@ -43,8 +46,8 @@
    - 无垫片
    - chrome 106+
    - safari 16.0+
-1. ⚠️ 🤖 🍎 [`CSS at-rule: @starting-style`](https://caniuse.com/mdn-css_at-rules_starting-style)
-   - 无垫片
+1. ✅ 🧩 ⚠️ 🤖 🍎 [`CSS at-rule: @starting-style`](https://caniuse.com/mdn-css_at-rules_starting-style)
+   - 有垫片 `<css-starting-style>`
    - chrome 117+
    - safari 17.5+
 1. ⚠️ 🍎 ❌ 🍎 [`View Transitions API (single-document)`](https://caniuse.com/view-transitions)
@@ -59,3 +62,11 @@
    - 无垫片
    - chrome 105+
    - chrome 15.4+
+1. ✅ [`selector list argument of :not()`](https://caniuse.com/css-not-sel-list)
+   - 无垫片
+   - chrome 88+
+   - chrome 9+
+1. ✅ [`CSS selector: :where(): Support for forgiving selector list`](https://caniuse.com/mdn-css_selectors_where_forgiving_selector_list)
+   - 无垫片
+   - chrome 88+
+   - chrome 14+

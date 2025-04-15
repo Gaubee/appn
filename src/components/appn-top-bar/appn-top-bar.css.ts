@@ -100,9 +100,14 @@ export const appnTopBarStyle = css`
     line-height: 1.8;
 
     font-weight: 600;
-    view-transition-name: appn-top-bar-title;
+    view-transition-class: appn-top-bar-title;
   }
 
+  ::view-transition-group(.appn-top-bar-title) {
+    /* animation-timing-function: ease-in-out; */
+    transition-duration: var(--page-enter-duration);
+    transition-timing-function: var(--page-enter-ease);
+  }
   .actions {
     flex-shrink: 0;
     min-width: 48px;

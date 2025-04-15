@@ -7,7 +7,11 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import 'tsx/esm';
 import type {UserConfig as ViteUserConfig} from 'vite';
 const resolve = (to: string) => path.resolve(import.meta.dirname, to);
-
+const useVite = !!process.env.USE_VITE;
+Object.assign(globalThis, {useVite});
+declare global {
+  var useVite: boolean;
+}
 export default function (eleventyConfig: UserConfig) {
   fs.rmSync(resolve('docs'), {recursive: true, force: true});
   fs.mkdirSync(resolve('docs/public'), {recursive: true});
@@ -21,27 +25,29 @@ export default function (eleventyConfig: UserConfig) {
 
   eleventyConfig.addPlugin(syntaxHighlight);
 
-  /// 注意，使用vite编译，就不能使用 setServerPassthroughCopyBehavior('passthrough')，vite要求fs中能看到文件
-  eleventyConfig.addPlugin(EleventyVitePlugin, {
-    viteOptions: {
-      esbuild: {
-        supported: {
-          decorators: false,
+  if (useVite) {
+    /// 注意，使用vite编译，就不能使用 setServerPassthroughCopyBehavior('passthrough')，vite要求fs中能看到文件
+    eleventyConfig.addPlugin(EleventyVitePlugin, {
+      viteOptions: {
+        esbuild: {
+          supported: {
+            decorators: false,
+          },
         },
-      },
-      build: {
-        target: 'es2022',
-      },
-    } satisfies ViteUserConfig,
-  });
-
-  // eleventyConfig.setServerPassthroughCopyBehavior('copy');
-  // eleventyConfig.setServerPassthroughCopyBehavior('passthrough');
-  // eleventyConfig.addPassthroughCopy('bundle');
-
-  // bundle 文件夹是动态的，使用symlink
-  // fs.symlinkSync(resolve('bundle'), resolve('docs/public/bundle'), 'junction');
-  eleventyConfig.addPassthroughCopy({bundle: 'public/bundle'});
+        build: {
+          target: 'es2022',
+        },
+      } satisfies ViteUserConfig,
+    });
+    eleventyConfig.addPassthroughCopy({bundle: 'public/bundle'});
+    // bundle 文件夹是动态的，使用symlink
+    // fs.symlinkSync(resolve('bundle'), resolve('docs/public/bundle'), 'junction');
+  } else {
+    // eleventyConfig.setServerPassthroughCopyBehavior('copy');
+    eleventyConfig.setServerPassthroughCopyBehavior('passthrough');
+    // eleventyConfig.addPassthroughCopy('bundle');
+    eleventyConfig.addPassthroughCopy({bundle: 'public/bundle'});
+  }
   eleventyConfig.addPassthroughCopy('docs-src/docs.css');
   eleventyConfig.addPassthroughCopy('docs-src/.nojekyll');
   eleventyConfig.addPassthroughCopy('docs-src/components');

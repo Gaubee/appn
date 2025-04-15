@@ -35,6 +35,7 @@ const buildinTypes = new Set([
   'NavigationTransition',
   'NavigationActivation',
   'NavigationCurrentEntryChangeEvent',
+  'NavigationTypeString',
   'HTMLTemplateElement',
 ]);
 

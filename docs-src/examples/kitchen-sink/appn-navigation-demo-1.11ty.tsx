@@ -43,10 +43,10 @@ export default class Page {
             </template>
             <template slot="router" data-hash="page1" id="page-template">
               <appn-page onactivated="this.querySelector('appn-top-bar').innerHTML =`This is ${new URL(event.detail.url).hash.replace(/^#/,'')}!!`">
-                <appn-header>
+                <appn-header style={{xxViewTransitionName: 'pageHeader'}}>
                   <appn-top-bar pageTitle="Some">This is Some Page...</appn-top-bar>
                 </appn-header>
-                <appn-view>
+                <appn-view style={{viewTransitionName: 'var(--view-transition-name, pageBody)'}}>
                   <appn-link mode="back">go back</appn-link>
                   <appn-link to="#page1">go to page1</appn-link>
                   <appn-link to="#page2">go to page2</appn-link>
