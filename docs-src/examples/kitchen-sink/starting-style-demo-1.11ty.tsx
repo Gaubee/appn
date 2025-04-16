@@ -29,7 +29,3 @@ export default class Page {
     );
   }
 }
-
-declare const btn: HTMLButtonElement;
-declare const tmp: HTMLTemplateElement;
-declare const canvas: HTMLDivElement;

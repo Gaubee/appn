@@ -2,12 +2,22 @@ import type {UserConfig} from '@11ty/eleventy';
 import syntaxHighlight from '@11ty/eleventy-plugin-syntaxhighlight';
 import EleventyVitePlugin from '@11ty/eleventy-plugin-vite';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {renderToStaticMarkup} from 'react-dom/server';
+import {match} from 'ts-pattern';
 import 'tsx/esm';
 import type {UserConfig as ViteUserConfig} from 'vite';
 const resolve = (to: string) => path.resolve(import.meta.dirname, to);
-const useVite = !!process.env.USE_VITE;
+const useVite = match(process.env.USE_VITE)
+  .with('', 'true', 'TRUE', () => true)
+  .with('false', 'FALSE', () => false)
+  .otherwise((v) => {
+    if (v != null) {
+      console.warn(`Invalid USE_VITE value: ${JSON.stringify(v)}`);
+    }
+    return os.platform() === 'darwin';
+  });
 Object.assign(globalThis, {useVite});
 declare global {
   var useVite: boolean;
@@ -16,7 +26,15 @@ export default function (eleventyConfig: UserConfig) {
   fs.rmSync(resolve('docs'), {recursive: true, force: true});
   fs.mkdirSync(resolve('docs/public'), {recursive: true});
 
-  eleventyConfig.setTemplateFormats(['ts|tsx|mts|cts|js|jsx|mjs|cjs'.split('|').map((ext) => `11ty.${ext}`), 'md', 'mdx']);
+  eleventyConfig.setTemplateFormats([
+    // javascript
+    ...'ts|tsx|mts|cts|js|jsx|mjs|cjs'.split('|').map((ext) => `11ty.${ext}`),
+    // markdown
+    'md',
+    'mdx',
+    // html
+    'html',
+  ]);
   eleventyConfig.on('importCacheReset', (paths) => {
     for (const dep of paths) {
       delete require.cache[require.resolve(dep)];
@@ -48,6 +66,8 @@ export default function (eleventyConfig: UserConfig) {
     // eleventyConfig.addPassthroughCopy('bundle');
     eleventyConfig.addPassthroughCopy({bundle: 'public/bundle'});
   }
+  eleventyConfig.addPassthroughCopy({'imgs/logo.webp': 'favicon.ico'});
+  eleventyConfig.addPassthroughCopy('components');
   eleventyConfig.addPassthroughCopy('docs-src/docs.css');
   eleventyConfig.addPassthroughCopy('docs-src/.nojekyll');
   eleventyConfig.addPassthroughCopy('docs-src/components');
