@@ -1,0 +1,1 @@
+btn.addEventListener("click",()=>{btn.disabled=!0,canvas.append(tmp.content.cloneNode(!0)),setTimeout(()=>{canvas.querySelectorAll(".showing").forEach(e=>{e.classList.remove("showing")}),setTimeout(()=>{canvas.innerHTML="",btn.disabled=!1},3e3)},3e3)});

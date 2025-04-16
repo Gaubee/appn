@@ -8,88 +8,39 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
         <title>AppnNavigation Demo 1</title>
-        <link rel="shortcut icon" href="../../../imgs/logo.webp" />
-        <link rel="stylesheet" href="../../../docs.css" />
+        <link rel="shortcut icon" href="/assets/logo-BMfT6qdq.webp" />
          
         
         
-                  <script
-                    type="module"
-                    src="/public/bundle/appn-navigation-provider.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/appn-theme-provider.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/appn-footer.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/appn-header.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/appn-icon.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/appn-link.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/appn-page.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/appn-scroll-view.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/appn-top-bar.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/appn-view.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/css-color-mix.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/css-starting-style.js"
-                  ></script>
                 
 
-                  <script
-                    type="module"
-                    src="/public/bundle/my-element.js"
-                  ></script>
                 
+        <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
+        <script type="module" crossorigin src="/assets/css-color-mix-B79xzPHc.js"></script>
+        <script type="module" crossorigin src="/assets/my-element-BsmC1udK.js"></script>
+        <link rel="stylesheet" crossorigin href="/assets/my-element-CSeCYlIX.css">
       </head>
       <body>
         <style id="injectStyle"></style><script>(()=>{const searchParams=new URLSearchParams(location.search);const css=String.raw;const styleText=css`
@@ -99,6 +50,6 @@
           /* --safe-area-inset-left: ${searchParams.get("safe-area-inset-left")??"0px"};
           --safe-area-inset-right: ${searchParams.get("safe-area-inset-right")??"0px"}; */
         }
-      `;document.getElementById("injectStyle").innerHTML=styleText})()</script><appn-theme-provider theme="ios"><appn-navigation-provider><template slot="router" data-pathname="" data-hash=""><appn-page><appn-header><appn-top-bar pageTitle="Home">This is Home Page</appn-top-bar></appn-header><appn-view><appn-link to="#page1">go to page1</appn-link><appn-link to="#page2" type="a">go to page2</appn-link></appn-view></appn-page></template><template slot="router" data-hash="page1" id="page-template"><appn-page onactivated="this.querySelector(&#x27;appn-top-bar&#x27;).innerHTML =`This is ${new URL(event.detail.url).hash.replace(/^#/,&#x27;&#x27;)}!!`"><appn-header style="xx-view-transition-name:pageHeader"><appn-top-bar pageTitle="Some">This is Some Page...</appn-top-bar></appn-header><appn-view style="view-transition-name:var(--view-transition-name, pageBody)"><appn-link mode="back">go back</appn-link><appn-link to="#page1">go to page1</appn-link><appn-link to="#page2">go to page2</appn-link><appn-link to="#page3">go to page3</appn-link><appn-link mode="replace" to="#page1">replace as page1</appn-link><appn-link mode="replace" to="#page2">replace as page2</appn-link><appn-link mode="replace" to="#page3">replace as page3</appn-link></appn-view></appn-page></template><template slot="router" data-hash="page2" data-target="page-template"></template><template slot="router" data-hash="page3" data-target="page-template"></template></appn-navigation-provider></appn-theme-provider>
+      `;document.getElementById("injectStyle").innerHTML=styleText})()</script><appn-theme-provider theme="ios"><appn-navigation-provider><template slot="router" data-pathname="" data-hash=""><appn-page><appn-header><appn-top-bar pageTitle="Home">This is Home Page</appn-top-bar></appn-header><appn-view><appn-link to="#page1">go to page1</appn-link><appn-link to="#page2" type="a">go to page2</appn-link></appn-view></appn-page></template><template slot="router" data-hash="page1" id="page-template"><appn-page onactivated="this.querySelector(&#x27;appn-top-bar&#x27;).innerHTML =`This is ${new URL(event.detail.url).hash.replace(/^#/,&#x27;&#x27;)}!!`"><appn-header><appn-top-bar pageTitle="Some">This is Some Page...</appn-top-bar></appn-header><appn-view style="view-transition-name:var(--view-transition-name, pageBody)"><appn-link mode="back">go back</appn-link><appn-link to="#page1">go to page1</appn-link><appn-link to="#page2">go to page2</appn-link><appn-link to="#page3">go to page3</appn-link><appn-link mode="replace" to="#page1">replace as page1</appn-link><appn-link mode="replace" to="#page2">replace as page2</appn-link><appn-link mode="replace" to="#page3">replace as page3</appn-link></appn-view></appn-page></template><template slot="router" data-hash="page2" data-target="page-template"></template><template slot="router" data-hash="page3" data-target="page-template"></template></appn-navigation-provider></appn-theme-provider>
       </body>
     </html>
