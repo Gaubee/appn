@@ -1,0 +1,154 @@
+ <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="Appn, WebComponent" />
+        <meta name="author" content="Gaubee, gaubeebangeel@gmail.com" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+        <title>Appn ➡️ Install</title>
+        <link rel="shortcut icon" href="../imgs/logo.webp" />
+        <link rel="stylesheet" href="../docs.css" />
+         
+        
+        
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-navigation-provider.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-theme-provider.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-footer.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-header.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-icon.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-link.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-page.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-scroll-view.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-top-bar.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-view.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/css-color-mix.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/css-starting-style.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/my-element.js"
+                  ></script>
+                
+      </head>
+      <body>
+        <header class="bg-ani">
+    <h1>Appn</h1>
+    <h2>
+      A web component library focuses on building a common Webapp navigation
+      standard on the Web.
+    </h2>
+     <style>
+      .nav {
+        margin-top: 2em;
+        padding: 0 2em;
+        border-radius: 2em;
+        backdrop-filter: contrast(0.5) brightness(2);
+        width: fit-content;
+        max-width: 100%;
+      }
+      .nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, 180px);
+        justify-content: center;
+        gap: 24px;
+      }
+
+      .nav > a {
+        display: block;
+        flex: 1;
+        font-size: 18px;
+        padding: 16px;
+        text-align: center;
+      }
+    </style>
+    <nav class="nav">
+      <a class="" href="../">Home</a>
+      <a class="" href="../examples/">Examples</a>
+      <a class="" href="../api/">API</a>
+      <a class="target" href="">Install</a>
+    </nav>
+  </header>
+      <div id="main-wrapper">
+        <main><h1>Install</h1>
+<p><a href="https://www.npmjs.com/package/appn">appn</a> is distributed on <strong>npm</strong>, so you can install it locally or use it via npm CDNs like unpkg.com.</p>
+<h2>Local Installation</h2>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> i appn</code></pre>
+<h2>CDN</h2>
+<p>npm CDNs like <a href="">unpkg.com</a> can directly serve files that have been published to npm. This works great for standard JavaScript modules that the browser can load natively.</p>
+<p>For this element to work from unpkg.com specifically, you need to include the <code>?module</code> query parameter, which tells unpkg.com to rewrite &quot;bare&quot; module specifiers to full URLs.</p>
+<h3>HTML</h3>
+<pre class="language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>module<span class="token punctuation">"</span></span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>https://unpkg.com/appn?module<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span></code></pre>
+<h3>JavaScript</h3>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span>AppnPage<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'https://unpkg.com/appn?module'</span><span class="token punctuation">;</span></code></pre>
+</main>
+      </div>
+      <footer class="bg-ani">
+    <ul>
+      <li>
+        <a target="_blank" href="https://github.com/gaubee/appn">Github</a>
+      </li>
+    </ul>
+  </footer>
+      </body>
+    </html>

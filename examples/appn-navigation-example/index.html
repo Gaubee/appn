@@ -1,0 +1,171 @@
+ <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="<appn-navigation> basic usage" />
+        <meta name="keywords" content="Appn, WebComponent, example" />
+        <meta name="author" content="Gaubee, gaubeebangeel@gmail.com" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+        <title>Appn Example: AppnNavigation</title>
+        <link rel="shortcut icon" href="../../imgs/logo.webp" />
+        <link rel="stylesheet" href="../../docs.css" />
+         
+        
+        
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-navigation-provider.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-theme-provider.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-footer.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-header.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-icon.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-link.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-page.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-scroll-view.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-top-bar.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-view.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/css-color-mix.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/css-starting-style.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/my-element.js"
+                  ></script>
+                
+      </head>
+      <body>
+        <header class="bg-ani">
+    <h1>Appn</h1>
+    <h2>
+      A web component library focuses on building a common Webapp navigation
+      standard on the Web.
+    </h2>
+     <style>
+      .nav {
+        margin-top: 2em;
+        padding: 0 2em;
+        border-radius: 2em;
+        backdrop-filter: contrast(0.5) brightness(2);
+        width: fit-content;
+        max-width: 100%;
+      }
+      .nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, 180px);
+        justify-content: center;
+        gap: 24px;
+      }
+
+      .nav > a {
+        display: block;
+        flex: 1;
+        font-size: 18px;
+        padding: 16px;
+        text-align: center;
+      }
+    </style>
+    <nav class="nav">
+      <a class="" href="../../">Home</a>
+      <a class="target" href="../">Examples</a>
+      <a class="" href="../../api/">API</a>
+      <a class="" href="../../install/">Install</a>
+    </nav>
+  </header>
+      <div id="main-wrapper">
+        <main>
+    <style>
+      
+        section.examples {
+          min-width: 600px;
+        }
+        section.examples > .content {
+          padding-inline: 16px;
+          padding-block-end: 16px;
+        }
+      
+    </style>
+    <section class="examples">
+      
+      <div class="content">
+        <h2>Example: AppnNavigation</h2>
+        <style>
+      .demo-frame {
+        margin: 8px;
+        outline: solid 1px blue;
+        border-radius: 24px;
+        width: 280px;
+        height: 360px;
+        border: 0;
+      }
+    </style><iframe class="demo-frame" src="/examples/kitchen-sink/appn-navigation-demo-1/?safe-area-inset-top=20px&amp;safe-area-inset-bottom=22px"></iframe>
+      </div>
+    </section>
+  </main>
+      </div>
+      <footer class="bg-ani">
+    <ul>
+      <li>
+        <a target="_blank" href="https://github.com/gaubee/appn">Github</a>
+      </li>
+    </ul>
+  </footer>
+      </body>
+    </html>

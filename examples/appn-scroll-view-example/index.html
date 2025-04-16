@@ -1,0 +1,175 @@
+ <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="<appn-scroll-view> basic usage" />
+        <meta name="keywords" content="Appn, WebComponent, example" />
+        <meta name="author" content="Gaubee, gaubeebangeel@gmail.com" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+        <title>Appn Example: AppnScrollView</title>
+        <link rel="shortcut icon" href="../../imgs/logo.webp" />
+        <link rel="stylesheet" href="../../docs.css" />
+         
+        
+        
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-navigation-provider.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-theme-provider.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-footer.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-header.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-icon.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-link.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-page.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-scroll-view.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-top-bar.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-view.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/css-color-mix.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/css-starting-style.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/my-element.js"
+                  ></script>
+                
+      </head>
+      <body>
+        <header class="bg-ani">
+    <h1>Appn</h1>
+    <h2>
+      A web component library focuses on building a common Webapp navigation
+      standard on the Web.
+    </h2>
+     <style>
+      .nav {
+        margin-top: 2em;
+        padding: 0 2em;
+        border-radius: 2em;
+        backdrop-filter: contrast(0.5) brightness(2);
+        width: fit-content;
+        max-width: 100%;
+      }
+      .nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, 180px);
+        justify-content: center;
+        gap: 24px;
+      }
+
+      .nav > a {
+        display: block;
+        flex: 1;
+        font-size: 18px;
+        padding: 16px;
+        text-align: center;
+      }
+    </style>
+    <nav class="nav">
+      <a class="" href="../../">Home</a>
+      <a class="target" href="../">Examples</a>
+      <a class="" href="../../api/">API</a>
+      <a class="" href="../../install/">Install</a>
+    </nav>
+  </header>
+      <div id="main-wrapper">
+        <main>
+    <style>
+      
+        section.examples {
+          min-width: 600px;
+        }
+        section.examples > .content {
+          padding-inline: 16px;
+          padding-block-end: 16px;
+        }
+      
+    </style>
+    <section class="examples">
+      
+      <div class="content">
+        <h2>Example: AppnScrollView</h2>
+        <style>
+      .scrollview {
+        outline: solid 1px blue;
+        margin: 8px;
+        width: 300px;
+        height: 300px;
+        border-radius: 8px;
+      }
+      .item {
+        background: linear-gradient(45deg, #f006, #00f6);
+        height: 100px;
+        width: 800px;
+      }
+    </style><appn-scroll-view class="scrollview"><div class="item">This is page content. index: 1</div><div class="item">This is page content. index: 2</div><div class="item">This is page content. index: 3</div><div class="item">This is page content. index: 4</div><div class="item">This is page content. index: 5</div><div class="item">This is page content. index: 6</div><div class="item">This is page content. index: 7</div><div class="item">This is page content. index: 8</div><div class="item">This is page content. index: 9</div><div class="item">This is page content. index: 10</div><div class="item">This is page content. index: 11</div><div class="item">This is page content. index: 12</div><div class="item">This is page content. index: 13</div><div class="item">This is page content. index: 14</div><div class="item">This is page content. index: 15</div><div class="item">This is page content. index: 16</div><div class="item">This is page content. index: 17</div><div class="item">This is page content. index: 18</div><div class="item">This is page content. index: 19</div><div class="item">This is page content. index: 20</div><div class="item">This is page content. index: 21</div><div class="item">This is page content. index: 22</div><div class="item">This is page content. index: 23</div><div class="item">This is page content. index: 24</div><div class="item">This is page content. index: 25</div><div class="item">This is page content. index: 26</div><div class="item">This is page content. index: 27</div><div class="item">This is page content. index: 28</div><div class="item">This is page content. index: 29</div><div class="item">This is page content. index: 30</div><div class="item">This is page content. index: 31</div><div class="item">This is page content. index: 32</div><div class="item">This is page content. index: 33</div><div class="item">This is page content. index: 34</div><div class="item">This is page content. index: 35</div><div class="item">This is page content. index: 36</div><div class="item">This is page content. index: 37</div><div class="item">This is page content. index: 38</div><div class="item">This is page content. index: 39</div><div class="item">This is page content. index: 40</div><div class="item">This is page content. index: 41</div><div class="item">This is page content. index: 42</div><div class="item">This is page content. index: 43</div><div class="item">This is page content. index: 44</div><div class="item">This is page content. index: 45</div><div class="item">This is page content. index: 46</div><div class="item">This is page content. index: 47</div><div class="item">This is page content. index: 48</div><div class="item">This is page content. index: 49</div><div class="item">This is page content. index: 50</div><div class="item">This is page content. index: 51</div><div class="item">This is page content. index: 52</div><div class="item">This is page content. index: 53</div><div class="item">This is page content. index: 54</div><div class="item">This is page content. index: 55</div><div class="item">This is page content. index: 56</div><div class="item">This is page content. index: 57</div><div class="item">This is page content. index: 58</div><div class="item">This is page content. index: 59</div><div class="item">This is page content. index: 60</div><div slot="footer" style="text-align:center">This is Page Footer</div></appn-scroll-view>
+      </div>
+    </section>
+  </main>
+      </div>
+      <footer class="bg-ani">
+    <ul>
+      <li>
+        <a target="_blank" href="https://github.com/gaubee/appn">Github</a>
+      </li>
+    </ul>
+  </footer>
+      </body>
+    </html>

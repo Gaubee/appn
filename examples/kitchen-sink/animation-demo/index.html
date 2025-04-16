@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="/components/button-group.ts"></script>
+    <link rel="stylesheet" href="/public/css/demo-1.css" />
+    <title>Animation Demo</title>
+    <style>
+      :root {
+        --accent-color: rgb(255, 68, 35); /* 更改强调色以示区别 */
+      }
+      #btnClass {
+        display: flex;
+        flex-direction: column;
+      }
+      #btnClass select {
+        height: 160px;
+      }
+
+      #block {
+        width: 200px;
+        aspect-ratio: 1;
+        background-color: var(--accent-color);
+        color: white;
+        /* 显示当前状态 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 12px;
+        overflow-wrap: break-word;
+        padding: 5px;
+        box-sizing: border-box;
+      }
+      :where(#block) {
+        animation-fill-mode: forwards;
+        animation-duration: 10s;
+        animation-timing-function: linear;
+      }
+
+      .ani-name-move {
+        animation-name: move;
+      }
+      .ani-reverse {
+        animation-direction: reverse;
+      }
+      .ani-duration {
+        animation-duration: 15s;
+      }
+      .ani-timing-function {
+        animation-timing-function: ease-in-out;
+      }
+      .ani-name-normal {
+        animation-name: move-normal;
+      }
+      .ani-name-reverse {
+        animation-name: move-reverse;
+      }
+      .ani-pause {
+        animation-play-state: paused;
+      }
+      @keyframes move-normal {
+        100% {
+          translate: 200px 0;
+        }
+      }
+      @keyframes move-reverse {
+        100% {
+          translate: 0 0;
+        }
+      }
+    </style>
+    <style id="aniNormalStyle" type="text/css">
+      @keyframes move {
+        0% {
+          translate: 0 0;
+        }
+        100% {
+          translate: 200px 0;
+        }
+      }
+    </style>
+    <style id="aniReverseStyle" type="template/css">
+      @keyframes move {
+        0% {
+          translate: 200px 0;
+        }
+        100% {
+          translate: 0 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="block"></div>
+    <section class="controllers">
+      <div>
+        <span>配置动画</span>
+        <button-group label="animation name">
+          <button data-value="ani-name-move">name-move</button>
+          <button data-value="ani-name-normal">name-normal</button>
+          <button data-value="ani-name-reverse">name-reverse</button>
+        </button-group>
+        <button-group label="animation 修饰" multiple>
+          <button data-value="ani-reverse">reverse</button>
+          <button data-value="ani-duration">duration</button>
+          <button data-value="ani-timing-function">timing-function</button>
+        </button-group>
+        <button id="btnKeyframes">change <b>move</b> keyframe</button>
+      </div>
+      <div>
+        <span>控制动画</span>
+        <button id="btnPause">pause</button>
+      </div>
+    </section>
+  </body>
+  <script>
+    btnPause.addEventListener('click', () => {
+      block.classList.toggle('ani-pause');
+    });
+    const allButtonGroup = [].slice.call(document.querySelectorAll('button-group'));
+    allButtonGroup.forEach((btnGroup) => {
+      btnGroup.addEventListener('change', () => {
+        block.classList.remove(...btnGroup.options);
+        block.classList.add(...btnGroup.values);
+      });
+    });
+    btnKeyframes.addEventListener('click', () => {
+      if (aniNormalStyle.type === 'text/css') {
+        aniNormalStyle.type = 'template/css';
+        aniReverseStyle.type = 'text/css';
+      } else {
+        aniNormalStyle.type = 'text/css';
+        aniReverseStyle.type = 'template/css';
+      }
+    });
+    new MutationObserver(() => {
+      block.innerHTML = block.className;
+    }).observe(block, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  </script>
+</html>

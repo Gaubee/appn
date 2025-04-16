@@ -1,0 +1,194 @@
+ <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="<appn-page> basic usage" />
+        <meta name="keywords" content="Appn, WebComponent, example" />
+        <meta name="author" content="Gaubee, gaubeebangeel@gmail.com" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+        <title>Appn Example: AppnPage</title>
+        <link rel="shortcut icon" href="../../imgs/logo.webp" />
+        <link rel="stylesheet" href="../../docs.css" />
+         
+        
+        
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-navigation-provider.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-theme-provider.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-footer.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-header.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-icon.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-link.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-page.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-scroll-view.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-top-bar.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/appn-view.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/css-color-mix.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/css-starting-style.js"
+                  ></script>
+                
+
+                  <script
+                    type="module"
+                    src="/public/bundle/my-element.js"
+                  ></script>
+                
+      </head>
+      <body>
+        <header class="bg-ani">
+    <h1>Appn</h1>
+    <h2>
+      A web component library focuses on building a common Webapp navigation
+      standard on the Web.
+    </h2>
+     <style>
+      .nav {
+        margin-top: 2em;
+        padding: 0 2em;
+        border-radius: 2em;
+        backdrop-filter: contrast(0.5) brightness(2);
+        width: fit-content;
+        max-width: 100%;
+      }
+      .nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, 180px);
+        justify-content: center;
+        gap: 24px;
+      }
+
+      .nav > a {
+        display: block;
+        flex: 1;
+        font-size: 18px;
+        padding: 16px;
+        text-align: center;
+      }
+    </style>
+    <nav class="nav">
+      <a class="" href="../../">Home</a>
+      <a class="target" href="../">Examples</a>
+      <a class="" href="../../api/">API</a>
+      <a class="" href="../../install/">Install</a>
+    </nav>
+  </header>
+      <div id="main-wrapper">
+        <main>
+    <style>
+      
+        section.examples {
+          min-width: 600px;
+        }
+        section.examples > .content {
+          padding-inline: 16px;
+          padding-block-end: 16px;
+        }
+      
+    </style>
+    <section class="examples">
+      
+      <div class="content">
+        <h2>Example: AppnPage</h2>
+        <style>
+      appn-page::part(layer) {
+        outline: solid 1px blue;
+        margin: 8px;
+        width: 280px;
+        height: 600px;
+        position: relative;
+        border-radius: 24px;
+        --safe-area-inset-top: 22px;
+        --safe-area-inset-bottom: 20px;
+
+        position: relative;
+      }
+      appn-page::part(layer)::after {
+        content: ' ';
+        display: block;
+        position: absolute;
+        width: 98px;
+        height: 4px;
+        border-radius: 2px;
+        backdrop-filter: invert(1);
+        bottom: calc((20px - 4px) * 0.38);
+        left: calc((280px - 98px) / 2);
+        z-index: 10;
+        transition-property: all;
+        transition-duration: 300ms;
+        transition-timing-function: ease-out;
+      }
+      .item {
+        background: linear-gradient(45deg, #f006, #00f6);
+        height: 100px;
+      }
+    </style><appn-theme-provider theme="ios"><appn-page><appn-header slot="header"><appn-top-bar>Page Title</appn-top-bar></appn-header><appn-view class="item">This is page content. index: 1</appn-view><appn-view class="item">This is page content. index: 2</appn-view><appn-view class="item">This is page content. index: 3</appn-view><appn-view class="item">This is page content. index: 4</appn-view><appn-view class="item">This is page content. index: 5</appn-view><appn-view class="item">This is page content. index: 6</appn-view><appn-view class="item">This is page content. index: 7</appn-view><appn-view class="item">This is page content. index: 8</appn-view><appn-view class="item">This is page content. index: 9</appn-view><appn-view class="item">This is page content. index: 10</appn-view><appn-view class="item">This is page content. index: 11</appn-view><appn-view class="item">This is page content. index: 12</appn-view><appn-view class="item">This is page content. index: 13</appn-view><appn-view class="item">This is page content. index: 14</appn-view><appn-view class="item">This is page content. index: 15</appn-view><appn-view class="item">This is page content. index: 16</appn-view><appn-view class="item">This is page content. index: 17</appn-view><appn-view class="item">This is page content. index: 18</appn-view><appn-view class="item">This is page content. index: 19</appn-view><appn-view class="item">This is page content. index: 20</appn-view><appn-view class="item">This is page content. index: 21</appn-view><appn-view class="item">This is page content. index: 22</appn-view><appn-view class="item">This is page content. index: 23</appn-view><appn-view class="item">This is page content. index: 24</appn-view><appn-view class="item">This is page content. index: 25</appn-view><appn-view class="item">This is page content. index: 26</appn-view><appn-view class="item">This is page content. index: 27</appn-view><appn-view class="item">This is page content. index: 28</appn-view><appn-view class="item">This is page content. index: 29</appn-view><appn-view class="item">This is page content. index: 30</appn-view><appn-view class="item">This is page content. index: 31</appn-view><appn-view class="item">This is page content. index: 32</appn-view><appn-view class="item">This is page content. index: 33</appn-view><appn-view class="item">This is page content. index: 34</appn-view><appn-view class="item">This is page content. index: 35</appn-view><appn-view class="item">This is page content. index: 36</appn-view><appn-view class="item">This is page content. index: 37</appn-view><appn-view class="item">This is page content. index: 38</appn-view><appn-view class="item">This is page content. index: 39</appn-view><appn-view class="item">This is page content. index: 40</appn-view><appn-view class="item">This is page content. index: 41</appn-view><appn-view class="item">This is page content. index: 42</appn-view><appn-view class="item">This is page content. index: 43</appn-view><appn-view class="item">This is page content. index: 44</appn-view><appn-view class="item">This is page content. index: 45</appn-view><appn-view class="item">This is page content. index: 46</appn-view><appn-view class="item">This is page content. index: 47</appn-view><appn-view class="item">This is page content. index: 48</appn-view><appn-view class="item">This is page content. index: 49</appn-view><appn-view class="item">This is page content. index: 50</appn-view><appn-view class="item">This is page content. index: 51</appn-view><appn-view class="item">This is page content. index: 52</appn-view><appn-view class="item">This is page content. index: 53</appn-view><appn-view class="item">This is page content. index: 54</appn-view><appn-view class="item">This is page content. index: 55</appn-view><appn-view class="item">This is page content. index: 56</appn-view><appn-view class="item">This is page content. index: 57</appn-view><appn-view class="item">This is page content. index: 58</appn-view><appn-view class="item">This is page content. index: 59</appn-view><appn-view class="item">This is page content. index: 60</appn-view><appn-footer slot="footer"><appn-top-bar>This is Page Footer</appn-top-bar></appn-footer></appn-page></appn-theme-provider>
+      </div>
+    </section>
+  </main>
+      </div>
+      <footer class="bg-ani">
+    <ul>
+      <li>
+        <a target="_blank" href="https://github.com/gaubee/appn">Github</a>
+      </li>
+    </ul>
+  </footer>
+      </body>
+    </html>

@@ -1,0 +1,256 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="/components/button-group.ts"></script>
+    <link rel="stylesheet" href="/public/css/demo-1.css" />
+    <title>Transition Demo</title>
+    <style>
+      :root {
+        --accent-color: rgb(128, 0, 128); /* 更改强调色以示区别 */
+      }
+
+      #block {
+        width: 200px;
+        aspect-ratio: 1;
+        background-color: var(--accent-color); /* 匹配强调色 */
+        color: white;
+        /* 提示浏览器这些属性可能会变化，以便优化 */
+        will-change: translate, opacity;
+        /* 显示当前状态 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 12px;
+        overflow-wrap: break-word;
+        padding: 5px;
+        box-sizing: border-box;
+      }
+      #block p {
+        margin: 0;
+        line-height: 2;
+      }
+      :where(#block) {
+        /* --- Transition 设置 --- */
+        translate: 0 0; /* 初始位置 */
+        opacity: 1; /* 初始透明度 */
+        /* 指定要进行过渡的属性 */
+        transition-property: translate, opacity; /* 同时对 translate 和 opacity 应用过渡 */
+        transition-duration: 5s; /* 默认持续时间 (应用于所有过渡属性) */
+        transition-timing-function: linear; /* 默认时间函数 (应用于所有过渡属性) */
+      }
+
+      /* --- Translate 目标状态类 --- */
+      .target-translate-200 {
+        translate: 200px 0;
+      }
+      .target-translate-0 {
+        translate: 0 0;
+      }
+
+      /* --- Opacity 目标状态类 --- */
+      .target-opacity-0 {
+        opacity: 0;
+      }
+      .target-opacity-1 {
+        opacity: 1;
+      }
+
+      /* --- 通用修饰符类 (会影响所有过渡属性) --- */
+      .fast-duration {
+        transition-duration: 1s;
+      }
+      .slow-duration {
+        transition-duration: 15s;
+      }
+      .ease-timing {
+        transition-timing-function: ease-in-out;
+      }
+      .linear-timing {
+        transition-timing-function: linear;
+      }
+
+      /* --- 暂停状态 --- */
+      /* 暂停时，我们通过内联样式设置所有过渡属性的当前值 */
+      #block.paused {
+        /* CSS 本身不做特殊处理，逻辑在 JS 中实现 */
+        translate: var(--translate) !important;
+        opacity: var(--opacity) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="block">初始状态</div>
+    <section class="controllers">
+      <div>
+        <span>动画变动值:</span>
+        <button-group label="translate">
+          <button data-value="target-translate-200">translateX (200px)</button>
+          <button data-value="target-translate-0">translateX (0px)</button>
+        </button-group>
+        <button-group label="opacity">
+          <button data-value="target-opacity-0">opacity 0%</button>
+          <button data-value="target-opacity-1">opacity 100%</button>
+        </button-group>
+      </div>
+      <div>
+        <span>动画修饰符:</span>
+        <!-- Modifiers (apply to both transitions) -->
+        <button-group label="transition-duration">
+          <button data-value="fast-duration">fast (1s)</button>
+          <button data-value="slow-duration">slow (15s)</button>
+        </button-group>
+        <button-group label="transition-timing-function">
+          <button data-value="ease-timing">ease-in-out</button>
+          <button data-value="linear-timing">linear</button>
+        </button-group>
+      </div>
+      <div>
+        <span>全局控制:</span>
+        <!-- Global Control -->
+        <button id="btnPause">暂停 / 继续</button>
+      </div>
+    </section>
+  </body>
+  <script>
+    // class HTMLButtonGroupElement extends HTMLElement {
+    //   static get observedAttributes() {
+    //     return ['label'];
+    //   }
+    //   #label = this.getAttribute('label');
+    //   get label() {
+    //     return this.#label;
+    //   }
+    //   set label(value) {
+    //     this.#label = String(value);
+    //     this.setAttribute('label', this.#label);
+    //   }
+    //   attributeChangedCallback(name, oldValue, newValue) {
+    //     if (name === 'label') {
+    //       this.label = newValue;
+    //     }
+    //   }
+    //   get value() {
+    //     this.querySelector('button.active').dataset.value;
+    //   }
+    //   #selectedBtn = null;
+    //   constructor() {
+    //     super();
+    //     this.addEventListener('click', (e) => {
+    //       const selectedBtn = e.target;
+    //       if (selectedBtn && selectedBtn instanceof HTMLButtonElement) {
+    //         this.querySelectorAll('button').forEach((btn) => {
+    //           if (selectedBtn == btn) {
+    //             btn.classList.add('active');
+    //           } else {
+    //             btn.classList.remove('active');
+    //           }
+    //         });
+    //         if (this.#selectedBtn != selectedBtn) {
+    //           this.#selectedBtn = selectedBtn;
+    //           this.dispatchEvent(
+    //             new CustomEvent('change', {
+    //               detail: {value: selectedBtn.dataset.value},
+    //             })
+    //           );
+    //         }
+    //       }
+    //     });
+    //     this.attachShadow({mode: 'open'});
+    //     const html = String.raw;
+    //     this.render();
+    //   }
+    //   render() {
+    //     this.shadowRoot.innerHTML = html`<style>
+    //         :host {
+    //           display: inline-flex;
+    //           flex-direction: row;
+    //         }
+    //       </style>
+    //       <label>${this.label}</label>
+    //       <slot></slot>`;
+    //   }
+    // }
+    // customElements.define('button-group', HTMLButtonGroupElement);
+
+    let isPaused = false; // 标记是否暂停
+
+    const allButtonGroup = [].slice.call(document.querySelectorAll('button-group'));
+    allButtonGroup.forEach((btnGroup) => {
+      btnGroup.addEventListener('change', (e) => {
+        block.classList.remove(...btnGroup.options);
+        block.classList.add(...btnGroup.values);
+      });
+    });
+
+    // --- 暂停/继续 控制 ---
+    btnPause.addEventListener('click', () => {
+      isPaused = !isPaused; // 切换暂停状态
+
+      updateButtonStates(); // 更新显示和按钮状态
+    });
+
+    // --- 显示当前状态 ---
+    function updateBlockContent() {
+      const html = [`<b>className</b>: ${block.className}`];
+      html.push(`<b>isPaused</b>: ${isPaused}`);
+
+      const computedStyle = getComputedStyle(block);
+      html.push(`<b>Translate</b>: ${computedStyle.translate}`);
+      html.push(`<b>Opacity</b>: ${computedStyle.opacity}`); // Display computed opacity
+      html.push(`<b>Duration</b>: ${computedStyle.transitionDuration}`);
+      html.push(`<b>Timing</b>: ${computedStyle.transitionTimingFunction}`);
+      const innerHTML = '<p>' + html.join('</p><p>') + '</p>';
+      if (innerHTML !== block.innerHTML) {
+        block.innerHTML = innerHTML;
+      }
+    }
+
+    // 观察 class 和 style 的变化，并更新内容 + 按钮状态
+    const observer = new MutationObserver(() => {
+      updateBlockContent(); // 确保按钮状态与类变化同步
+    });
+    observer.observe(block, {
+      attributes: true,
+      attributeFilter: ['class', 'style'], // 观察 class 和 style
+    });
+
+    // 用于在按钮上直观指示活动状态的辅助函数
+    function updateButtonStates() {
+      // 暂停时禁用所有目标和修饰符按钮
+      allButtonGroup.forEach((g) => {
+        g.disabled = isPaused;
+      });
+      block.classList.toggle('paused', isPaused); // 同步 .paused 类
+
+      if (isPaused) {
+        // 暂停: 获取当前计算出的 translate 和 opacity 值
+        const computedStyle = getComputedStyle(block);
+        block.style.setProperty('--translate', computedStyle.translate);
+        block.style.setProperty('--opacity', computedStyle.opacity);
+
+        btnPause.textContent = '继续'; // Resume
+        btnPause.classList.add('active');
+      } else {
+        // 继续: 移除内联样式，让基于类的过渡接管
+        block.style.removeProperty('--translate');
+        block.style.removeProperty('--opacity');
+
+        btnPause.textContent = '暂停'; // Pause
+        btnPause.classList.remove('active');
+      }
+    }
+
+    // 初始状态更新
+    updateButtonStates();
+
+    // 更新 block 内的文本显示
+    requestAnimationFrame(function loop() {
+      updateBlockContent();
+      requestAnimationFrame(loop);
+    });
+  </script>
+</html>
