@@ -75,11 +75,6 @@ export const appnTopBarStyle = css`
     display: flex;
     transition-duration: var(--menu-enter-duration);
     transition-timing-function: var(--menu-enter-ease);
-    @starting-style {
-      scale: 0.5;
-      opacity: 0.5;
-      box-shadow: 0 0 0 0 transparent;
-    }
   }
   #nav-history:not(:popover-open) {
     scale: 0.5;

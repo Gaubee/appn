@@ -13,6 +13,7 @@ import '../appn-icon/appn-icon';
 import '../appn-link/appn-link';
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from '../appn-navigation-provider/appn-navigation-context';
 import {nav_before_history_entries} from '../appn-navigation-provider/internal/appn-navigation-helper';
+import '../css-starting-style/css-starting-style';
 import {appnTopBarStyle} from './appn-top-bar.css';
 
 const navigation_entry_page_title_wm = new WeakMap<NavigationHistoryEntry, string>();
@@ -122,6 +123,7 @@ export class AppnTopBarElement extends LitElement {
       <div class="actions">
         <slot name="end"></slot>
       </div>
+      <css-starting-style selector="#nav-history:popover-open" cssText="scale:0.5;opacity:0.5;box-shadow:0 0 0 0 transparent;"></css-starting-style>
     `;
   }
 }
