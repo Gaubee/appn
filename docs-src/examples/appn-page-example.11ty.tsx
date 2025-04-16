@@ -54,7 +54,9 @@ export default class Page {
               <appn-top-bar>Page Title</appn-top-bar>
             </appn-header>
             {Array.from({length: 60}, (_, i) => (
-              <appn-view className="item">This is page content. index: {i + 1}</appn-view>
+              <appn-view key={i} className="item">
+                This is page content. index: {i + 1}
+              </appn-view>
             ))}
             <appn-footer slot="footer">
               <appn-top-bar>This is Page Footer</appn-top-bar>

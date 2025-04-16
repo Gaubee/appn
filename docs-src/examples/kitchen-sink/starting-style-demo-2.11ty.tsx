@@ -6,7 +6,7 @@ export default class Page {
       layout: 'root.11ty.ts',
       title: '@starting-style Demo 2',
       scripts: ['/components/starting-style-demo-2.ts'],
-      links: ['/public/css/starting-style-demo.css'],
+      links: ['/css/starting-style-demo.css'],
     };
   }
   render() {

@@ -32,7 +32,9 @@ export default class Page {
         <appn-scroll-view className="scrollview">
           {/* <appn-header slot="header">嘻嘻哈哈</appn-header> */}
           {Array.from({length: 60}, (_, i) => (
-            <div className="item">This is page content. index: {i + 1}</div>
+            <div key={i} className="item">
+              This is page content. index: {i + 1}
+            </div>
           ))}
           <div slot="footer" style={{textAlign: 'center'}}>
             This is Page Footer

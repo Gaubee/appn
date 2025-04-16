@@ -21,6 +21,7 @@ export namespace CustomElementsJson {
     name: string;
     description?: string;
     privacy?: 'private' | 'protected' | 'public';
+    static?: boolean;
     parameters: Parameter[];
     return?: {
       type: TypeInfo;

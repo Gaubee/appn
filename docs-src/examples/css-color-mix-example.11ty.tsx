@@ -13,7 +13,7 @@ export default class Page {
     const css = String.raw;
     const styleText = css`
       .demo-frame {
-        margin: 8px;
+        margin: 9px;
         outline: solid 1px blue;
         border-radius: 24px;
         width: 650px;
@@ -24,7 +24,7 @@ export default class Page {
     return (
       <>
         <style dangerouslySetInnerHTML={{__html: styleText}}></style>
-        <iframe className="demo-frame" src="/examples/kitchen-sink/color-mix-demo-1"></iframe>
+        <iframe className="demo-frame" src="/examples/kitchen-sink/color-mix-demo-1/"></iframe>
       </>
     );
   }

@@ -2,26 +2,12 @@ import type {UserConfig} from '@11ty/eleventy';
 import syntaxHighlight from '@11ty/eleventy-plugin-syntaxhighlight';
 import EleventyVitePlugin from '@11ty/eleventy-plugin-vite';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {match} from 'ts-pattern';
 import 'tsx/esm';
 import type {UserConfig as ViteUserConfig} from 'vite';
 const resolve = (to: string) => path.resolve(import.meta.dirname, to);
-const useVite = match(process.env.USE_VITE)
-  .with('', 'true', 'TRUE', () => true)
-  .with('false', 'FALSE', () => false)
-  .otherwise((v) => {
-    if (v != null) {
-      console.warn(`Invalid USE_VITE value: ${JSON.stringify(v)}`);
-    }
-    return os.platform() === 'darwin';
-  });
-Object.assign(globalThis, {useVite});
-declare global {
-  var useVite: boolean;
-}
+
 export default function (eleventyConfig: UserConfig) {
   fs.rmSync(resolve('docs'), {recursive: true, force: true});
   fs.mkdirSync(resolve('docs/public'), {recursive: true});
@@ -43,32 +29,28 @@ export default function (eleventyConfig: UserConfig) {
 
   eleventyConfig.addPlugin(syntaxHighlight);
 
-  if (useVite) {
-    /// 注意，使用vite编译，就不能使用 setServerPassthroughCopyBehavior('passthrough')，vite要求fs中能看到文件
-    eleventyConfig.addPlugin(EleventyVitePlugin, {
-      viteOptions: {
-        esbuild: {
-          supported: {
-            decorators: false,
-          },
+  /// 注意，使用vite编译，就不能使用 setServerPassthroughCopyBehavior('passthrough')，vite要求fs中能看到文件
+  eleventyConfig.addPlugin(EleventyVitePlugin, {
+    viteOptions: {
+      esbuild: {
+        supported: {
+          decorators: false,
         },
-        build: {
-          target: 'es2022',
-        },
-      } satisfies ViteUserConfig,
-    });
-    eleventyConfig.addPassthroughCopy({bundle: 'public/bundle'});
-    // bundle 文件夹是动态的，使用symlink
-    // fs.symlinkSync(resolve('bundle'), resolve('docs/public/bundle'), 'junction');
-  } else {
-    // eleventyConfig.setServerPassthroughCopyBehavior('copy');
-    eleventyConfig.setServerPassthroughCopyBehavior('passthrough');
-    // eleventyConfig.addPassthroughCopy('bundle');
-    eleventyConfig.addPassthroughCopy({bundle: 'public/bundle'});
-  }
+      },
+      build: {
+        target: 'es2022',
+      },
+      server: {
+        watch: {},
+      },
+    } satisfies ViteUserConfig,
+  });
+  eleventyConfig.setServerPassthroughCopyBehavior('copy');
+  eleventyConfig.addPassthroughCopy('bundle');
   eleventyConfig.addPassthroughCopy({'imgs/logo.webp': 'favicon.ico'});
   eleventyConfig.addPassthroughCopy('components');
   eleventyConfig.addPassthroughCopy('docs-src/docs.css');
+  eleventyConfig.addPassthroughCopy('docs-src/css');
   eleventyConfig.addPassthroughCopy('docs-src/.nojekyll');
   eleventyConfig.addPassthroughCopy('docs-src/components');
   eleventyConfig.addPassthroughCopy('docs-src/public');
@@ -79,6 +61,9 @@ export default function (eleventyConfig: UserConfig) {
   eleventyConfig.addPassthroughCopy('node_modules/lit/polyfill-support.js');
   eleventyConfig.ignores.delete('README.md');
   eleventyConfig.addWatchTarget('bundle');
+  // eleventyConfig.addWatchTarget('src', {
+  //   resetConfig: true,
+  // });
   eleventyConfig.addWatchTarget('docs-src/**/*.html');
   // add support for TypeScript and JSX:
   eleventyConfig.addExtension(['11ty.jsx', '11ty.tsx'], {

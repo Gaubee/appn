@@ -30,9 +30,11 @@ export default function (data: EleventyData): string {
         <link rel="stylesheet" href="${safeUrl('/docs.css')}" />
         ${polyfill} ${scripts?.map((script_src) => html`<script type="module" src=${script_src}></script>`).join('') ?? ''}
         ${links?.map((link_href) => html`<link rel="stylesheet" href=${link_href} />`) ?? ''}
-        ${useVite
-          ? html`<script type="module" src="${path.resolve(import.meta.dirname, `../../src/index.ts`)}"></script> `
-          : customElementDeclarations
+        ${
+          // useVite
+          // ? html`<script type="module" src="${path.resolve(import.meta.dirname, `../../src/index.ts`)}"></script> `
+          // :
+           customElementDeclarations
               .sort((a, b) => {
                 const aw = a.tagName.endsWith('-provider') ? 1 : 0;
                 const bw = b.tagName.endsWith('-provider') ? 1 : 0;
@@ -49,7 +51,7 @@ export default function (data: EleventyData): string {
                     src="${
                       // relative(page.url, `public/bundle/${ele.tagName}.js`)
                       // ele.filename
-                      `/public/bundle/${ele.tagName}.js`
+                      `/bundle/${ele.tagName}.js`
                     }"
                   ></script>
                 `;

@@ -21,7 +21,7 @@
     "docs": "pnpm build && pnpm analyze && pnpm docs:build && pnpm docs:gen",
     "docs:clean": "rimraf docs",
     "docs:gen": "eleventy --config=eleventy.config.ts",
-    "docs:gen:watch": "node --watch ./node_modules/@11ty/eleventy/cmd.cjs  --config=eleventy.config.ts --watch --serve",
+    "docs:gen:watch": "node --watch --watch-path=./bundle ./node_modules/@11ty/eleventy/cmd.cjs  --config=eleventy.config.ts --watch --serve",
     "docs:build": "rollup -c",
     "docs:build:watch": "rollup -c --watch",
     "docs:assets": "node scripts/assets.ts",

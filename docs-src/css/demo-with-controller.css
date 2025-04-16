@@ -47,7 +47,7 @@ button {
   cursor: pointer;
 }
 
-button.active {
+button.active,
+button:active {
   background-color: color-mix(in srgb, var(--accent-color) 30%, canvas);
-  font-weight: bold;
 }

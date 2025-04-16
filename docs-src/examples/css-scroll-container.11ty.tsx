@@ -41,13 +41,19 @@ export default class Page {
             </div>
             <div className="scroller">
               {Array.from({length: 6}, (_, i) => (
-                <div className="item">Item 1/{i}</div>
+                <div key={i} className="item">
+                  Item 1/{i}
+                </div>
               ))}
               {Array.from({length: 6}, (_, i) => (
-                <div className="item">Item 2/{i}</div>
+                <div key={i} className="item">
+                  Item 2/{i}
+                </div>
               ))}
               {Array.from({length: 6}, (_, i) => (
-                <div className="item">Item 3/{i}</div>
+                <div key={i} className="item">
+                  Item 3/{i}
+                </div>
               ))}
             </div>
             <div className="stuck-bottom">
