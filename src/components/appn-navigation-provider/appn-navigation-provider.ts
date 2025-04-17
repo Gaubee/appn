@@ -182,20 +182,22 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
   private __effectRoutes = async (navigationType?: NavigationTypeString) => {
-    const effectRoutes = () => {
+    const effectRoutes = (mode: 'prepare' | 'enter') => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = this.__nav.entries();
       const currentEntry = this.__nav.currentEntry;
       const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
       allEntries.forEach((navEntry) => {
-        return this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex, navigationType});
+        return this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex, navigationType, mode});
       });
     };
+    // effectRoutes('prepare');
     document.startViewTransition(() => {
-      return effectRoutes();
+      return effectRoutes('enter');
     });
     // effectRoutes();
   };
+
   private __effectRoute = (
     navEntry: NavigationHistoryEntry,
     routersElements: HTMLTemplateElement[],
@@ -204,6 +206,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       currentEntry: NavigationHistoryEntry | null;
       currentEntryIndex: number;
       navigationType?: NavigationTypeString;
+      mode: 'prepare' | 'enter';
     }
   ) => {
     const current_url = navEntry.url;

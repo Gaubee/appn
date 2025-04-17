@@ -1,0 +1,160 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Isolation Demo</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        line-height: 1.4;
+      }
+
+      h1,
+      h2 {
+        text-align: center;
+      }
+
+      p {
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto 20px auto;
+      }
+
+      .page-background {
+        background-color: #f0f0f0; /* 页面浅灰色背景 */
+        padding: 20px;
+        border-radius: 8px;
+      }
+
+      .container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        padding: 15px;
+        background-color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .explanation {
+        flex: 1;
+        font-size: 0.9em;
+        color: #333;
+      }
+
+      /* --- 通用样式 --- */
+      .group,
+      .group-image-pair, /* Added for consistency if needed */
+      .image-pair {
+        width: 150px;
+        height: 150px;
+        position: relative; /* 为了子元素的绝对定位 */
+        border: 1px dashed #666;
+        flex-shrink: 0; /* 防止容器被压缩 */
+      }
+
+      .content {
+        position: absolute;
+        inset: 0; /* 填充父容器 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        text-align: center;
+        font-size: 0.9em;
+        border-radius: 3px; /* 轻微圆角 */
+      }
+
+      .old {
+        background-color: rgba(0, 0, 255, 0.5); /* Semi-transparent Blue */
+        color: navy;
+        z-index: 1; /* old 在下方 */
+        mix-blend-mode: plus-lighter; /* Blend with elements below within its context */
+      }
+
+      .new {
+        background-color: rgba(255, 255, 0, 0.5); /* Semi-transparent Yellow */
+        color: darkgoldenrod;
+        z-index: 2; /* new 在上方 */
+        mix-blend-mode: plus-lighter; /* Blend with elements below within its context */
+      }
+
+      /* --- Scenario 1: Separate Group and Image Pair (Correct) --- */
+
+      .group {
+        background-color: rgb(255, 0, 0); /* Solid Red background */
+      }
+
+      .image-pair {
+        /* isolation creates a stacking context where blending happens */
+        isolation: isolate;
+        border-color: blue; /* Blue border for image-pair */
+      }
+
+      /* --- Scenario 2: Combined Group/Image Pair (Problematic Structure) --- */
+      /* Selects the div that has BOTH classes */
+      .group.image-pair {
+        /* Inherits red background from .group rule */
+        /* IMPORTANT: No isolation: isolate is applied here! */
+        border-color: red; /* Red border for combined element */
+      }
+    </style>
+  </head>
+  <body>
+    <h1>View Transition Isolation Demo</h1>
+    <p>观察两种结构下，当子元素使用 mix-blend-mode: plus-lighter 时，容器的红色背景是否干扰混合。</p>
+
+    <div class="page-background">
+      <!-- 加一个页面背景色 -->
+
+      <h2>Scenario 1: Separate Group and Image Pair (Correct Way)</h2>
+      <div class="container">
+        <div class="group">
+          <!-- .group has solid red background -->
+          <div class="image-pair">
+            <!-- .image-pair with isolation: isolate (blue border) -->
+            <div class="content old">Old<br />(Blue, 50% Alpha)<br />plus-lighter</div>
+            <div class="content new">New<br />(Yellow, 50% Alpha)<br />plus-lighter</div>
+          </div>
+        </div>
+        <div class="explanation">
+          <b>说明:</b>
+          <ol>
+            <li><code>.image-pair</code> (蓝色边框) 设置了 <code>isolation: isolate</code>，创建了一个独立的混合环境。</li>
+            <li><code>.old</code> (半透明蓝) 使用 <code>plus-lighter</code> 混合，但其下方在隔离环境内无内容，因此视觉上主要是自身颜色。</li>
+            <li><code>.new</code> (半透明黄) 使用 <code>plus-lighter</code> 混合，它与其下方的 <code>.old</code> 在隔离环境内进行混合。</li>
+            <li>
+              <b>关键:</b> 这个混合过程完全发生在 <code>.image-pair</code> 内部，外部 <code>.group</code> 的纯红色背景<b>不参与</b>混合计算。混合结果 (明亮的青/白色)
+              清晰地呈现在红色背景之上，此时你几乎看不到红色背景。
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <h2>Scenario 2: Combined Element Simulating Group/Image Pair (Problematic)</h2>
+      <div class="container">
+        <div class="group image-pair">
+          <!-- Single div with both classes (red border), inherits red background -->
+          <!-- NO isolation: isolate applied here -->
+          <div class="content old">Old<br />(Blue, 50% Alpha)<br />plus-lighter</div>
+          <div class="content new">New<br />(Yellow, 50% Alpha)<br />plus-lighter</div>
+        </div>
+        <div class="explanation">
+          <b>说明:</b>
+          <ol>
+            <li>这个 <code>div</code> (红色边框) 具有 <code>.group</code> 类的纯红色背景，但**没有**设置 <code>isolation: isolate</code>。</li>
+            <li><code>.old</code> (半透明蓝) 使用 <code>plus-lighter</code> 混合。由于没有隔离层，它直接与其容器（即这个 <code>div</code>）的纯红色背景混合。</li>
+            <li><code>.new</code> (半透明黄) 使用 <code>plus-lighter</code> 混合。它与其下方的所有内容混合，即步骤2中（<code>.old</code> + 红色背景）的混合结果。</li>
+            <li>
+              <b>关键:</b> 元素的混合直接受到了其容器背景色的“污染”。最终颜色是红色背景、半透明蓝色和半透明黄色通过 `plus-lighter`
+              叠加的结果，颜色非常亮且与场景1明显不同。这展示了缺乏隔离层时混合效果如何变得不可预测和混乱。
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
