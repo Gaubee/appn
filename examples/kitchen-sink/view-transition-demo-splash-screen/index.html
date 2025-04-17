@@ -1,0 +1,247 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Transition Demo</title>
+    <style>
+      :root {
+        --accent-color: rgb(255, 128, 0); /* 更改强调色以示区别 */
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      #canvas {
+        width: 400px;
+        height: 200px;
+        display: flex;
+        flex-direction: row;
+        position: relative;
+        justify-content: center;
+        align-items: center;
+        /* overflow: hidden; */
+        margin: 0 auto;
+        border: 1px solid color-mix(in srgb, var(--accent-color), currentColor);
+      }
+      #progressBar {
+        width: 300px;
+        height: 3rem;
+        background-color: color-mix(in srgb, var(--accent-color), canvas);
+        position: relative;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        view-transition-name: progressBar;
+      }
+      #progressBarValue {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 0;
+        height: 100%;
+        /* width: 100%; */
+        /* left: calc(var(--progress, 0%) - 100%); */
+        width: var(--progress, 0%);
+        view-transition-name: progressBarValue;
+        background-image: repeating-linear-gradient(135deg, #f8bbd0, #f8bbd0 20px, #e1f5fe 20px, #e1f5fe 40px);
+      }
+      #progressBarValue.vt {
+        background-image: none;
+      }
+      #progressBarLabel {
+        view-transition-name: progressBarLabel;
+      }
+
+      ::view-transition-new(progressBarValue) {
+        /* Prevent the default animation, so both views remain opacity:1 throughout the transition */
+        animation: none;
+        /* Make the height the same as the group, meaning the view size might not match its aspect-ratio. */
+        height: 100%;
+        width: 100%;
+      }
+      ::view-transition-group(progressBarValue) {
+        /* Make the height the same as the group, meaning the view size might not match its aspect-ratio. */
+        background-image: repeating-linear-gradient(135deg, #f8bbd0, #f8bbd0 20px, #e1f5fe 20px, #e1f5fe 40px);
+      }
+
+      ::view-transition-new(progressBar) {
+        overflow: clip;
+      }
+
+      ::view-transition-group(*) {
+        animation-duration: 0.5s;
+      }
+    </style>
+    <style id="clipStyle"></style>
+    <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
+    <script type="module" crossorigin src="/assets/demo-with-controller-Mnc5H9dh.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/demo-with-controller-BLRnsDe2.css">
+  </head>
+  <body>
+    <div id="canvas">
+      <div id="progressBar">
+        <div id="progressBarValue"></div>
+        <div id="progressBarLabel"></div>
+      </div>
+    </div>
+    <section class="controllers">
+      <div>
+        <span>全局控制:</span>
+        <button id="btnPlay">播放</button>
+      </div>
+    </section>
+  </body>
+  <script>
+    CSS.registerProperty({
+      name: '--progress',
+      syntax: '<percentage>',
+      inherits: false,
+      initialValue: '0%',
+    });
+    /**
+     * @type {HTMLButtonElement}
+     */
+    const btnPlay = document.getElementById('btnPlay');
+    /**
+     * @type {HTMLDivElement}
+     */
+    const canvas = document.getElementById('canvas');
+    /**
+     * @type {HTMLDivElement}
+     */
+    const progressBar = document.getElementById('progressBar');
+    /**
+     * @type {HTMLDivElement}
+     */
+    const progressBarValue = document.getElementById('progressBarValue');
+    /**
+     * @type {HTMLStyleElement}
+     */
+    const clipStyle = document.getElementById('clipStyle');
+
+    class AppResourcesController extends EventTarget {
+      #task;
+      init() {
+        if (this.#task) {
+          this.#task.reject();
+        }
+        this.#task = Promise.withResolvers();
+        this.removeAllEventListener();
+      }
+      #progress = 0;
+      start() {
+        this.#progress = 0;
+        const ti = setInterval(() => {
+          this.#progress += Math.random() * 10;
+          if (this.#progress >= 100) {
+            this.#progress = 100;
+          }
+          this.dispatchEvent(new CustomEvent('progress', {detail: this.#progress}));
+          if (this.#progress === 100) {
+            clearInterval(ti);
+            this.#task.resolve();
+          }
+        }, 100);
+      }
+      get progress() {
+        return this.#progress;
+      }
+      get ready() {
+        return this.#task.promise;
+      }
+
+      #events = [];
+      addEventListener(a, b) {
+        this.#events.push([a, b]);
+        return super.addEventListener(a, b);
+      }
+      removeAllEventListener() {
+        for (const [a, b] of this.#events) {
+          super.removeEventListener(a, b);
+        }
+        this.#events = [];
+      }
+    }
+    const arc = new AppResourcesController();
+
+    class ViewTransitionController {
+      oldEles;
+      newEles;
+      constructor() {
+        this.init();
+      }
+      init() {
+        this.#value = {
+          progress: '0%',
+          label: '',
+        };
+        this.#render();
+      }
+      #render() {
+        progressBarValue.style.setProperty('--progress', this.#value.progress);
+        progressBarLabel.innerHTML = this.#value.label;
+      }
+
+      #t;
+      #lock;
+      #value = {
+        progress: '0%',
+        label: '',
+      };
+      async start() {
+        const raf = () => new Promise((cb) => requestAnimationFrame(cb));
+        do {
+          // debugger;
+          progressBarValue.classList.add('vt');
+          const ani = document.startViewTransition(() => {
+            this.#render();
+          });
+          await ani.ready;
+          //   progressBarValue.classList.remove('vt');
+          //   await Promise.race([raf(), ani.finished]);
+          //   progressBarValue.classList.add('vt');
+          await ani.finished;
+        } while (this.#value.progress !== '100%');
+
+        progressBarValue.classList.add('vt');
+        const ani = document.startViewTransition(() => {
+          this.#render();
+        });
+        await ani.finished;
+        progressBarValue.classList.remove('vt');
+      }
+      async setProgress(progress, label) {
+        this.#value = {
+          progress: progress,
+          label: label,
+        };
+      }
+      async endProgress(label) {
+        this.#value = {
+          progress: '100%',
+          label: label,
+        };
+      }
+    }
+    const vtc = new ViewTransitionController();
+    vtc.init();
+
+    btnPlay.addEventListener('click', async () => {
+      vtc.init();
+      arc.init();
+
+      arc.addEventListener('progress', (e) => {
+        console.log(e.detail);
+        vtc.setProgress(`${e.detail}%`, `${e.detail.toFixed(2)}% loading...`);
+      });
+      vtc.start();
+      arc.start();
+      await arc.ready;
+      vtc.endProgress('Done!');
+    });
+  </script>
+</html>
