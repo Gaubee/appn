@@ -49,9 +49,7 @@
         view-transition-name: progressBarValue;
         background-image: repeating-linear-gradient(135deg, #f8bbd0, #f8bbd0 20px, #e1f5fe 20px, #e1f5fe 40px);
       }
-      #progressBarValue.vt {
-        background-image: none;
-      }
+
       #progressBarLabel {
         view-transition-name: progressBarLabel;
       }
@@ -62,6 +60,9 @@
         /* Make the height the same as the group, meaning the view size might not match its aspect-ratio. */
         height: 100%;
         width: 100%;
+      }
+      ::view-transition-image-pair(progressBarValue) {
+        opacity: 0;
       }
       ::view-transition-group(progressBarValue) {
         /* Make the height the same as the group, meaning the view size might not match its aspect-ratio. */
@@ -195,24 +196,16 @@
       async start() {
         const raf = () => new Promise((cb) => requestAnimationFrame(cb));
         do {
-          // debugger;
-          progressBarValue.classList.add('vt');
           const ani = document.startViewTransition(() => {
             this.#render();
           });
-          await ani.ready;
-          //   progressBarValue.classList.remove('vt');
-          //   await Promise.race([raf(), ani.finished]);
-          //   progressBarValue.classList.add('vt');
           await ani.finished;
         } while (this.#value.progress !== '100%');
 
-        progressBarValue.classList.add('vt');
         const ani = document.startViewTransition(() => {
           this.#render();
         });
         await ani.finished;
-        progressBarValue.classList.remove('vt');
       }
       async setProgress(progress, label) {
         this.#value = {
