@@ -44,3 +44,4 @@ export const getAdoptedStyleSheets = (ele: Element | DocumentOrShadowRoot): Adop
 };
 
 export const isSupportCssLayer = /*@__PURE__*/ typeof CSSLayerBlockRule === 'function' && typeof CSSLayerStatementRule === 'function';
+export const isSupportViewTransition = /*@__PURE__*/ CSS.supports('view-transition-name: none');

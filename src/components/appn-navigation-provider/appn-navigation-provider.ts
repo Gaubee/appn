@@ -1,6 +1,7 @@
 import '@virtualstate/navigation/polyfill';
 import 'urlpattern-polyfill';
 
+import {CssSheetArray} from '@gaubee/web';
 import {ContextProvider, provide} from '@lit/context';
 import {html, LitElement} from 'lit';
 import {customElement, property, queryAssignedElements} from 'lit/decorators.js';
@@ -34,6 +35,8 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
 
   //#region AppnNavigation
   private __nav = window.navigation;
+  private __previousEntry: NavigationHistoryEntry | null = null;
+  private __currentEntry: NavigationHistoryEntry | null = this.__nav.currentEntry;
   constructor() {
     super();
     new ContextProvider(this, {
@@ -45,8 +48,12 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       if (!event.canIntercept) {
         return;
       }
+      this.__previousEntry = this.__nav.currentEntry;
       event.intercept({
-        handler: () => this.__effectRoutes(event.navigationType),
+        handler: () => {
+          this.__currentEntry = this.__nav.currentEntry!;
+          return this.__effectRoutes(event.navigationType);
+        },
       });
     });
     this.__nav.addEventListener('currententrychange', (_event) => {
@@ -96,6 +103,11 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
 
   @provide({context: appnNavigationHistoryEntryContext})
   accessor currentEntry: NavigationHistoryEntry | null = this.__nav.currentEntry;
+
+  #currentEntryIndex = -1; //this.currentEntry ? this.__nav.entries().indexOf(this.currentEntry) : -1;
+  get currentEntryIndex() {
+    return this.#currentEntryIndex;
+  }
 
   /** Updates the state object of the current NavigationHistoryEntry. */
   updateCurrentEntry(options: NavigationUpdateCurrentEntryOptions): void {
@@ -182,23 +194,29 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
   private __effectRoutes = async (navigationType?: NavigationTypeString) => {
-    const effectRoutes = (mode: 'prepare' | 'enter') => {
+    const effectRoutes = async (mode: 'prepare' | 'enter') => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = this.__nav.entries();
-      const currentEntry = this.__nav.currentEntry;
+      const currentEntry = mode === 'prepare' ? this.__previousEntry : this.__currentEntry;
+      console.log(this.__previousEntry?.url);
+      console.log(this.__currentEntry?.url);
       const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
-      allEntries.forEach((navEntry) => {
-        return this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex, navigationType, mode});
-      });
+      this.#currentEntryIndex = currentEntryIndex;
+      if (currentEntryIndex === -1) {
+        return;
+      }
+      for (const navEntry of allEntries) {
+        await this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex, navigationType, mode});
+      }
     };
-    // effectRoutes('prepare');
+    await effectRoutes('prepare');
     document.startViewTransition(() => {
       return effectRoutes('enter');
     });
     // effectRoutes();
   };
 
-  private __effectRoute = (
+  private __effectRoute = async (
     navEntry: NavigationHistoryEntry,
     routersElements: HTMLTemplateElement[],
     context: {
@@ -232,8 +250,10 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           : routerElement;
         if (templateElement) {
           const oldNavHistoryEntryNode = this.querySelector<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`);
+          let navHistoryEntryNode: AppnNavigationHistoryEntryElement;
 
           if (oldNavHistoryEntryNode) {
+            navHistoryEntryNode = oldNavHistoryEntryNode;
             oldNavHistoryEntryNode.navigationEntry = navEntry;
             if (oldNavHistoryEntryNode.templateEle !== templateElement) {
               oldNavHistoryEntryNode.templateEle = templateElement;
@@ -241,18 +261,56 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
               oldNavHistoryEntryNode.innerHTML = '';
               oldNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
             }
-            oldNavHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
           } else {
             const newNavHistoryEntryNode = new AppnNavigationHistoryEntryElement();
+            navHistoryEntryNode = newNavHistoryEntryNode;
             newNavHistoryEntryNode.navigationEntry = navEntry;
             newNavHistoryEntryNode.templateEle = templateElement;
             newNavHistoryEntryNode.pathname = relative_parts.pathname;
             newNavHistoryEntryNode.search = relative_parts.search;
             newNavHistoryEntryNode.hash = relative_parts.hash;
             newNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
-            newNavHistoryEntryNode.navigationType = context.navigationType ?? null;
-            this.appendChild(newNavHistoryEntryNode);
-            newNavHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
+          }
+
+          navHistoryEntryNode.navigationType = context.navigationType ?? null; // 它可能一开始的时候就在 future 里，所以 navigationType 默认为 null
+          navHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
+
+          if (!navHistoryEntryNode.parentElement) {
+            // 这里await一下，是给自定义元素完成自己的生命周期留时间
+            await this.appendChild(navHistoryEntryNode);
+          }
+          /// 过渡元素
+          const sharedElements = navHistoryEntryNode.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old]');
+          // if(navEntry.key === context.currentEntry?.key){
+          //   navHistoryEntryNode.style.viewTransitionName = 'appn-page' ;
+          // }
+          navHistoryEntryNode.style.viewTransitionName = 'appn-' + navEntry.key;
+          if (navEntry.key === context.currentEntry?.key) {
+            if (context.mode === 'prepare') {
+              for (const sharedElement of sharedElements) {
+                const vtn = (sharedElement.style.viewTransitionName = sharedElement.dataset.sharedElementOld || '');
+                if (vtn) {
+                  const cssText = sharedElement.dataset.sharedElementOldStyle;
+                  if (cssText) {
+                    this.sharedElementCss.setRule(vtn, `::view-transition-group(${vtn}){${cssText}}`);
+                  }
+                }
+              }
+            } else {
+              for (const sharedElement of sharedElements) {
+                const vtn = (sharedElement.style.viewTransitionName = sharedElement.dataset.sharedElement || '');
+                if (vtn) {
+                  const cssText = sharedElement.dataset.sharedElementStyle;
+                  if (cssText) {
+                    this.sharedElementCss.setRule(vtn, `::view-transition-group(${vtn}){${cssText}}`);
+                  }
+                }
+              }
+            }
+          } else {
+            for (const sharedElement of sharedElements) {
+              sharedElement.style.viewTransitionName = '';
+            }
           }
         }
         break;
@@ -260,11 +318,13 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     }
   };
 
+  sharedElementCss = new CssSheetArray();
+
   override render() {
     return this.__html;
   }
   private __html = cache(html`
-    <slot name="router" @slotchange=${this.__effectRoutes}></slot>
+    <slot name="router" @slotchange=${() => this.__effectRoutes()}></slot>
     <slot></slot>
     <css-starting-style
       slotted=""

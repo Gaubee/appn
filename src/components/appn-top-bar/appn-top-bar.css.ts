@@ -16,11 +16,36 @@ export const appnTopBarStyle = css`
   .leading {
     flex-shrink: 0;
     min-width: 48px;
-    anchor-name: --leading;
     user-select: none;
+    display: flex;
+    align-self: center;
   }
-  .back-button {
-    view-transition-name: appn-top-bar-back-button;
+
+  .title {
+    flex: 1;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--title-clamp, 1);
+    height: 2em;
+    line-height: 1.8;
+  }
+
+  .actions {
+    flex-shrink: 0;
+    min-width: 48px;
+    display: flex;
+    align-self: center;
+  }
+`;
+export const appnNavBackStyle = css`
+  :host {
+    anchor-name: --leading;
+    display: inline-flex;
+    height: 100%;
   }
   #nav-history {
     position-anchor: --leading;
@@ -82,29 +107,9 @@ export const appnTopBarStyle = css`
     box-shadow: 0 0 0 0 transparent;
     pointer-events: none;
   }
-
-  .title {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: var(--title-clamp, 1);
-    height: 2em;
-    line-height: 1.8;
-
+`;
+export const appnNavTitleStyle = css`
+  :host {
     font-weight: 600;
-    view-transition-class: appn-top-bar-title;
-  }
-
-  ::view-transition-group(.appn-top-bar-title) {
-    /* animation-timing-function: ease-in-out; */
-    transition-duration: var(--page-enter-duration);
-    transition-timing-function: var(--page-enter-ease);
-  }
-  .actions {
-    flex-shrink: 0;
-    min-width: 48px;
   }
 `;

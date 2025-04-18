@@ -1,5 +1,6 @@
 import {iter_map_not_null} from '@gaubee/util';
 import {css} from 'lit';
+import {isSupportViewTransition} from '../../utils/css-helper';
 import {cssLiteral} from '../../utils/lit-helper';
 export const pageFutureTranslateX = cssLiteral('100%');
 export const pageFutureTranslateY = cssLiteral('0%');
@@ -121,16 +122,19 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null(
         --page-scale-y: ${pagePastScaleY};
         --page-opacity: ${pagePastOpacity};
       }
-
-      :host([data-from-tense='present']) {
-        transition-duration: var(--page-leave-duration);
-        transition-timing-function: var(--page-leave-ease);
-      }
-      :host([data-tense='present']) {
-        transition-duration: var(--page-enter-duration);
-        transition-timing-function: var(--page-enter-ease);
-      }
     `,
+    isSupportViewTransition
+      ? css``
+      : css`
+          :host([data-from-tense='present']) {
+            transition-duration: var(--page-leave-duration);
+            transition-timing-function: var(--page-leave-ease);
+          }
+          :host([data-tense='present']) {
+            transition-duration: var(--page-enter-duration);
+            transition-timing-function: var(--page-enter-ease);
+          }
+        `,
   ],
   (v) => v
 );

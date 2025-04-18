@@ -14,6 +14,8 @@ export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationPr
 
   /** The current NavigationHistoryEntry. */
   readonly currentEntry: NavigationHistoryEntry | null;
+  // /** The index of current NavigationHistoryEntry. */
+  // readonly currentEntryIndex: number;
 
   /** Updates the state object of the current NavigationHistoryEntry. */
   updateCurrentEntry(options: NavigationUpdateCurrentEntryOptions): void;

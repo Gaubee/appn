@@ -40,7 +40,7 @@ export const nav_state_get_kv = <T = unknown>(navState: NavigationHistoryEntry |
   return;
 };
 
-export const nav_before_history_entries = async (nav: AppnNavigation | null, currentId = nav?.currentEntry?.id): Promise<NavigationHistoryEntry[] | undefined> => {
+export const nav_before_history_entries = async (nav: AppnNavigation | null | undefined, currentId = nav?.currentEntry?.id): Promise<NavigationHistoryEntry[] | undefined> => {
   if (nav == null || currentId == null) {
     return;
   }

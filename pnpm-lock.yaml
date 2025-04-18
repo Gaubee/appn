@@ -29,8 +29,8 @@ importers:
         specifier: ^0.26.2
         version: 0.26.2
       '@gaubee/web':
-        specifier: ^0.6.3
-        version: 0.6.3(@gaubee/util@0.26.2)
+        specifier: ^0.7.1
+        version: 0.7.1(@gaubee/util@0.26.2)
       '@lit-labs/observers':
         specifier: ^2.0.5
         version: 2.0.5
@@ -992,8 +992,8 @@ packages:
   '@gaubee/util@0.26.2':
     resolution: {integrity: sha512-vry9apn+ctpznJJeeb3eIk3iMpWhEAjrJRefRP4geLTSF61AAIspR3io4NH5tqg7neJIJSooJN/3eC6Q0VQhjQ==}
 
-  '@gaubee/web@0.6.3':
-    resolution: {integrity: sha512-mEcM584jhKljAbQazID84jfTHNy/7lSLpM9A6OZrlij73bpuFZ7etBBKrO6bNQmN2qYNIqgharElTCZ3GBs91A==}
+  '@gaubee/web@0.7.1':
+    resolution: {integrity: sha512-kikm7/6gT5xxfOGjbUZDyRTJIktjWYcfa0ytRFP5JaimGybOZa0D4k2ZeVwp/92fO59acVYwHpsn5u7N4/kcVA==}
     peerDependencies:
       '@gaubee/util': '*'
 
@@ -4768,7 +4768,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@gaubee/web@0.6.3(@gaubee/util@0.26.2)':
+  '@gaubee/web@0.7.1(@gaubee/util@0.26.2)':
     dependencies:
       '@gaubee/util': 0.26.2
       tslib: 2.8.1
