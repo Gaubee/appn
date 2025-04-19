@@ -194,6 +194,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
   private __effectRoutes = async (navigationType?: NavigationTypeString) => {
+    const sharedElementMap = new Map<string, HTMLElement>();
     const effectRoutes = async (mode: 'prepare' | 'enter' | 'finished') => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = this.__nav.entries();
@@ -206,7 +207,15 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         return;
       }
       for (const navEntry of allEntries) {
-        await this.__effectRoute(navEntry, routersElements, {allEntries, currentEntry, currentEntryIndex, navigationType, mode});
+        await this.__effectRoute(navEntry, routersElements, {
+          allEntries,
+          previousEntry: this.__previousEntry,
+          currentEntry,
+          currentEntryIndex,
+          navigationType,
+          mode,
+          sharedElementMap,
+        });
       }
     };
     await effectRoutes('prepare');
@@ -224,10 +233,12 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     routersElements: HTMLTemplateElement[],
     context: {
       allEntries: NavigationHistoryEntry[];
+      previousEntry: NavigationHistoryEntry | null;
       currentEntry: NavigationHistoryEntry | null;
       currentEntryIndex: number;
       navigationType?: NavigationTypeString;
       mode: 'prepare' | 'enter' | 'finished';
+      sharedElementMap: Map<string, HTMLElement>;
     }
   ) => {
     const current_url = navEntry.url;
@@ -238,6 +249,11 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     if (!relative_parts) {
       return;
     }
+
+    const sharedElementPagesContext: {
+      previousEntryNode?: AppnNavigationHistoryEntryElement;
+      currentEntryNode?: AppnNavigationHistoryEntryElement;
+    } = {};
     for (const routerElement of routersElements) {
       const {pathname = '*', search = '*', hash = '*'} = routerElement.dataset;
       const p = new URLPattern({pathname, search, hash});
@@ -293,52 +309,82 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
             await this.appendChild(navHistoryEntryNode);
           }
         }
-        /// 过渡元素
-        const sharedElements = navHistoryEntryNode.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old],[data-shared-element-new]');
-        if (context.mode === 'finished') {
+
+        if (navEntry.key === context.currentEntry?.key) {
+          sharedElementPagesContext.currentEntryNode = navHistoryEntryNode;
+        }
+        if (navEntry.key === context.previousEntry?.key) {
+          sharedElementPagesContext.previousEntryNode = navHistoryEntryNode;
+        }
+
+        break;
+      }
+    }
+    /// 最后，处理过渡元素
+    if (context.mode === 'finished') {
+      for (const navHistoryEntryNode of [sharedElementPagesContext.currentEntryNode, sharedElementPagesContext.previousEntryNode]) {
+        if (navHistoryEntryNode) {
+          const sharedElements = navHistoryEntryNode.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old],[data-shared-element-new]');
           /// 清理所有 viewTransitionName
           navHistoryEntryNode.style.viewTransitionName = '';
           for (const sharedElement of sharedElements) {
             sharedElement.style.viewTransitionName = '';
           }
-        } else {
-          navHistoryEntryNode.style.viewTransitionName = 'appn-' + navEntry.key;
-          if (navEntry.key === context.currentEntry?.key) {
-            if (context.mode === 'prepare') {
-              for (const sharedElement of sharedElements) {
-                const {dataset} = sharedElement;
-                const vtn = (sharedElement.style.viewTransitionName = dataset.sharedElementOld || dataset.sharedElement || '');
-                if (vtn) {
-                  const cssText = dataset.sharedElementOldStyle;
-                  if (cssText) {
-                    this.sharedElementCss.setRule(vtn, `::view-transition-group(${vtn}){${cssText}}`);
-                  }
-                }
-              }
-            } else {
-              for (const sharedElement of sharedElements) {
-                const {dataset} = sharedElement;
-                const vtn = (sharedElement.style.viewTransitionName = dataset.sharedElementNew || dataset.sharedElement || '');
-                if (vtn) {
-                  const cssText = dataset.sharedElementStyle;
-                  if (cssText) {
-                    this.sharedElementCss.setRule(vtn, `::view-transition-group(${vtn}){${cssText}}`);
-                  }
-                }
-              }
-            }
-          } else {
-            for (const sharedElement of sharedElements) {
-              sharedElement.style.viewTransitionName = '';
-            }
+        }
+      }
+    } else if (context.mode === 'prepare') {
+      for (const navHistoryEntryNode of [sharedElementPagesContext.currentEntryNode]) {
+        if (navHistoryEntryNode) {
+          const sharedElements = navHistoryEntryNode.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old],[data-shared-element-new]');
+          const appnNavVtn = (navHistoryEntryNode.style.viewTransitionName = 'appn-' + navEntry.index);
+          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${navEntry.index};}`);
+          for (const sharedElement of sharedElements) {
+            const {dataset} = sharedElement;
+            const vtn = dataset.sharedElementOld || dataset.sharedElement || '';
+            this.__setSharedElement(vtn, sharedElement, context.sharedElementMap);
           }
         }
-        break;
+      }
+    } else if (context.mode === 'enter') {
+      for (const navHistoryEntryNode of [sharedElementPagesContext.previousEntryNode, sharedElementPagesContext.currentEntryNode]) {
+        if (navHistoryEntryNode) {
+          const sharedElements = navHistoryEntryNode.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old],[data-shared-element-new]');
+          const appnNavVtn = (navHistoryEntryNode.style.viewTransitionName = 'appn-' + navEntry.index);
+          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${navEntry.index};}`);
+          for (const sharedElement of sharedElements) {
+            const {dataset} = sharedElement;
+            const vtn = dataset.sharedElementNew || dataset.sharedElement || '';
+            this.__setSharedElement(vtn, sharedElement, context.sharedElementMap);
+          }
+        }
       }
     }
   };
 
   sharedElementCss = new CssSheetArray();
+  private __setSharedElement(vtn: string, element: HTMLElement, sharedElementMap: Map<string, HTMLElement>) {
+    if (vtn) {
+      const oldElement = sharedElementMap.get(vtn);
+      if (oldElement) {
+        oldElement.style.viewTransitionName = '';
+      }
+      element.style.viewTransitionName = vtn;
+      sharedElementMap.set(vtn, element);
+      const dataset = element.dataset;
+      const cssText = dataset.sharedElementStyle;
+      if (cssText) {
+        this.sharedElementCss.setRule(`group(${vtn})`, `::view-transition-group(${vtn}){${cssText}}`);
+      }
+      const oldCssText = dataset.sharedElementOldStyle;
+      if (oldCssText) {
+        this.sharedElementCss.setRule(`old(${vtn})`, `::view-transition-old(${vtn}){${oldCssText}}`);
+      }
+      const newCssText = dataset.sharedElementNewStyle;
+      if (newCssText) {
+        this.sharedElementCss.setRule(`new(${vtn})`, `::view-transition-new(${vtn}){${newCssText}}`);
+      }
+    }
+  }
 
   override render() {
     return this.__html;
@@ -430,8 +476,8 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
             .otherwise(() => (selfIndex < presentIndex ? 'past' : 'future'));
     this.dataset.tense = tense;
 
-    const vtn = `vtn-${selfIndex}`;
-    this.style.setProperty('--view-transition-name', vtn);
+    // const vtn = `vtn-${selfIndex}`;
+    // this.style.setProperty('--view-transition-name', vtn);
     this.inert = tense !== 'present';
 
     return html`<slot></slot>`;

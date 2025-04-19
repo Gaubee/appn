@@ -1,7 +1,7 @@
 import type {UserConfig as EleventyUserConfig} from '@11ty/eleventy';
 import syntaxHighlight from '@11ty/eleventy-plugin-syntaxhighlight';
 import EleventyVitePlugin from '@11ty/eleventy-plugin-vite';
-import {func_debounce} from '@gaubee/util';
+import {func_throttle} from '@gaubee/util';
 import fs from 'node:fs';
 import path from 'node:path';
 import {renderToStaticMarkup} from 'react-dom/server';
@@ -61,11 +61,11 @@ export default function (eleventyConfig: EleventyUserConfig) {
   eleventyConfig.addPassthroughCopy('imgs');
   eleventyConfig.addPassthroughCopy('node_modules/lit/polyfill-support.js');
   eleventyConfig.ignores.delete('README.md');
-  
+
   // eleventyConfig.addWatchTarget('bundle');
   // 这里 bundle 的监听不生效，所以这里手动关闭进程，让node --watch 自动重启
-  const exit = func_debounce(() => process.exit(0), 300);
-  fs.watch(resolve('bundle'), (event, filename) => {
+  const exit = func_throttle(() => process.exit(1), 1000);
+  fs.watch(resolve('bundle'), {}, (event, filename) => {
     exit();
   });
   // eleventyConfig.addWatchTarget('src', {
