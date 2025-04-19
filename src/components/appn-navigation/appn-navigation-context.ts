@@ -2,7 +2,7 @@
 
 import {createContext} from '@lit/context';
 import type {Pattern} from 'ts-pattern';
-import type {AppnNavigationProviderElement} from './appn-navigation-provider';
+import type {AppnNavigationProviderElement} from './appn-navigation';
 
 export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationProviderElement> {
   readonly baseURI: string;

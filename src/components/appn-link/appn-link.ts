@@ -7,7 +7,7 @@ import {match} from 'ts-pattern';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {safeProperty} from '../../utils/safe-property';
 import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
-import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from '../appn-navigation-provider/appn-navigation-context';
+import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from '../appn-navigation/appn-navigation-context';
 import {appnLinkStyle} from './appn-link.css';
 
 const APP_LINK_MODE_ENUM_VALUES = ['push', 'replace', 'forward', 'back', 'back-or-push', 'forward-or-push'] as const;

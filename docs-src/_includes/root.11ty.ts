@@ -1,6 +1,4 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import {customElementDeclarations} from '../custom-elements-metadata.js';
+import {getComponentsEntry} from '../custom-elements-metadata.js';
 import {relativePath as relative} from './relative-path.js';
 
 import type {EleventyData} from './types.js';
@@ -30,33 +28,11 @@ export default function (data: EleventyData): string {
         <link rel="stylesheet" href="${safeUrl('/docs.css')}" />
         ${polyfill} ${scripts?.map((script_src) => html`<script type="module" src=${script_src}></script>`).join('') ?? ''}
         ${links?.map((link_href) => html`<link rel="stylesheet" href=${link_href} />`) ?? ''}
-        ${
-          // useVite
-          // ? html`<script type="module" src="${path.resolve(import.meta.dirname, `../../src/index.ts`)}"></script> `
-          // :
-           customElementDeclarations
-              .sort((a, b) => {
-                const aw = a.tagName.endsWith('-provider') ? 1 : 0;
-                const bw = b.tagName.endsWith('-provider') ? 1 : 0;
-                return bw - aw;
-              })
-              .map((ele) => {
-                return {...ele, filename: path.resolve(import.meta.dirname, `../../bundle/${ele.tagName}.js`)};
-              })
-              .filter(({filename}) => fs.existsSync(filename))
-              .map((ele) => {
-                return html`
-                  <script
-                    type="module"
-                    src="${
-                      // relative(page.url, `public/bundle/${ele.tagName}.js`)
-                      // ele.filename
-                      `/bundle/${ele.tagName}.js`
-                    }"
-                  ></script>
-                `;
-              })
-              .join('\n')}
+        ${getComponentsEntry()
+          .map((entry) => {
+            return html`<script type="module" src="${entry.bundle}"></script>`;
+          })
+          .join('\n')}
       </head>
       <body>
         ${content}

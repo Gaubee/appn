@@ -10,7 +10,7 @@ import {customElement, property, query} from 'lit/decorators.js';
 import {when} from 'lit/directives/when.js';
 import '../appn-icon/appn-icon';
 import '../appn-link/appn-link';
-import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from '../appn-navigation-provider/appn-navigation-context';
+import {appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';
 import '../css-starting-style/css-starting-style';
 import {createPreNavs} from './appn-top-bar-context';
 import {appnNavBackStyle, appnNavTitleStyle, appnTopBarStyle} from './appn-top-bar.css';

@@ -194,7 +194,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
   private __effectRoutes = async (navigationType?: NavigationTypeString) => {
-    const effectRoutes = async (mode: 'prepare' | 'enter') => {
+    const effectRoutes = async (mode: 'prepare' | 'enter' | 'finished') => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = this.__nav.entries();
       const currentEntry = mode === 'prepare' ? this.__previousEntry : this.__currentEntry;
@@ -210,9 +210,12 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       }
     };
     await effectRoutes('prepare');
-    document.startViewTransition(() => {
+    const tran = document.startViewTransition(() => {
       return effectRoutes('enter');
     });
+    await tran.finished;
+    await effectRoutes('finished');
+
     // effectRoutes();
   };
 
@@ -224,7 +227,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       currentEntry: NavigationHistoryEntry | null;
       currentEntryIndex: number;
       navigationType?: NavigationTypeString;
-      mode: 'prepare' | 'enter';
+      mode: 'prepare' | 'enter' | 'finished';
     }
   ) => {
     const current_url = navEntry.url;
@@ -246,12 +249,22 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
                 (ele) => ele instanceof HTMLTemplateElement,
                 (ele) => ele
               )
-              .otherwise(() => null)
+              .otherwise(() => {
+                console.warn(`no found templateElement by id: ${JSON.stringify(routerElement.dataset.target)}`);
+                return null;
+              })
           : routerElement;
-        if (templateElement) {
-          const oldNavHistoryEntryNode = this.querySelector<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`);
-          let navHistoryEntryNode: AppnNavigationHistoryEntryElement;
+        // 找不到模板元素
+        if (!templateElement) break;
 
+        const oldNavHistoryEntryNode = this.querySelector<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`);
+        let navHistoryEntryNode: AppnNavigationHistoryEntryElement;
+        if (context.mode === 'finished') {
+          if (!oldNavHistoryEntryNode) {
+            break;
+          }
+          navHistoryEntryNode = oldNavHistoryEntryNode;
+        } else {
           if (oldNavHistoryEntryNode) {
             navHistoryEntryNode = oldNavHistoryEntryNode;
             oldNavHistoryEntryNode.navigationEntry = navEntry;
@@ -279,18 +292,24 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
             // 这里await一下，是给自定义元素完成自己的生命周期留时间
             await this.appendChild(navHistoryEntryNode);
           }
-          /// 过渡元素
-          const sharedElements = navHistoryEntryNode.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old]');
-          // if(navEntry.key === context.currentEntry?.key){
-          //   navHistoryEntryNode.style.viewTransitionName = 'appn-page' ;
-          // }
+        }
+        /// 过渡元素
+        const sharedElements = navHistoryEntryNode.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old],[data-shared-element-new]');
+        if (context.mode === 'finished') {
+          /// 清理所有 viewTransitionName
+          navHistoryEntryNode.style.viewTransitionName = '';
+          for (const sharedElement of sharedElements) {
+            sharedElement.style.viewTransitionName = '';
+          }
+        } else {
           navHistoryEntryNode.style.viewTransitionName = 'appn-' + navEntry.key;
           if (navEntry.key === context.currentEntry?.key) {
             if (context.mode === 'prepare') {
               for (const sharedElement of sharedElements) {
-                const vtn = (sharedElement.style.viewTransitionName = sharedElement.dataset.sharedElementOld || '');
+                const {dataset} = sharedElement;
+                const vtn = (sharedElement.style.viewTransitionName = dataset.sharedElementOld || dataset.sharedElement || '');
                 if (vtn) {
-                  const cssText = sharedElement.dataset.sharedElementOldStyle;
+                  const cssText = dataset.sharedElementOldStyle;
                   if (cssText) {
                     this.sharedElementCss.setRule(vtn, `::view-transition-group(${vtn}){${cssText}}`);
                   }
@@ -298,9 +317,10 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
               }
             } else {
               for (const sharedElement of sharedElements) {
-                const vtn = (sharedElement.style.viewTransitionName = sharedElement.dataset.sharedElement || '');
+                const {dataset} = sharedElement;
+                const vtn = (sharedElement.style.viewTransitionName = dataset.sharedElementNew || dataset.sharedElement || '');
                 if (vtn) {
-                  const cssText = sharedElement.dataset.sharedElementStyle;
+                  const cssText = dataset.sharedElementStyle;
                   if (cssText) {
                     this.sharedElementCss.setRule(vtn, `::view-transition-group(${vtn}){${cssText}}`);
                   }

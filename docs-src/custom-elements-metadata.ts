@@ -117,3 +117,23 @@ console.log(
   'all customElement tagsName',
   customElementDeclarations.map((d) => d.tagName)
 );
+
+export const getComponentsEntry = () => {
+  const componentsDir = path.resolve(import.meta.dirname, '../src/components/');
+  const distDir = path.resolve(import.meta.dirname, '../dist/');
+
+  const inputFiles = fs
+    .readdirSync(componentsDir)
+    .map((comName) => {
+      return {
+        componentName: comName,
+        bundle: `/bundle/${comName}.js`,
+        src: path.join(componentsDir, comName, comName + '.ts'),
+        dist: path.join(distDir, 'components', comName, comName + '.js'),
+      };
+    })
+    .filter((entry) => {
+      return fs.existsSync(entry.src);
+    });
+  return inputFiles;
+};

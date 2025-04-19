@@ -1,8 +1,8 @@
 import {ContextConsumer} from '@lit/context';
 import {Task} from '@lit/task';
 import type {ReactiveControllerHost} from 'lit';
-import {appnNavigationContext, appnNavigationHistoryEntryContext} from '../appn-navigation-provider/appn-navigation-context';
-import {nav_before_history_entries} from '../appn-navigation-provider/internal/appn-navigation-helper';
+import {appnNavigationContext, appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';
+import {nav_before_history_entries} from '../appn-navigation/internal/appn-navigation-helper';
 
 export const createPreNavs = (host: ReactiveControllerHost & HTMLElement) => {
   const navConsumer = new ContextConsumer(host, {context: appnNavigationContext});

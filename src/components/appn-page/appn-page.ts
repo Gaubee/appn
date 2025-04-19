@@ -9,7 +9,7 @@ import {LitElement, html, type PropertyValues} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {ResizeController} from '../../utils/resize-controller';
-import {appnNavigationHistoryEntryContext} from '../appn-navigation-provider/appn-navigation-context';
+import {appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';
 import '../appn-scroll-view/appn-scroll-view';
 import {appnThemeContext, type AppnTheme} from '../appn-theme-provider/appn-theme-context';
 import {appnPageStyles} from './appn-page.css';

@@ -1,38 +1,22 @@
 /**
  * @license
- * Copyright 2018 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright 2025 Gaubee
+ * License: MIT
  */
+import 'tsx';
 
 import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-import terser from '@rollup/plugin-terser';
 import fs from 'node:fs';
 import path from 'node:path';
 import {defineConfig} from 'rollup';
-// import minifyHTML from 'rollup-plugin-minify-html-literals';
-// import minifyHTML from 'rollup-plugin-minify-html-literals-v3';
 import {minifyTemplateLiterals} from 'rollup-plugin-minify-template-literals';
-
 import summary from 'rollup-plugin-summary';
-import 'tsx';
 
-const componentsDir = path.resolve(import.meta.dirname, './src/components/');
-const distDir = path.resolve(import.meta.dirname, './dist/');
+const {getComponentsEntry} = await import('./docs-src/custom-elements-metadata.ts');
 
-const inputFiles = fs
-  .readdirSync(componentsDir)
-  .map((comName) => {
-    return path.join(distDir, 'components', comName, comName + '.js');
-  })
-  .filter((filepath) => {
-    return fs.existsSync(filepath);
-  })
-  .map((filepath) => {
-    return path.relative(import.meta.dirname, filepath);
-  });
+const inputFiles = getComponentsEntry().map((entry) => entry.dist);
 export default defineConfig((env) => {
-  console.log('QAQ env', env);
   return {
     input: inputFiles,
     output: {

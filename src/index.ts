@@ -1,5 +1,5 @@
-export * from './components/appn-navigation-provider/appn-navigation-context';
-export * from './components/appn-navigation-provider/appn-navigation-provider';
+export * from './components/appn-navigation/appn-navigation-context';
+export * from './components/appn-navigation/appn-navigation';
 export * from './components/appn-theme-provider/appn-theme-context';
 export * from './components/appn-theme-provider/appn-theme-provider';
 
