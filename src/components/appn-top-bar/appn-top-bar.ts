@@ -66,7 +66,8 @@ export class AppnNavBackElement extends LitElement {
     const navEntry = this.#preNavs.navigationEntry;
     if (navEntry) {
       this.dataset.sharedElement = 'appn-nav-back';
-      this.dataset.sharedElementStyle = `z-index:${navEntry.index + 1};`;
+      this.dataset.sharedElementNewStyle = `width:fit-content;`;
+      this.dataset.sharedElementOldStyle = `width:fit-content;`;
     }
   }
   override render() {
@@ -122,7 +123,7 @@ export class AppnNavBackTextElement extends LitElement {
     if (navigationEntry) {
       const pre_index = navigationEntry.index - 1;
       this.dataset.sharedElement = `appn-title-${pre_index}`;
-      this.dataset.sharedElementStyle = `z-index:${navigationEntry.index + 1};`;
+      // this.dataset.sharedElementStyle = `z-index:${navigationEntry.index + 1};`;
       this.dataset.sharedElementNewStyle = `width:fit-content;`;
       this.dataset.sharedElementOldStyle = `width:fit-content;`;
     }
@@ -164,7 +165,7 @@ export class AppnNavTitleElement extends LitElement {
     const navigationEntry = this.#navigationEntry;
     if (navigationEntry) {
       this.dataset.sharedElement = `appn-title-${navigationEntry.index}`;
-      this.dataset.sharedElementStyle = `z-index:${navigationEntry.index + 1};`;
+      // this.dataset.sharedElementStyle = `z-index:${navigationEntry.index + 1};`;
     }
   }
   protected override render() {

@@ -19,6 +19,11 @@ export default class Page {
           /* --safe-area-inset-left: ${searchParams.get('safe-area-inset-left') ?? '0px'};
           --safe-area-inset-right: ${searchParams.get('safe-area-inset-right') ?? '0px'}; */
         }
+        .qaq {
+          width: 100px;
+          aspect-ratio: 1;
+          background-color: rgba(255, 0, 0, 0.5);
+        }
       `;
       document.getElementById('injectStyle')!.innerHTML = styleText;
     };
@@ -70,11 +75,32 @@ export default class Page {
                   <appn-link mode="replace" to="#page3">
                     replace as page3
                   </appn-link>
+                  <div className="qaq" data-shared-element="qaq">
+                    QAQ
+                  </div>
                 </appn-view>
               </appn-page>
             </template>
             <template slot="router" data-hash="page2" data-target="page-template"></template>
-            <template slot="router" data-hash="page3" data-target="page-template"></template>
+            <template slot="router" data-hash="page3">
+              <appn-page>
+                <appn-header>
+                  <appn-top-bar>
+                    <appn-nav-back slot="start"></appn-nav-back>
+                    <appn-nav-title pageTitle="Page3"></appn-nav-title>
+                  </appn-top-bar>
+                </appn-header>
+                <appn-view>
+                  <div className="qaq" data-shared-element="qaq" style={{backgroundColor: 'rgba(0, 255, 0, 0.5)', color: 'blue', alignSelf: 'center', width: '200px'}}>
+                    QAQ
+                  </div>
+                  <appn-link mode="back">
+                    返回
+                    <appn-nav-back-text style={{color: 'red'}}></appn-nav-back-text>
+                  </appn-link>
+                </appn-view>
+              </appn-page>
+            </template>
           </appn-navigation-provider>
         </appn-theme-provider>
       </>

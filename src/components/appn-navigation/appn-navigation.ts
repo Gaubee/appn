@@ -347,29 +347,37 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       }
     } else if (context.mode === 'prepare') {
       const sharedElementMap = new Map<string, HTMLElement>();
+      const indexs = [sharedElementPagesContext.previous?.navEntry.index ?? 0, sharedElementPagesContext.subsequent?.navEntry.index ?? 0].sort();
+      const [minIndex, maxIndex] = indexs;
+      const sharedElementIndex = (maxIndex - minIndex) * 10 + 1;
       for (const pageItem of [sharedElementPagesContext.subsequent, sharedElementPagesContext.previous]) {
         if (pageItem) {
           const sharedElements = querySharedElement(pageItem);
           const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
-          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${pageItem.navEntry.index};}`);
+          const zIndexStart = (pageItem.navEntry.index - minIndex) * 10;
+          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${zIndexStart};}`);
           for (const sharedElement of sharedElements) {
             const {dataset} = sharedElement;
             const vtn = dataset.sharedElementOld || dataset.sharedElement || '';
-            this.__setSharedElement(vtn, sharedElement, sharedElementMap);
+            this.__setSharedElement(vtn, sharedElement, sharedElementMap, `z-index:${sharedElementIndex};`);
           }
         }
       }
     } else if (context.mode === 'enter') {
       const sharedElementMap = new Map<string, HTMLElement>();
+      const indexs = [sharedElementPagesContext.previous?.navEntry.index ?? 0, sharedElementPagesContext.subsequent?.navEntry.index ?? 0].sort();
+      const [minIndex, maxIndex] = indexs;
+      const sharedElementIndex = (maxIndex - minIndex) * 10 + 1;
       for (const pageItem of [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent]) {
         if (pageItem) {
           const sharedElements = querySharedElement(pageItem);
           const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
-          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${pageItem.navEntry.index};}`);
+          const zIndexStart = (pageItem.navEntry.index - minIndex) * 10;
+          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${zIndexStart};}`);
           for (const sharedElement of sharedElements) {
             const {dataset} = sharedElement;
             const vtn = dataset.sharedElementNew || dataset.sharedElement || '';
-            this.__setSharedElement(vtn, sharedElement, sharedElementMap);
+            this.__setSharedElement(vtn, sharedElement, sharedElementMap, `z-index:${sharedElementIndex};`);
           }
         }
       }
@@ -383,10 +391,15 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
      * 否则它在 transition 的时候，会被其它 view-transition 给捕获。
      */
     sharedElementCss.addRule('[data-shared-element-state="old"]{visibility: hidden;!important;}');
+
+    /// 出于兼容性的考虑，这里暂时不使用 view-transition-group(class) + view-transition-class 来做修饰。而且目前需求比较简单
+    // sharedElementCss.addRule('::view-transition-group(*){--old-z-index:1;--new-z-index:2;}');
+    // sharedElementCss.addRule('::view-transition-group(.old){z-index:1;}');
+    // sharedElementCss.addRule('::view-transition-group(.new){z-index:2;}');
     return sharedElementCss;
   })(new CssSheetArray());
 
-  private __setSharedElement(vtn: string, element: HTMLElement, sharedElementMap: Map<string, HTMLElement>) {
+  private __setSharedElement(vtn: string, element: HTMLElement, sharedElementMap: Map<string, HTMLElement>, zIndexCssText: string) {
     if (vtn) {
       const oldElement = sharedElementMap.get(vtn);
       if (oldElement) {
@@ -398,9 +411,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       element.dataset.sharedElementState = 'new';
       const dataset = element.dataset;
       const cssText = dataset.sharedElementStyle;
-      if (cssText) {
-        this.sharedElementCss.setRule(`group(${vtn})`, `::view-transition-group(${vtn}){${cssText}}`);
-      }
+      this.sharedElementCss.setRule(`group(${vtn})`, `::view-transition-group(${vtn}){${zIndexCssText}${cssText ?? ''}}`);
       const oldCssText = dataset.sharedElementOldStyle;
       if (oldCssText) {
         this.sharedElementCss.setRule(`old(${vtn})`, `::view-transition-old(${vtn}){${oldCssText}}`);
