@@ -64,7 +64,7 @@ export default function (eleventyConfig: EleventyUserConfig) {
 
   // eleventyConfig.addWatchTarget('bundle');
   // 这里 bundle 的监听不生效，所以这里手动关闭进程，让node --watch 自动重启
-  const exit = func_throttle(() => process.exit(1), 1000);
+  const exit = func_throttle(() => process.exit(0), 1000);
   fs.watch(resolve('bundle'), {}, (event, filename) => {
     exit();
   });
