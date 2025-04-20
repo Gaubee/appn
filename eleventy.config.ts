@@ -10,6 +10,7 @@ import type {UserConfig as ViteUserConfig} from 'vite';
 const resolve = (to: string) => path.resolve(import.meta.dirname, to);
 
 export default function (eleventyConfig: EleventyUserConfig) {
+  const isWatch = process.argv.includes('--watch');
   fs.rmSync(resolve('docs'), {recursive: true, force: true});
   fs.mkdirSync(resolve('docs/public'), {recursive: true});
 
@@ -64,10 +65,12 @@ export default function (eleventyConfig: EleventyUserConfig) {
 
   // eleventyConfig.addWatchTarget('bundle');
   // 这里 bundle 的监听不生效，所以这里手动关闭进程，让node --watch 自动重启
-  const exit = func_throttle(() => process.exit(0), 1000);
-  fs.watch(resolve('bundle'), {}, (event, filename) => {
-    exit();
-  });
+  if (isWatch) {
+    const exit = func_throttle(() => process.exit(0), 1000);
+    fs.watch(resolve('bundle'), {}, (event, filename) => {
+      exit();
+    });
+  }
   // eleventyConfig.addWatchTarget('src', {
   //   resetConfig: true,
   // });
