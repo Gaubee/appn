@@ -194,29 +194,31 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
   private __effectRoutes = async (navigationType?: NavigationTypeString) => {
-    const sharedElementMap = new Map<string, HTMLElement>();
     const effectRoutes = async (mode: 'prepare' | 'enter' | 'finished') => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = this.__nav.entries();
       const currentEntry = mode === 'prepare' ? this.__previousEntry : this.__currentEntry;
-      console.log(this.__previousEntry?.url);
-      console.log(this.__currentEntry?.url);
       const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
       this.#currentEntryIndex = currentEntryIndex;
       if (currentEntryIndex === -1) {
         return;
       }
-      for (const navEntry of allEntries) {
-        await this.__effectRoute(navEntry, routersElements, {
-          allEntries,
-          previousEntry: this.__previousEntry,
-          currentEntry,
-          currentEntryIndex,
-          navigationType,
-          mode,
-          sharedElementMap,
-        });
+      // TODO 未来 mode === 'finished' 时，需要通知元素生命周期
+      if (mode !== 'finished') {
+        for (const navEntry of allEntries) {
+          await this.__effectRoute(navEntry, routersElements, {
+            allEntries,
+            currentEntry,
+            currentEntryIndex,
+            navigationType,
+          });
+        }
       }
+      this.__effectPagesSharedElement({
+        previousEntry: this.__previousEntry,
+        subsequentEntry: this.__currentEntry,
+        mode,
+      });
     };
     await effectRoutes('prepare');
     const tran = document.startViewTransition(() => {
@@ -233,12 +235,9 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     routersElements: HTMLTemplateElement[],
     context: {
       allEntries: NavigationHistoryEntry[];
-      previousEntry: NavigationHistoryEntry | null;
       currentEntry: NavigationHistoryEntry | null;
       currentEntryIndex: number;
       navigationType?: NavigationTypeString;
-      mode: 'prepare' | 'enter' | 'finished';
-      sharedElementMap: Map<string, HTMLElement>;
     }
   ) => {
     const current_url = navEntry.url;
@@ -250,10 +249,6 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       return;
     }
 
-    const sharedElementPagesContext: {
-      previousEntryNode?: AppnNavigationHistoryEntryElement;
-      currentEntryNode?: AppnNavigationHistoryEntryElement;
-    } = {};
     for (const routerElement of routersElements) {
       const {pathname = '*', search = '*', hash = '*'} = routerElement.dataset;
       const p = new URLPattern({pathname, search, hash});
@@ -275,101 +270,132 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
 
         const oldNavHistoryEntryNode = this.querySelector<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`);
         let navHistoryEntryNode: AppnNavigationHistoryEntryElement;
-        if (context.mode === 'finished') {
-          if (!oldNavHistoryEntryNode) {
-            break;
-          }
+
+        if (oldNavHistoryEntryNode) {
           navHistoryEntryNode = oldNavHistoryEntryNode;
+          oldNavHistoryEntryNode.navigationEntry = navEntry;
+          if (oldNavHistoryEntryNode.templateEle !== templateElement) {
+            oldNavHistoryEntryNode.templateEle = templateElement;
+            oldNavHistoryEntryNode.hash = relative_parts.hash;
+            oldNavHistoryEntryNode.innerHTML = '';
+            oldNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
+          }
         } else {
-          if (oldNavHistoryEntryNode) {
-            navHistoryEntryNode = oldNavHistoryEntryNode;
-            oldNavHistoryEntryNode.navigationEntry = navEntry;
-            if (oldNavHistoryEntryNode.templateEle !== templateElement) {
-              oldNavHistoryEntryNode.templateEle = templateElement;
-              oldNavHistoryEntryNode.hash = relative_parts.hash;
-              oldNavHistoryEntryNode.innerHTML = '';
-              oldNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
-            }
-          } else {
-            const newNavHistoryEntryNode = new AppnNavigationHistoryEntryElement();
-            navHistoryEntryNode = newNavHistoryEntryNode;
-            newNavHistoryEntryNode.navigationEntry = navEntry;
-            newNavHistoryEntryNode.templateEle = templateElement;
-            newNavHistoryEntryNode.pathname = relative_parts.pathname;
-            newNavHistoryEntryNode.search = relative_parts.search;
-            newNavHistoryEntryNode.hash = relative_parts.hash;
-            newNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
-          }
-
-          navHistoryEntryNode.navigationType = context.navigationType ?? null; // 它可能一开始的时候就在 future 里，所以 navigationType 默认为 null
-          navHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
-
-          if (!navHistoryEntryNode.parentElement) {
-            // 这里await一下，是给自定义元素完成自己的生命周期留时间
-            await this.appendChild(navHistoryEntryNode);
-          }
+          const newNavHistoryEntryNode = new AppnNavigationHistoryEntryElement();
+          navHistoryEntryNode = newNavHistoryEntryNode;
+          newNavHistoryEntryNode.navigationEntry = navEntry;
+          newNavHistoryEntryNode.templateEle = templateElement;
+          newNavHistoryEntryNode.pathname = relative_parts.pathname;
+          newNavHistoryEntryNode.search = relative_parts.search;
+          newNavHistoryEntryNode.hash = relative_parts.hash;
+          newNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
         }
 
-        if (navEntry.key === context.currentEntry?.key) {
-          sharedElementPagesContext.currentEntryNode = navHistoryEntryNode;
-        }
-        if (navEntry.key === context.previousEntry?.key) {
-          sharedElementPagesContext.previousEntryNode = navHistoryEntryNode;
+        navHistoryEntryNode.navigationType = context.navigationType ?? null; // 它可能一开始的时候就在 future 里，所以 navigationType 默认为 null
+        navHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
+
+        if (!navHistoryEntryNode.parentElement) {
+          // 这里await一下，是给自定义元素完成自己的生命周期留时间
+          await this.appendChild(navHistoryEntryNode);
         }
 
         break;
       }
     }
+  };
+  private __effectPagesSharedElement = async (context: {
+    /** 导航的起始页 */
+    previousEntry: NavigationHistoryEntry | null;
+    /** 导航的目标页 */
+    subsequentEntry: NavigationHistoryEntry | null;
+    /** 生命周期 */
+    mode: 'prepare' | 'enter' | 'finished';
+  }) => {
+    type PageItem = {node: AppnNavigationHistoryEntryElement; navEntry: NavigationHistoryEntry};
+    const sharedElementPagesContext: {
+      [key in 'previous' | 'subsequent']?: PageItem;
+    } = {};
+    /// 获取过渡元素
+    const queryPageItem = (navEntry: NavigationHistoryEntry | null): PageItem | undefined => {
+      if (navEntry) {
+        const node = this.querySelector<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`);
+        if (node) {
+          return {node, navEntry};
+        }
+      }
+      return;
+    };
+    sharedElementPagesContext.previous = queryPageItem(context.previousEntry);
+    sharedElementPagesContext.subsequent = queryPageItem(context.subsequentEntry);
+
+    const querySharedElement = (pageItem: PageItem) => {
+      return pageItem.node.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old],[data-shared-element-new]');
+    };
+
     /// 最后，处理过渡元素
     if (context.mode === 'finished') {
-      for (const navHistoryEntryNode of [sharedElementPagesContext.currentEntryNode, sharedElementPagesContext.previousEntryNode]) {
-        if (navHistoryEntryNode) {
-          const sharedElements = navHistoryEntryNode.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old],[data-shared-element-new]');
+      for (const pageItem of [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent]) {
+        if (pageItem) {
+          const sharedElements = querySharedElement(pageItem);
           /// 清理所有 viewTransitionName
-          navHistoryEntryNode.style.viewTransitionName = '';
+          pageItem.node.style.viewTransitionName = '';
           for (const sharedElement of sharedElements) {
             sharedElement.style.viewTransitionName = '';
+            sharedElement.removeAttribute('data-shared-element-state');
           }
         }
       }
     } else if (context.mode === 'prepare') {
-      for (const navHistoryEntryNode of [sharedElementPagesContext.currentEntryNode]) {
-        if (navHistoryEntryNode) {
-          const sharedElements = navHistoryEntryNode.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old],[data-shared-element-new]');
-          const appnNavVtn = (navHistoryEntryNode.style.viewTransitionName = 'appn-' + navEntry.index);
-          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${navEntry.index};}`);
+      const sharedElementMap = new Map<string, HTMLElement>();
+      for (const pageItem of [sharedElementPagesContext.subsequent, sharedElementPagesContext.previous]) {
+        if (pageItem) {
+          const sharedElements = querySharedElement(pageItem);
+          const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
+          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${pageItem.navEntry.index};}`);
           for (const sharedElement of sharedElements) {
             const {dataset} = sharedElement;
             const vtn = dataset.sharedElementOld || dataset.sharedElement || '';
-            this.__setSharedElement(vtn, sharedElement, context.sharedElementMap);
+            this.__setSharedElement(vtn, sharedElement, sharedElementMap);
           }
         }
       }
     } else if (context.mode === 'enter') {
-      for (const navHistoryEntryNode of [sharedElementPagesContext.previousEntryNode, sharedElementPagesContext.currentEntryNode]) {
-        if (navHistoryEntryNode) {
-          const sharedElements = navHistoryEntryNode.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old],[data-shared-element-new]');
-          const appnNavVtn = (navHistoryEntryNode.style.viewTransitionName = 'appn-' + navEntry.index);
-          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${navEntry.index};}`);
+      const sharedElementMap = new Map<string, HTMLElement>();
+      for (const pageItem of [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent]) {
+        if (pageItem) {
+          const sharedElements = querySharedElement(pageItem);
+          const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
+          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${pageItem.navEntry.index};}`);
           for (const sharedElement of sharedElements) {
             const {dataset} = sharedElement;
             const vtn = dataset.sharedElementNew || dataset.sharedElement || '';
-            this.__setSharedElement(vtn, sharedElement, context.sharedElementMap);
+            this.__setSharedElement(vtn, sharedElement, sharedElementMap);
           }
         }
       }
     }
   };
 
-  sharedElementCss = new CssSheetArray();
+  sharedElementCss = ((sharedElementCss) => {
+    /**
+     * state=old的情况出现在， previousPage 和 subsequentPage 都存在，但是由于 previousPage 页面共同拥有一个 sharedElement。
+     * 这就意味着元素是从 previousPage 获取的 old 状态，然后再 subsequentPage 获取的 new 状态。那么原本的 previousPage 页面的元素，在被获取完 old 状态后，就应该隐藏。
+     * 否则它在 transition 的时候，会被其它 view-transition 给捕获。
+     */
+    sharedElementCss.addRule('[data-shared-element-state="old"]{visibility: hidden;!important;}');
+    return sharedElementCss;
+  })(new CssSheetArray());
+
   private __setSharedElement(vtn: string, element: HTMLElement, sharedElementMap: Map<string, HTMLElement>) {
     if (vtn) {
       const oldElement = sharedElementMap.get(vtn);
       if (oldElement) {
         oldElement.style.viewTransitionName = '';
+        oldElement.dataset.sharedElementState = 'old';
       }
-      element.style.viewTransitionName = vtn;
       sharedElementMap.set(vtn, element);
+      element.style.viewTransitionName = vtn;
+      element.dataset.sharedElementState = 'new';
       const dataset = element.dataset;
       const cssText = dataset.sharedElementStyle;
       if (cssText) {
