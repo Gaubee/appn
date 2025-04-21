@@ -5,7 +5,7 @@
  */
 
 import {consume} from '@lit/context';
-import {LitElement, html, type PropertyValues} from 'lit';
+import {LitElement, css, html, type PropertyValues} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {ResizeController} from '../../utils/resize-controller';
@@ -89,10 +89,11 @@ export class AppnPageElement extends LitElement {
     this.inert = !this.open;
     return html`
       <style>
-        :host {
-          --page-header-height: ${this.#headerHeight}px;
-          --page-footer-height: ${this.#footerHeight}px;
-        }
+        ${css`
+          :host {
+            --page-header-height: ${this.#headerHeight}px;
+            --page-footer-height: ${this.#footerHeight}px;
+          }`}
       </style>
       <div class="layer" part="layer">
         <appn-scroll-view class="root" part="root">

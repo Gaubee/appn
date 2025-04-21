@@ -5,13 +5,16 @@
  */
 import 'tsx';
 
+import {iter_map_not_null} from '@gaubee/util';
 import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
+import {bold, gray, green, yellow} from '@std/fmt/colors';
 import fs from 'node:fs';
 import path from 'node:path';
 import {defineConfig} from 'rollup';
 import {minifyTemplateLiterals} from 'rollup-plugin-minify-template-literals';
 import summary from 'rollup-plugin-summary';
+import {match, P} from 'ts-pattern';
 
 const {getComponentsEntry} = await import('./docs-src/custom-elements-metadata.ts');
 
@@ -24,8 +27,17 @@ export default defineConfig((env) => {
       format: 'esm',
     },
     onwarn(warning) {
-      if (warning.code !== 'THIS_IS_UNDEFINED') {
-        console.error(`(!) ${warning.message}`);
+      warning.plugin;
+      const canLog = match(warning)
+        .with(
+          // ignores
+          {code: 'THIS_IS_UNDEFINED'},
+          {code: 'CIRCULAR_DEPENDENCY', ids: [P.string.includes('/node_modules/culori/'), ...P.array()]},
+          () => false
+        )
+        .otherwise(() => true);
+      if (canLog) {
+        console.warn(yellow(`${bold('(!)')} ${gray(iter_map_not_null([warning.code, warning.plugin]).join(' '))} ${warning.message}`));
       }
     },
     plugins: [
@@ -51,14 +63,14 @@ export default defineConfig((env) => {
       //     },
       //   },
       // }),
-      minifyTemplateLiterals(),
+      minifyTemplateLiterals({}),
       summary(),
       {
         name: 'generate-react-types',
         async buildEnd(error) {
           const {doWrite} = await import('./scripts/react-generator');
           doWrite(true);
-          console.log('react.ts generated!!');
+          console.log(green('./src/react.ts generated!!'));
         },
       },
     ],

@@ -43,5 +43,5 @@ export const getAdoptedStyleSheets = (ele: Element | DocumentOrShadowRoot): Adop
   return map_get_or_put(ass_wn, ele, createAdoptedStyleSheets);
 };
 
-export const isSupportCssLayer = /*@__PURE__*/ typeof CSSLayerBlockRule === 'function' && typeof CSSLayerStatementRule === 'function';
+export const isSupportCssLayer = typeof CSSLayerBlockRule === 'function';
 export const isSupportViewTransition = /*@__PURE__*/ CSS.supports('view-transition-name: none');

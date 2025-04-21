@@ -174,7 +174,7 @@ export class AppnScrollViewElement extends LitElement {
   protected override render() {
     this.__hostSize.bindElement(this);
     const {canOverlayScrollbar} = this;
-    const injectCss: CSSResult[] = [];
+    const injectCssList: CSSResult[] = [];
     if (canOverlayScrollbar) {
       this.__hostScroll.unbindElement(this);
     } else {
@@ -182,9 +182,12 @@ export class AppnScrollViewElement extends LitElement {
       this.__hostScroll.bindElement(this);
       /// 需要自己绘制 scrollbar
       const scrollbarSize = this.__getScrollbarSizePx();
-      injectCss.push(css`
+      injectCssList.push(css`
         :host {
           --scrollbar-size: ${scrollbarSize}px;
+          /* 盒子的宽高，用于子元素计算滚动内容 */
+          --view-width: ${this.#hostWidth}px;
+          --view-height: ${this.#hostHeight}px;
         }
         .mock-content {
           width: calc(${this.#contentWidth}px - var(--scrollbar-track-size));
@@ -197,7 +200,7 @@ export class AppnScrollViewElement extends LitElement {
        */
       if (AppnScrollViewElement.__supportsCssScrollbar) {
         const scrollbarTrackSize = scrollbarSize + 4;
-        injectCss.push(css`
+        injectCssList.push(css`
           :host {
             scrollbar-width: none;
             --scrollbar-track-size: ${scrollbarTrackSize}px;
@@ -214,7 +217,7 @@ export class AppnScrollViewElement extends LitElement {
           }
         `);
       } else {
-        injectCss.push(css`
+        injectCssList.push(css`
           :host {
             --scrollbar-track-size: ${scrollbarSize}px;
           }
@@ -247,13 +250,7 @@ export class AppnScrollViewElement extends LitElement {
     }
     return html`
       <style>
-        ${injectCss}
-
-        /* 盒子的宽高，用于子元素计算滚动内容 */
-        :host {
-          --view-width: ${this.#hostWidth}px;
-          --view-height: ${this.#hostHeight}px;
-        }
+        ${injectCssList}
       </style>
       <div class="scrollbar-sticky">
         ${cache(

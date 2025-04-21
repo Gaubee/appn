@@ -41,7 +41,8 @@ export const appnScrollViewStyle = css`
     height: max-content;
     z-index: 1;
     position: relative;
-    transform: translateZ(0); // 渲染成独立的层
+    /* 渲染成独立的层 */
+    transform: translateZ(0);
   }
   .scrollbar-sticky {
     position: sticky;
@@ -59,7 +60,7 @@ export const appnScrollViewStyle = css`
     position: relative;
   }
   .scrollbar {
-    // 这里禁用平滑滚动
+    /** 这里禁用平滑滚动 */
     scroll-behavior: auto;
 
     -ms-overflow-style: auto;

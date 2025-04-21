@@ -5,7 +5,7 @@
  */
 
 import {consume} from '@lit/context';
-import {LitElement, html, type PropertyValues} from 'lit';
+import {LitElement, css, html, type PropertyValues} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 import {when} from 'lit/directives/when.js';
 import '../appn-icon/appn-icon';
@@ -173,9 +173,10 @@ export class AppnNavTitleElement extends LitElement {
 
     return html`<slot>${this.pageTitle}</slot>
       <style>
-        :host {
-          --title-clamp: ${this.lines};
-        }
+        ${css`
+          :host {
+            --title-clamp: ${this.lines};
+          }`}
       </style>`;
   }
 }

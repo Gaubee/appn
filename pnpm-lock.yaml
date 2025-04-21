@@ -17,6 +17,9 @@ patchedDependencies:
   '@open-wc/testing':
     hash: 4bb5aae5f7477453da97eb801fc6972e89bee9b1790a047f18ca32fba3f7506b
     path: patches/@open-wc__testing.patch
+  minify-literals:
+    hash: 749bcfd3f7708a140fce939df59f167f361c864d7413f433026df4d79ed3ac57
+    path: patches/minify-literals.patch
   prismjs:
     hash: 6892ef9361add6cf80bd00df5b35c095b5cd8a913c54ab010fa278f27147dba9
     path: patches/prismjs.patch
@@ -26,11 +29,11 @@ importers:
   .:
     dependencies:
       '@gaubee/util':
-        specifier: ^0.26.2
-        version: 0.26.2
+        specifier: ^0.26.4
+        version: 0.26.4
       '@gaubee/web':
         specifier: ^0.7.1
-        version: 0.7.1(@gaubee/util@0.26.2)
+        version: 0.7.1(@gaubee/util@0.26.4)
       '@lit-labs/observers':
         specifier: ^2.0.5
         version: 2.0.5
@@ -43,6 +46,9 @@ importers:
       '@lit/task':
         specifier: ^1.0.2
         version: 1.0.2
+      '@std/fmt':
+        specifier: npm:@jsr/std__fmt@^1.0.6
+        version: '@jsr/std__fmt@1.0.6'
       big.js:
         specifier: ^6.2.2
         version: 6.2.2
@@ -989,8 +995,8 @@ packages:
   '@esm-bundle/chai@4.3.4-fix.0':
     resolution: {integrity: sha512-26SKdM4uvDWlY8/OOOxSB1AqQWeBosCX3wRYUZO7enTAj03CtVxIiCimYVG2WpULcyV51qapK4qTovwkUr5Mlw==}
 
-  '@gaubee/util@0.26.2':
-    resolution: {integrity: sha512-vry9apn+ctpznJJeeb3eIk3iMpWhEAjrJRefRP4geLTSF61AAIspR3io4NH5tqg7neJIJSooJN/3eC6Q0VQhjQ==}
+  '@gaubee/util@0.26.4':
+    resolution: {integrity: sha512-Upnl+MUKHDwFoREDF2onuAy7J/MrI82qKSMcRBddCUNkgzsXvcfqIZ8aqVs8AJUhvtDkWrqwAIPkdH657o7+aQ==}
 
   '@gaubee/web@0.7.1':
     resolution: {integrity: sha512-kikm7/6gT5xxfOGjbUZDyRTJIktjWYcfa0ytRFP5JaimGybOZa0D4k2ZeVwp/92fO59acVYwHpsn5u7N4/kcVA==}
@@ -1047,6 +1053,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
+
+  '@jsr/std__fmt@1.0.6':
+    resolution: {integrity: sha512-oPA9iNSb2Cg50Les9HUxpZ1Iw6To6yn2dawJ/SiO9SRMHE0Fh7EbRw5TLz9iwkrAfoWg9NfqRYkyNkDAg0B2ZQ==, tarball: https://npm.jsr.io/~/11/@jsr/std__fmt/1.0.6.tgz}
 
   '@lit-labs/observers@2.0.5':
     resolution: {integrity: sha512-DYHc3XhNgfl9RoDFMz99OvnElWIU7ncNga1tYd/9Wez4NOsMDRXsSD6LjFfpHCVfzZic6MdlVfB7+iIuWXl5Ng==}
@@ -4764,13 +4773,13 @@ snapshots:
     dependencies:
       '@types/chai': 5.2.1
 
-  '@gaubee/util@0.26.2':
+  '@gaubee/util@0.26.4':
     dependencies:
       tslib: 2.8.1
 
-  '@gaubee/web@0.7.1(@gaubee/util@0.26.2)':
+  '@gaubee/web@0.7.1(@gaubee/util@0.26.4)':
     dependencies:
-      '@gaubee/util': 0.26.2
+      '@gaubee/util': 0.26.4
       tslib: 2.8.1
 
   '@github/catalyst@1.7.0': {}
@@ -4820,6 +4829,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  '@jsr/std__fmt@1.0.6': {}
 
   '@lit-labs/observers@2.0.5':
     dependencies:
@@ -6868,7 +6879,7 @@ snapshots:
 
   mimic-fn@2.1.0: {}
 
-  minify-literals@1.0.10:
+  minify-literals@1.0.10(patch_hash=749bcfd3f7708a140fce939df59f167f361c864d7413f433026df4d79ed3ac57):
     dependencies:
       clean-css: 5.3.3
       html-minifier-terser: 7.2.0
@@ -7254,7 +7265,7 @@ snapshots:
   rollup-plugin-minify-template-literals@1.1.7(rollup@4.39.0):
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@4.39.0)
-      minify-literals: 1.0.10
+      minify-literals: 1.0.10(patch_hash=749bcfd3f7708a140fce939df59f167f361c864d7413f433026df4d79ed3ac57)
     transitivePeerDependencies:
       - rollup
 

@@ -355,7 +355,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           const sharedElements = querySharedElement(pageItem);
           const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
           const zIndexStart = (pageItem.navEntry.index - minIndex) * 10;
-          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${zIndexStart};}`);
+          this.__sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${zIndexStart};}`);
           for (const sharedElement of sharedElements) {
             const {dataset} = sharedElement;
             const vtn = dataset.sharedElementOld || dataset.sharedElement || '';
@@ -373,7 +373,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           const sharedElements = querySharedElement(pageItem);
           const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
           const zIndexStart = (pageItem.navEntry.index - minIndex) * 10;
-          this.sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${zIndexStart};}`);
+          this.__sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${zIndexStart};}`);
           for (const sharedElement of sharedElements) {
             const {dataset} = sharedElement;
             const vtn = dataset.sharedElementNew || dataset.sharedElement || '';
@@ -384,7 +384,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     }
   };
 
-  sharedElementCss = ((sharedElementCss) => {
+  private __sharedElementCss = ((sharedElementCss) => {
     /**
      * state=old的情况出现在， previousPage 和 subsequentPage 都存在，但是由于 previousPage 页面共同拥有一个 sharedElement。
      * 这就意味着元素是从 previousPage 获取的 old 状态，然后再 subsequentPage 获取的 new 状态。那么原本的 previousPage 页面的元素，在被获取完 old 状态后，就应该隐藏。
@@ -411,14 +411,14 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       element.dataset.sharedElementState = 'new';
       const dataset = element.dataset;
       const cssText = dataset.sharedElementStyle;
-      this.sharedElementCss.setRule(`group(${vtn})`, `::view-transition-group(${vtn}){${zIndexCssText}${cssText ?? ''}}`);
+      this.__sharedElementCss.setRule(`group(${vtn})`, `::view-transition-group(${vtn}){${zIndexCssText}${cssText ?? ''}}`);
       const oldCssText = dataset.sharedElementOldStyle;
       if (oldCssText) {
-        this.sharedElementCss.setRule(`old(${vtn})`, `::view-transition-old(${vtn}){${oldCssText}}`);
+        this.__sharedElementCss.setRule(`old(${vtn})`, `::view-transition-old(${vtn}){${oldCssText}}`);
       }
       const newCssText = dataset.sharedElementNewStyle;
       if (newCssText) {
-        this.sharedElementCss.setRule(`new(${vtn})`, `::view-transition-new(${vtn}){${newCssText}}`);
+        this.__sharedElementCss.setRule(`new(${vtn})`, `::view-transition-new(${vtn}){${newCssText}}`);
       }
     }
   }

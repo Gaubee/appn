@@ -1,5 +1,7 @@
 import {func_remember} from '@gaubee/util';
+import {css} from 'lit';
 import {Signal} from 'signal-polyfill';
+import {cssLiteral} from '../lit-helper';
 
 /**
  * 使用一个CustomElement可以避免样式污染，从而获取浏览器最原始的滚动条样式。
@@ -23,38 +25,39 @@ class ScrollbarTrackerElement extends HTMLElement {
     this.attachShadow({mode: 'open'});
     const html = String.raw;
     this.shadowRoot!.innerHTML = html`<style>
-        :host {
-          position: absolute;
-          top: -9999px;
-          width: 100px;
-          height: 100px;
-          overflow: scroll;
-          pointer-events: none;
-          visibility: hidden;
-          scrollbar-width: ${options.scrollbarWidth ?? 'auto'};
-        }
-        :host,
-        .scroll-view {
-          position: absolute;
-          top: -9999px;
-          overflow: scroll;
-          pointer-events: none;
-          visibility: hidden;
-        }
-        :host {
-          width: 0px;
-          height: 0px;
-        }
-        .scroll-view {
-          width: 100px;
-          height: 100px;
-          scrollbar-width: auto;
-        }
-        .scroll-view-thin {
-          width: 100px;
-          height: 100px;
-          scrollbar-width: thin;
-        }
+        ${css`
+          :host {
+            position: absolute;
+            top: -9999px;
+            width: 100px;
+            height: 100px;
+            overflow: scroll;
+            pointer-events: none;
+            visibility: hidden;
+            scrollbar-width: ${cssLiteral(options.scrollbarWidth ?? 'auto')};
+          }
+          :host,
+          .scroll-view {
+            position: absolute;
+            top: -9999px;
+            overflow: scroll;
+            pointer-events: none;
+            visibility: hidden;
+          }
+          :host {
+            width: 0px;
+            height: 0px;
+          }
+          .scroll-view {
+            width: 100px;
+            height: 100px;
+            scrollbar-width: auto;
+          }
+          .scroll-view-thin {
+            width: 100px;
+            height: 100px;
+            scrollbar-width: thin;
+          }`}
       </style>
       <div class="scroll-view"></div>
       <div class="scroll-view-thin"></div>`;
