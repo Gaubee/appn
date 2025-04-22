@@ -68,17 +68,26 @@ export class AppnLinkElement extends LitElement {
       to: to_url,
       mode: this.mode,
     };
+    const isEquals = () => {
+      const {currentEntry} = nav;
+      if (currentEntry) {
+        if (currentEntry.url === to_url && Object.is(currentEntry.getState(), state)) {
+          return true;
+        }
+      }
+      return false;
+    };
 
     await match(this.mode)
       .with('push', () => {
-        if (to_url) {
+        if (to_url && !isEquals()) {
           const event = new AppnLinkNavigateEvent({type: 'push', url: to_url, state, info});
           this.dispatchEvent(event);
           event.applyNavigate(nav, currentEntry);
         }
       })
       .with('replace', () => {
-        if (to_url) {
+        if (to_url && !isEquals()) {
           const event = new AppnLinkNavigateEvent({type: 'replace', url: to_url, state, info});
           this.dispatchEvent(event);
           event.applyNavigate(nav, currentEntry);
