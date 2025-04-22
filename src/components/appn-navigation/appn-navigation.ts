@@ -24,6 +24,8 @@ import {
   pageFutureTranslateY,
 } from './appn-navigation.css';
 
+export type ViewTransitionLifecycle = 'prepare' | 'started' | 'finished';
+
 const APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES = [null, 'horizontal', 'vertical'] as const;
 export type AppnNavigationStackDirection = (typeof APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES)[number];
 /**
@@ -195,35 +197,56 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
   private __effectRoutes = async (navigationType?: NavigationTypeString) => {
-    const effectRoutes = async (mode: 'prepare' | 'enter' | 'finished') => {
+    const allNavHistoryEntryNodeMap = new Map<number, AppnNavigationHistoryEntryElement>();
+    {
+      for (const node of this.querySelectorAll<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry`)) {
+        const index = node.dataset.index;
+        if (index) {
+          allNavHistoryEntryNodeMap.set(+index, node);
+        }
+      }
+    }
+    const unuseEntryNodes = new Set(allNavHistoryEntryNodeMap.values());
+
+    const effectRoutes = async (lifecycle: ViewTransitionLifecycle) => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = this.__nav.entries();
-      const currentEntry = mode === 'prepare' ? this.__previousEntry : this.__currentEntry;
+      const currentEntry = lifecycle === 'prepare' ? this.__previousEntry : this.__currentEntry;
       const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
       this.#currentEntryIndex = currentEntryIndex;
       if (currentEntryIndex === -1) {
         return;
       }
+      this.style.setProperty('--present-index', `${currentEntryIndex}`);
+
       // TODO 未来 mode === 'finished' 时，需要通知元素生命周期
-      if (mode !== 'finished') {
+      if (lifecycle !== 'finished') {
         for (const navEntry of allEntries) {
-          await this.__effectRoute(navEntry, routersElements, {
+          const ele = await this.__effectRoute(navEntry, routersElements, allNavHistoryEntryNodeMap, {
             allEntries,
             currentEntry,
             currentEntryIndex,
             navigationType,
           });
+          if (ele) {
+            unuseEntryNodes.delete(ele);
+          }
+        }
+      } else {
+        // 移除废弃的元素
+        for (const ele of unuseEntryNodes) {
+          ele.remove();
         }
       }
       this.__effectPagesSharedElement({
         previousEntry: this.__previousEntry,
         subsequentEntry: this.__currentEntry,
-        mode,
+        lifecycle,
       });
     };
     await effectRoutes('prepare');
     const tran = document.startViewTransition(() => {
-      return effectRoutes('enter');
+      return effectRoutes('started');
     });
     await tran.finished;
     await effectRoutes('finished');
@@ -234,13 +257,14 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   private __effectRoute = async (
     navEntry: NavigationHistoryEntry,
     routersElements: HTMLTemplateElement[],
+    allNavHistoryEntryNodeMap: Map<number, AppnNavigationHistoryEntryElement>,
     context: {
       allEntries: NavigationHistoryEntry[];
       currentEntry: NavigationHistoryEntry | null;
       currentEntryIndex: number;
       navigationType?: NavigationTypeString;
     }
-  ) => {
+  ): Promise<AppnNavigationHistoryEntryElement | undefined> => {
     const current_url = navEntry.url;
     if (!current_url) {
       return;
@@ -269,7 +293,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         // 找不到模板元素
         if (!templateElement) break;
 
-        const oldNavHistoryEntryNode = this.querySelector<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`);
+        const oldNavHistoryEntryNode = allNavHistoryEntryNodeMap.get(navEntry.index);
         let navHistoryEntryNode: AppnNavigationHistoryEntryElement;
 
         if (oldNavHistoryEntryNode) {
@@ -283,6 +307,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           }
         } else {
           const newNavHistoryEntryNode = new AppnNavigationHistoryEntryElement();
+          allNavHistoryEntryNodeMap.set(navEntry.index, newNavHistoryEntryNode);
           navHistoryEntryNode = newNavHistoryEntryNode;
           newNavHistoryEntryNode.navigationEntry = navEntry;
           newNavHistoryEntryNode.templateEle = templateElement;
@@ -300,9 +325,10 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           await this.appendChild(navHistoryEntryNode);
         }
 
-        break;
+        return navHistoryEntryNode;
       }
     }
+    return;
   };
   private __effectPagesSharedElement = async (context: {
     /** 导航的起始页 */
@@ -310,7 +336,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     /** 导航的目标页 */
     subsequentEntry: NavigationHistoryEntry | null;
     /** 生命周期 */
-    mode: 'prepare' | 'enter' | 'finished';
+    lifecycle: ViewTransitionLifecycle;
   }) => {
     type PageItem = {node: AppnNavigationHistoryEntryElement; navEntry: NavigationHistoryEntry};
     const sharedElementPagesContext: {
@@ -334,9 +360,10 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     };
 
     /// 最后，处理过渡元素
-    if (context.mode === 'finished') {
+    if (context.lifecycle === 'finished') {
       for (const pageItem of [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent]) {
         if (pageItem) {
+          pageItem.node.removeAttribute('data-view-transition-lifecycle');
           const sharedElements = querySharedElement(pageItem);
           /// 清理所有 viewTransitionName
           pageItem.node.style.viewTransitionName = '';
@@ -352,13 +379,14 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       const indexs = [sharedElementPagesContext.previous?.navEntry.index ?? 0, sharedElementPagesContext.subsequent?.navEntry.index ?? 0].sort((a, b) => a - b);
       const [minIndex, maxIndex] = indexs;
       const sharedElementIndex = (maxIndex - minIndex + 1) * 10 + 1;
-      const sharedElementPages = match(context.mode)
+      const sharedElementPages = match(context.lifecycle)
         .with('prepare', () => [sharedElementPagesContext.subsequent, sharedElementPagesContext.previous])
-        .with('enter', () => [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent])
+        .with('started', () => [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent])
         .exhaustive();
 
       for (const pageItem of sharedElementPages) {
         if (pageItem) {
+          pageItem.node.dataset.viewTransitionLifecycle = context.lifecycle;
           const sharedElements = querySharedElement(pageItem);
           const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
           const zIndexStart = (pageItem.navEntry.index - minIndex + 1) * 10;
@@ -455,7 +483,6 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
     /** 当前 NavigationHistoryEntry 的 index */
     const presentIndex = this.presentEntryIndex;
     this.style.setProperty('--index', (this.dataset.index = `${selfIndex}`));
-    this.style.setProperty('--present-index', `${presentIndex}`);
 
     let fromTense = this.dataset.tense as NavigationHistoryEntryTense;
     /**
@@ -500,7 +527,6 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
             .with(presentIndex, () => 'present' as const)
             .otherwise(() => (selfIndex < presentIndex ? 'past' : 'future'));
     this.dataset.tense = tense;
-    this.dataset.indexDiff = `${selfIndex - presentIndex}`;
 
     // const vtn = `vtn-${selfIndex}`;
     // this.style.setProperty('--view-transition-name', vtn);
