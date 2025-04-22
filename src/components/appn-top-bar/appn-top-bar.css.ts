@@ -16,6 +16,7 @@ export const appnTopBarStyle = css`
   .leading {
     flex-shrink: 0;
     min-width: 48px;
+
     user-select: none;
     display: flex;
     align-self: center;
@@ -23,6 +24,7 @@ export const appnTopBarStyle = css`
 
   .title {
     flex: 1;
+    flex-shrink: 0;
 
     overflow: hidden;
     text-overflow: ellipsis;
@@ -37,6 +39,8 @@ export const appnTopBarStyle = css`
   .actions {
     flex-shrink: 0;
     min-width: 48px;
+
+    user-select: none;
     display: flex;
     align-self: center;
   }
@@ -46,6 +50,10 @@ export const appnNavBackStyle = css`
     anchor-name: --leading;
     display: inline-flex;
     height: 100%;
+    width: 100%;
+  }
+  .back-button::part(link) {
+    width: 100%;
   }
   #nav-history {
     position-anchor: --leading;
@@ -110,6 +118,10 @@ export const appnNavBackStyle = css`
 `;
 export const appnNavTitleStyle = css`
   :host {
-    font-weight: 600;
+    /**
+     * 不使用 font-weight: 600; 这会导致文本宽度的变化。
+     * 从而影响 view-transiton 在变换的时候，文本错位的问题
+     */
+    font-variation-settings: 'wght' 600;
   }
 `;

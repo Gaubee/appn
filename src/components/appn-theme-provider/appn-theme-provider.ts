@@ -6,10 +6,9 @@
 
 import {func_remember, obj_props} from '@gaubee/util';
 import {provide} from '@lit/context';
-import {LitElement, css, html} from 'lit';
+import {LitElement, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {getAdoptedStyleSheets} from '../../utils/css-helper';
-import {cssLiteral} from '../../utils/lit-helper';
 import {colorSchemeStateify} from '../../utils/match-media-signal/color-scheme-stateify';
 import {effect_state} from '../../utils/signals';
 import {appnThemeContext, findAppnTheme, getAllAppnThemes, registerAppnTheme, type AppnTheme} from './appn-theme-context';
@@ -95,7 +94,7 @@ export class AppnThemeProviderElement extends LitElement {
     return this.#themeContext;
   }
 
-  private __transitionStyleSheet = func_remember(
+  private __themeStyleSheet = func_remember(
     (cssText: string) => {
       const css = new CSSStyleSheet();
       css.replaceSync(cssText);
@@ -121,114 +120,68 @@ export class AppnThemeProviderElement extends LitElement {
       const leave = 'leave' in tran ? tran.leave : tran;
       transitionCss += `--${key}-enter-ease:${enter.ease};--${key}-enter-duration:${enter.duration};--${key}-leave-ease:${leave};--${key}-leave-duration:${leave.duration};`;
     }
+    const tag = this.tagName;
     if (transitionCss) {
-      transitionCss = `:host{${transitionCss}}`;
+      transitionCss = `${tag}{${transitionCss}}`;
     }
-    const transitionStyleSheet = this.__transitionStyleSheet(transitionCss);
-    const ass = getAdoptedStyleSheets(this.shadowRoot!);
-    ass.set('transition', transitionStyleSheet);
-    css`
-      :host {
-        --font-style: ${cssLiteral(font.style)};
-        --font-variant-ligatures: ${cssLiteral(font.variantLigatures)};
-        --font-variant-caps: ${cssLiteral(font.variantCaps)};
-        --font-variant-numeric: ${cssLiteral(font.variantNumeric)};
-        --font-variant-east-asian: ${cssLiteral(font.variantEastAsian)};
-        --font-variant-alternates: ${cssLiteral(font.variantAlternates)};
-        --font-variant-position: ${cssLiteral(font.variantPosition)};
-        --font-variant-emoji: ${cssLiteral(font.variantEmoji)};
-        --font-weight: ${cssLiteral(font.weight)};
-        --font-stretch: ${cssLiteral(font.stretch)};
-        --font-size: ${cssLiteral(font.size)};
-        --font-family: ${cssLiteral(font.family)};
-        --font-optical-sizing: ${cssLiteral(font.opticalSizing)};
-        --font-size-adjust: ${cssLiteral(font.sizeAdjust)};
-        --font-kerning: ${cssLiteral(font.kerning)};
-        --font-feature-settings: ${cssLiteral(font.featureSettings)};
-        --font-variation-settings: ${cssLiteral(font.variationSettings)};
-        --line-height: ${cssLiteral(font.lineHeight)};
+    const css = String.raw;
+    const themeStyleSheet = this.__themeStyleSheet(
+      transitionCss +
+        css`
+          ${tag} {
+            --font-style: ${font.style};
+            --font-variant-ligatures: ${font.variantLigatures};
+            --font-variant-caps: ${font.variantCaps};
+            --font-variant-numeric: ${font.variantNumeric};
+            --font-variant-east-asian: ${font.variantEastAsian};
+            --font-variant-alternates: ${font.variantAlternates};
+            --font-variant-position: ${font.variantPosition};
+            --font-variant-emoji: ${font.variantEmoji};
+            --font-weight: ${font.weight};
+            --font-stretch: ${font.stretch};
+            --font-size: ${font.size};
+            --font-family: ${font.family};
+            --font-optical-sizing: ${font.opticalSizing};
+            --font-size-adjust: ${font.sizeAdjust};
+            --font-kerning: ${font.kerning};
+            --font-feature-settings: ${font.featureSettings};
+            --font-variation-settings: ${font.variationSettings};
+            --line-height: ${font.lineHeight};
 
-        --color-canvas: ${cssLiteral(colors.Canvas)};
-        --color-canvas-text: ${cssLiteral(colors.CanvasText)};
-        --color-accent: ${cssLiteral(colors.Accent)};
-        --color-accent-text: ${cssLiteral(colors.AccentText)};
-        --color-red: ${cssLiteral(colors.Red)};
-        --color-orange: ${cssLiteral(colors.Orange)};
-        --color-yellow: ${cssLiteral(colors.Yellow)};
-        --color-green: ${cssLiteral(colors.Green)};
-        --color-mint: ${cssLiteral(colors.Mint)};
-        --color-teal: ${cssLiteral(colors.Teal)};
-        --color-cyan: ${cssLiteral(colors.Cyan)};
-        --color-blue: ${cssLiteral(colors.Blue)};
-        --color-indigo: ${cssLiteral(colors.Indigo)};
-        --color-purple: ${cssLiteral(colors.Purple)};
-        --color-pink: ${cssLiteral(colors.Pink)};
-        --color-brown: ${cssLiteral(colors.Brown)};
+            --color-canvas: ${colors.Canvas};
+            --color-canvas-text: ${colors.CanvasText};
+            --color-accent: ${colors.Accent};
+            --color-accent-text: ${colors.AccentText};
+            --color-red: ${colors.Red};
+            --color-orange: ${colors.Orange};
+            --color-yellow: ${colors.Yellow};
+            --color-green: ${colors.Green};
+            --color-mint: ${colors.Mint};
+            --color-teal: ${colors.Teal};
+            --color-cyan: ${colors.Cyan};
+            --color-blue: ${colors.Blue};
+            --color-indigo: ${colors.Indigo};
+            --color-purple: ${colors.Purple};
+            --color-pink: ${colors.Pink};
+            --color-brown: ${colors.Brown};
 
-        --grid-unit: ${cssLiteral(themeContext.gridUnit)};
-        --grid-unit-0.5: calc(var(--grid-unit) / 2);
-        --grid-unit-2: calc(var(--grid-unit) * 2);
-        --grid-unit-3: calc(var(--grid-unit) * 3);
-        --grid-unit-4: calc(var(--grid-unit) * 4);
-
-        --safe-area-inset-top: ${cssLiteral(safeAreaInset.top)};
-        --safe-area-inset-bottom: ${cssLiteral(safeAreaInset.bottom)};
-        --safe-area-inset-left: ${cssLiteral(safeAreaInset.left)};
-        --safe-area-inset-right: ${cssLiteral(safeAreaInset.right)};
-      }
-    `;
-    return html`<style>
-        ${css`
-          :host {
-            --font-style: ${cssLiteral(font.style)};
-            --font-variant-ligatures: ${cssLiteral(font.variantLigatures)};
-            --font-variant-caps: ${cssLiteral(font.variantCaps)};
-            --font-variant-numeric: ${cssLiteral(font.variantNumeric)};
-            --font-variant-east-asian: ${cssLiteral(font.variantEastAsian)};
-            --font-variant-alternates: ${cssLiteral(font.variantAlternates)};
-            --font-variant-position: ${cssLiteral(font.variantPosition)};
-            --font-variant-emoji: ${cssLiteral(font.variantEmoji)};
-            --font-weight: ${cssLiteral(font.weight)};
-            --font-stretch: ${cssLiteral(font.stretch)};
-            --font-size: ${cssLiteral(font.size)};
-            --font-family: ${cssLiteral(font.family)};
-            --font-optical-sizing: ${cssLiteral(font.opticalSizing)};
-            --font-size-adjust: ${cssLiteral(font.sizeAdjust)};
-            --font-kerning: ${cssLiteral(font.kerning)};
-            --font-feature-settings: ${cssLiteral(font.featureSettings)};
-            --font-variation-settings: ${cssLiteral(font.variationSettings)};
-            --line-height: ${cssLiteral(font.lineHeight)};
-
-            --color-canvas: ${cssLiteral(colors.Canvas)};
-            --color-canvas-text: ${cssLiteral(colors.CanvasText)};
-            --color-accent: ${cssLiteral(colors.Accent)};
-            --color-accent-text: ${cssLiteral(colors.AccentText)};
-            --color-red: ${cssLiteral(colors.Red)};
-            --color-orange: ${cssLiteral(colors.Orange)};
-            --color-yellow: ${cssLiteral(colors.Yellow)};
-            --color-green: ${cssLiteral(colors.Green)};
-            --color-mint: ${cssLiteral(colors.Mint)};
-            --color-teal: ${cssLiteral(colors.Teal)};
-            --color-cyan: ${cssLiteral(colors.Cyan)};
-            --color-blue: ${cssLiteral(colors.Blue)};
-            --color-indigo: ${cssLiteral(colors.Indigo)};
-            --color-purple: ${cssLiteral(colors.Purple)};
-            --color-pink: ${cssLiteral(colors.Pink)};
-            --color-brown: ${cssLiteral(colors.Brown)};
-
-            --grid-unit: ${cssLiteral(themeContext.gridUnit)};
+            --grid-unit: ${themeContext.gridUnit};
             --grid-unit-0.5: calc(var(--grid-unit) / 2);
             --grid-unit-2: calc(var(--grid-unit) * 2);
             --grid-unit-3: calc(var(--grid-unit) * 3);
             --grid-unit-4: calc(var(--grid-unit) * 4);
 
-            --safe-area-inset-top: ${cssLiteral(safeAreaInset.top)};
-            --safe-area-inset-bottom: ${cssLiteral(safeAreaInset.bottom)};
-            --safe-area-inset-left: ${cssLiteral(safeAreaInset.left)};
-            --safe-area-inset-right: ${cssLiteral(safeAreaInset.right)};
-          }`}${transitionStyleSheet}
-      </style>
-      <slot></slot>`;
+            --safe-area-inset-top: ${safeAreaInset.top};
+            --safe-area-inset-bottom: ${safeAreaInset.bottom};
+            --safe-area-inset-left: ${safeAreaInset.left};
+            --safe-area-inset-right: ${safeAreaInset.right};
+          }
+        `
+    );
+    const ass = getAdoptedStyleSheets(this.shadowRoot!.host);
+    ass.set('appn-theme', themeStyleSheet);
+
+    return html`<slot></slot>`;
   }
 }
 
