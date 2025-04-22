@@ -66,8 +66,8 @@ export class AppnNavBackElement extends LitElement {
     const navEntry = this.#preNavs.navigationEntry;
     if (navEntry) {
       this.dataset.sharedElement = 'appn-nav-back';
-      this.dataset.sharedElementNewStyle = `width:fit-content;`;
-      this.dataset.sharedElementOldStyle = `width:fit-content;`;
+      this.dataset.sharedElementNewStyle = `width:100%;`;
+      this.dataset.sharedElementOldStyle = `width:100%;`;
     }
   }
   override render() {

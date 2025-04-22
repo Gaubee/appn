@@ -15,7 +15,7 @@ export default function (data: EleventyData): string {
   //   <script src="${safeUrl('/node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js')}"></script>
   //   <script src="${safeUrl('/node_modules/lit/polyfill-support.js')}"></script>`;
   return html` <!doctype html>
-    <html lang="en">
+    <html>
       <head>
         <meta charset="utf-8" />
         <meta name="description" content="${description ?? ''}" />

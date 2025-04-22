@@ -500,7 +500,7 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
             .with(presentIndex, () => 'present' as const)
             .otherwise(() => (selfIndex < presentIndex ? 'past' : 'future'));
     this.dataset.tense = tense;
-    this.dataset.indexDiff = `${presentIndex - selfIndex}`;
+    this.dataset.indexDiff = `${selfIndex - presentIndex}`;
 
     // const vtn = `vtn-${selfIndex}`;
     // this.style.setProperty('--view-transition-name', vtn);
