@@ -36,6 +36,12 @@ registerAppnTheme(
  */
 @customElement('appn-theme-provider')
 export class AppnThemeProviderElement extends LitElement {
+  static {
+    const notoSansLink = document.createElement('link');
+    notoSansLink.rel = 'stylesheet';
+    notoSansLink.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap';
+    document.head.appendChild(notoSansLink);
+  }
   static readonly registerTheme = registerAppnTheme;
   static readonly findTheme = findAppnTheme;
   static get allThemes() {

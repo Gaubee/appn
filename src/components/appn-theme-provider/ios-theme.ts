@@ -14,8 +14,9 @@ const iosBaseTheme = {
       /// 英文字体优先链
       '-apple-system' /* 系统自动调用 San Francisco (iOS/macOS) */,
       'BlinkMacSystemFont' /* Chrome 的 San Francisco 回退方案 */,
-      "'Helvetica Neue'" /* iOS 7-8 及旧版 macOS 回退 */,
       "'Segoe UI'" /* Windows 系统适配 */,
+      "'Helvetica Neue'" /* iOS 7-8 及旧版 macOS 回退 */,
+      "'Noto Sans'" /* Android 系统适配 */,
 
       /// 中文字体优先链
       "'PingFang SC'" /* 苹方简体 (iOS 9+) */,
@@ -25,6 +26,8 @@ const iosBaseTheme = {
       "'Source Han Sans SC'" /* 思源黑体 */,
       "'Hiragino Sans GB'" /* 冬青黑体 (旧版 macOS 中文回退) */,
       "'Microsoft YaHei'" /* 微软雅黑 (Windows 中文适配) */,
+
+      /// 东亚字体优先链
       'sans-serif' /* 通用无衬线兜底 */,
     ].join(', '),
   },
