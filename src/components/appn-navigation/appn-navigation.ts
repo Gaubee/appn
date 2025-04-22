@@ -1,6 +1,7 @@
 import '@virtualstate/navigation/polyfill';
 import 'urlpattern-polyfill';
 
+import {func_remember} from '@gaubee/util';
 import {CssSheetArray} from '@gaubee/web';
 import {ContextProvider, provide} from '@lit/context';
 import {html, LitElement} from 'lit';
@@ -345,81 +346,68 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           }
         }
       }
-    } else if (context.mode === 'prepare') {
+    } else {
+      const sharedElementCss = this.__sharedElementCss();
       const sharedElementMap = new Map<string, HTMLElement>();
-      const indexs = [sharedElementPagesContext.previous?.navEntry.index ?? 0, sharedElementPagesContext.subsequent?.navEntry.index ?? 0].sort();
+      const indexs = [sharedElementPagesContext.previous?.navEntry.index ?? 0, sharedElementPagesContext.subsequent?.navEntry.index ?? 0].sort((a, b) => a - b);
       const [minIndex, maxIndex] = indexs;
-      const sharedElementIndex = (maxIndex - minIndex) * 10 + 1;
-      for (const pageItem of [sharedElementPagesContext.subsequent, sharedElementPagesContext.previous]) {
+      const sharedElementIndex = (maxIndex - minIndex + 1) * 10 + 1;
+      const sharedElementPages = match(context.mode)
+        .with('prepare', () => [sharedElementPagesContext.subsequent, sharedElementPagesContext.previous])
+        .with('enter', () => [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent])
+        .exhaustive();
+
+      for (const pageItem of sharedElementPages) {
         if (pageItem) {
           const sharedElements = querySharedElement(pageItem);
           const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
-          const zIndexStart = (pageItem.navEntry.index - minIndex) * 10;
-          this.__sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${zIndexStart};}`);
+          const zIndexStart = (pageItem.navEntry.index - minIndex + 1) * 10;
+          sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${zIndexStart};}`);
           for (const sharedElement of sharedElements) {
             const {dataset} = sharedElement;
-            const vtn = dataset.sharedElementOld || dataset.sharedElement || '';
-            this.__setSharedElement(vtn, sharedElement, sharedElementMap, `z-index:${sharedElementIndex};`);
-          }
-        }
-      }
-    } else if (context.mode === 'enter') {
-      const sharedElementMap = new Map<string, HTMLElement>();
-      const indexs = [sharedElementPagesContext.previous?.navEntry.index ?? 0, sharedElementPagesContext.subsequent?.navEntry.index ?? 0].sort();
-      const [minIndex, maxIndex] = indexs;
-      const sharedElementIndex = (maxIndex - minIndex) * 10 + 1;
-      for (const pageItem of [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent]) {
-        if (pageItem) {
-          const sharedElements = querySharedElement(pageItem);
-          const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
-          const zIndexStart = (pageItem.navEntry.index - minIndex) * 10;
-          this.__sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${zIndexStart};}`);
-          for (const sharedElement of sharedElements) {
-            const {dataset} = sharedElement;
-            const vtn = dataset.sharedElementNew || dataset.sharedElement || '';
-            this.__setSharedElement(vtn, sharedElement, sharedElementMap, `z-index:${sharedElementIndex};`);
+            const vtn = dataset.sharedElement;
+            if (vtn) {
+              this.__setSharedElement(sharedElementCss, vtn, sharedElement, sharedElementMap, `z-index:${sharedElementIndex};`);
+            }
           }
         }
       }
     }
   };
 
-  private __sharedElementCss = ((sharedElementCss) => {
+  /**
+   * 这里注入一些全局样式，所以不放在 appnNavigationStyle 里头。
+   */
+  private __sharedElementCss = func_remember(() => {
+    const sharedElementCss = new CssSheetArray();
     /**
      * state=old的情况出现在， previousPage 和 subsequentPage 都存在，但是由于 previousPage 页面共同拥有一个 sharedElement。
      * 这就意味着元素是从 previousPage 获取的 old 状态，然后再 subsequentPage 获取的 new 状态。那么原本的 previousPage 页面的元素，在被获取完 old 状态后，就应该隐藏。
      * 否则它在 transition 的时候，会被其它 view-transition 给捕获。
      */
-    sharedElementCss.addRule('[data-shared-element-state="old"]{visibility: hidden;!important;}');
-
-    /// 出于兼容性的考虑，这里暂时不使用 view-transition-group(class) + view-transition-class 来做修饰。而且目前需求比较简单
-    // sharedElementCss.addRule('::view-transition-group(*){--old-z-index:1;--new-z-index:2;}');
-    // sharedElementCss.addRule('::view-transition-group(.old){z-index:1;}');
-    // sharedElementCss.addRule('::view-transition-group(.new){z-index:2;}');
+    sharedElementCss.addRule(`[data-shared-element-state='old'] { visibility: hidden !important; }`);
     return sharedElementCss;
-  })(new CssSheetArray());
+  });
 
-  private __setSharedElement(vtn: string, element: HTMLElement, sharedElementMap: Map<string, HTMLElement>, zIndexCssText: string) {
-    if (vtn) {
-      const oldElement = sharedElementMap.get(vtn);
-      if (oldElement) {
-        oldElement.style.viewTransitionName = '';
-        oldElement.dataset.sharedElementState = 'old';
-      }
-      sharedElementMap.set(vtn, element);
-      element.style.viewTransitionName = vtn;
-      element.dataset.sharedElementState = 'new';
-      const dataset = element.dataset;
-      const cssText = dataset.sharedElementStyle;
-      this.__sharedElementCss.setRule(`group(${vtn})`, `::view-transition-group(${vtn}){${zIndexCssText}${cssText ?? ''}}`);
-      const oldCssText = dataset.sharedElementOldStyle;
-      if (oldCssText) {
-        this.__sharedElementCss.setRule(`old(${vtn})`, `::view-transition-old(${vtn}){${oldCssText}}`);
-      }
-      const newCssText = dataset.sharedElementNewStyle;
-      if (newCssText) {
-        this.__sharedElementCss.setRule(`new(${vtn})`, `::view-transition-new(${vtn}){${newCssText}}`);
-      }
+  private __setSharedElement(sharedElementCss: CssSheetArray, vtn: string, element: HTMLElement, sharedElementMap: Map<string, HTMLElement>, zIndexCssText: string) {
+    const oldElement = sharedElementMap.get(vtn);
+    if (oldElement) {
+      oldElement.style.viewTransitionName = '';
+      oldElement.dataset.sharedElementState = 'old';
+    }
+    sharedElementMap.set(vtn, element);
+    element.style.viewTransitionName = vtn;
+    element.dataset.sharedElementState = 'new';
+    const dataset = element.dataset;
+    const cssText = dataset.sharedElementStyle;
+    sharedElementCss.setRule(`group(${vtn})`, `::view-transition-group(${vtn}){${zIndexCssText}${cssText ?? ''}}`);
+    const oldCssText = dataset.sharedElementOldStyle;
+    if (oldCssText) {
+      sharedElementCss.setRule(`old(${vtn})`, `::view-transition-old(${vtn}){${oldCssText}}`);
+    }
+    const newCssText = dataset.sharedElementNewStyle;
+    if (newCssText) {
+      sharedElementCss.setRule(`new(${vtn})`, `::view-transition-new(${vtn}){${newCssText}}`);
     }
   }
 
@@ -512,6 +500,7 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
             .with(presentIndex, () => 'present' as const)
             .otherwise(() => (selfIndex < presentIndex ? 'past' : 'future'));
     this.dataset.tense = tense;
+    this.dataset.indexDiff = `${presentIndex - selfIndex}`;
 
     // const vtn = `vtn-${selfIndex}`;
     // this.style.setProperty('--view-transition-name', vtn);

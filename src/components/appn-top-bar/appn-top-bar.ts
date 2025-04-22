@@ -123,7 +123,6 @@ export class AppnNavBackTextElement extends LitElement {
     if (navigationEntry) {
       const pre_index = navigationEntry.index - 1;
       this.dataset.sharedElement = `appn-title-${pre_index}`;
-      // this.dataset.sharedElementStyle = `z-index:${navigationEntry.index + 1};`;
       this.dataset.sharedElementNewStyle = `width:fit-content;`;
       this.dataset.sharedElementOldStyle = `width:fit-content;`;
     }
