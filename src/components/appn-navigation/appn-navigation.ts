@@ -1,4 +1,3 @@
-import '@virtualstate/navigation/polyfill';
 import 'urlpattern-polyfill';
 
 import {func_remember, iter_map_not_null, math_clamp} from '@gaubee/util';

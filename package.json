@@ -104,7 +104,6 @@
     "@types/sinon": "^17.0.4",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
-    "@virtualstate/navigation": "1.0.1-alpha.209",
     "@web/dev-server": "^0.4.6",
     "@web/dev-server-legacy": "^2.1.1",
     "@web/test-runner": "^0.20.1",

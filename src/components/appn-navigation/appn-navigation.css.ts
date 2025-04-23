@@ -127,11 +127,7 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null([
     }
   `,
   isSupportViewTransition
-    ? css`
-        ::view-transition-group(*) {
-          animation-duration: 1s;
-        }
-      `
+    ? null
     : css`
         :host([data-from-tense='present']) {
           transition-duration: var(--page-leave-duration);

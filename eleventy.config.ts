@@ -58,7 +58,6 @@ export default function (eleventyConfig: EleventyUserConfig) {
   eleventyConfig.addPassthroughCopy('docs-src/public');
   eleventyConfig.addPassthroughCopy('node_modules/@webcomponents/webcomponentsjs');
   eleventyConfig.addPassthroughCopy('node_modules/prismjs/themes');
-  eleventyConfig.addPassthroughCopy('@virtualstate/navigation/esnext');
   eleventyConfig.addPassthroughCopy('imgs');
   eleventyConfig.addPassthroughCopy('node_modules/lit/polyfill-support.js');
   eleventyConfig.ignores.delete('README.md');

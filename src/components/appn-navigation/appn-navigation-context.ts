@@ -56,10 +56,7 @@ export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationPr
 
 /**
  *
- * require navigation API supports.
- * ```js
- * import "@virtualstate/navigation/polyfill";
- * ```
+ * navigation API
  */
 export const appnNavigationContext = createContext<AppnNavigation<AppnNavigationProviderElement> | null>(Symbol('appn-navigation'));
 
