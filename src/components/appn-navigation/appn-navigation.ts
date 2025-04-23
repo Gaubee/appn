@@ -1,17 +1,18 @@
 import '@virtualstate/navigation/polyfill';
 import 'urlpattern-polyfill';
 
-import {func_remember} from '@gaubee/util';
+import {func_remember, iter_map_not_null, math_clamp} from '@gaubee/util';
 import {CssSheetArray} from '@gaubee/web';
 import {ContextProvider, provide} from '@lit/context';
 import {html, LitElement} from 'lit';
 import {customElement, property, queryAssignedElements} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
-import {match, Pattern} from 'ts-pattern';
+import {match, P, Pattern} from 'ts-pattern';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {baseurl_relative_parts} from '../../utils/relative-path';
 import {safeProperty} from '../../utils/safe-property';
 import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
+import {AppnPageElement, type AppnSwapbackInfo} from '../appn-page/appn-page';
 import '../css-starting-style/css-starting-style';
 import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from './appn-navigation-context';
 import {
@@ -51,11 +52,12 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       if (!event.canIntercept) {
         return;
       }
+      event.info;
       this.__previousEntry = this.__nav.currentEntry;
       event.intercept({
         handler: () => {
           this.__currentEntry = this.__nav.currentEntry!;
-          return this.__effectRoutes(event.navigationType);
+          return this.__effectRoutes(event.navigationType, event.info);
         },
       });
     });
@@ -193,10 +195,21 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   @queryAssignedElements({slot: 'router', flatten: true})
   accessor routersElements!: HTMLTemplateElement[];
 
+  //#region navigate effectRoutes
   /**
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
-  private __effectRoutes = async (navigationType?: NavigationTypeString) => {
+  private __effectRoutes = async (navigationType?: NavigationTypeString, info?: unknown) => {
+    /**
+     * 手势返回模式
+     */
+    const swapbackInfo = match(info)
+      .with({by: 'swapback', start: P.instanceOf(Touch), page: P.instanceOf(AppnPageElement)}, (info) => info satisfies AppnSwapbackInfo)
+      .otherwise(() => null);
+
+    /**
+     * 所有`<appn-nabigation-history-entry>`元素索引
+     */
     const allNavHistoryEntryNodeMap = new Map<number, AppnNavigationHistoryEntryElement>();
     {
       for (const node of this.querySelectorAll<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry`)) {
@@ -206,6 +219,9 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         }
       }
     }
+    /**
+     * 存储那些没有被使用到的`<appn-nabigation-history-entry>`元素，在finished的时候会被移除掉
+     */
     const unuseEntryNodes = new Set(allNavHistoryEntryNodeMap.values());
 
     const effectRoutes = async (lifecycle: ViewTransitionLifecycle) => {
@@ -244,10 +260,65 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         lifecycle,
       });
     };
+    const viewTransitionCss = this.__viewTransitionCss();
+    if (swapbackInfo) {
+      viewTransitionCss.setAnimation('linear');
+    } else {
+      viewTransitionCss.setAnimation();
+    }
+
     await effectRoutes('prepare');
     const tran = document.startViewTransition(() => {
       return effectRoutes('started');
     });
+    if (swapbackInfo) {
+      const pageWidth = swapbackInfo.page.clientWidth;
+      await tran.ready;
+      const htmlEle = document.documentElement;
+      const onTouchMove = (e: TouchEvent) => {
+        const touch = e.touches[0]!;
+        const move = touch.clientX - swapbackInfo.start.clientX;
+        const p = math_clamp(0, move / pageWidth, 1);
+        const currentTime = Math.min(totalDuration * p);
+        // console.log('onTouchMove', touch.clientX, swapbackInfo.start.clientX, move, pageWidth, currentTime);
+        animations.forEach((ctor) => (ctor.currentTime = currentTime));
+      };
+      const onTouchEnd = (_e: TouchEvent) => {
+        // const touch = e.touches[0]!;
+        // const move = touch.clientX - swapbackInfo.start.clientX;
+        // console.log('onTouchEnd');
+        // if (touch.clientX < pageWidth / 2) {
+        //   // TODO cancel
+        // }
+
+        // TODO 这里应该支持继续使用原本的动画曲线，viewTransitionCss.setAnimation();
+        animations.forEach((ani) => ani.play());
+      };
+      htmlEle.addEventListener('touchmove', onTouchMove);
+      htmlEle.addEventListener('touchend', onTouchEnd);
+      tran.finished.finally(() => {
+        htmlEle.removeEventListener('touchmove', onTouchEnd);
+        htmlEle.removeEventListener('touchend', onTouchMove);
+      });
+
+      let totalDuration = 1000;
+      const animations = iter_map_not_null(htmlEle.getAnimations({subtree: true}), (ani) => {
+        const {effect} = ani;
+        if (effect instanceof KeyframeEffect && effect.pseudoElement?.startsWith('::view-transition')) {
+          if (effect.pseudoElement === '::view-transition-group(root)') {
+            totalDuration = effect.getTiming().duration as number;
+          }
+
+          ani.pause();
+          return ani as Animation & {effect: KeyframeEffect & {pseudoElement: `::view-transition${string}`}};
+        }
+        return;
+      });
+      // @ts-ignore
+      globalThis.animationControllers = animations;
+      // @ts-ignore
+      globalThis.swapbackInfo = swapbackInfo;
+    }
     await tran.finished;
     await effectRoutes('finished');
 
@@ -374,7 +445,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         }
       }
     } else {
-      const sharedElementCss = this.__sharedElementCss();
+      const sharedElementCss = this.__viewTransitionCss();
       const sharedElementMap = new Map<string, HTMLElement>();
       const indexs = [sharedElementPagesContext.previous?.navEntry.index ?? 0, sharedElementPagesContext.subsequent?.navEntry.index ?? 0].sort((a, b) => a - b);
       const [minIndex, maxIndex] = indexs;
@@ -406,15 +477,22 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   /**
    * 这里注入一些全局样式，所以不放在 appnNavigationStyle 里头。
    */
-  private __sharedElementCss = func_remember(() => {
-    const sharedElementCss = new CssSheetArray();
+  private __viewTransitionCss = func_remember(() => {
+    const cssArray = new CssSheetArray();
     /**
      * state=old的情况出现在， previousPage 和 subsequentPage 都存在，但是由于 previousPage 页面共同拥有一个 sharedElement。
      * 这就意味着元素是从 previousPage 获取的 old 状态，然后再 subsequentPage 获取的 new 状态。那么原本的 previousPage 页面的元素，在被获取完 old 状态后，就应该隐藏。
      * 否则它在 transition 的时候，会被其它 view-transition 给捕获。
      */
-    sharedElementCss.addRule(`[data-shared-element-state='old'] { visibility: hidden !important; }`);
-    return sharedElementCss;
+    cssArray.addRule(`[data-shared-element-state='old'] { visibility: hidden !important; }`);
+
+    const setAnimation = (timelineFunction?: string) => {
+      cssArray.setRule(
+        'timeline-function',
+        `::view-transition-group(*){animation-timing-function:${timelineFunction ?? 'cubic-bezier(0.2, 0.9, 0.5, 1)'};animation-duration:350ms}`
+      );
+    };
+    return Object.assign(cssArray, {setAnimation});
   });
 
   private __setSharedElement(sharedElementCss: CssSheetArray, vtn: string, element: HTMLElement, sharedElementMap: Map<string, HTMLElement>, zIndexCssText: string) {
@@ -438,6 +516,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       sharedElementCss.setRule(`new(${vtn})`, `::view-transition-new(${vtn}){${newCssText}}`);
     }
   }
+  //#endregion
 
   override render() {
     return this.__html;

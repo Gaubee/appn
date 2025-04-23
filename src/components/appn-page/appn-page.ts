@@ -5,16 +5,22 @@
  */
 
 import {consume} from '@lit/context';
-import {LitElement, css, html, type PropertyValues} from 'lit';
+import {css, html, LitElement, type PropertyValues} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {ResizeController} from '../../utils/resize-controller';
-import {appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';
+import {AppnNavigateEvent} from '../appn-link/appn-link';
+import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from '../appn-navigation/appn-navigation-context';
 import '../appn-scroll-view/appn-scroll-view';
 import {appnThemeContext, type AppnTheme} from '../appn-theme-provider/appn-theme-context';
 import {appnPageStyles} from './appn-page.css';
 
 export type AppnPageMode = AppnPageElement['mode'];
+export type AppnSwapbackInfo = {
+  by: 'swapback';
+  start: Touch;
+  page: AppnPageElement;
+};
 
 /**
  *
@@ -66,6 +72,9 @@ export class AppnPageElement extends LitElement {
   @property({type: String, reflect: true, attribute: true})
   accessor hash = '*';
 
+  @property({type: Boolean, reflect: true, attribute: true})
+  accessor swapback = true;
+
   @consume({context: appnNavigationHistoryEntryContext, subscribe: true})
   accessor navigationEntry: NavigationHistoryEntry | null = null;
 
@@ -85,6 +94,56 @@ export class AppnPageElement extends LitElement {
     }
   }
 
+  @eventProperty<AppnPageElement, AppnNavigateEvent>()
+  accessor onswapback!: PropertyEventListener<AppnPageElement, AppnNavigateEvent>;
+
+  @consume({context: appnNavigationContext})
+  accessor #nav: AppnNavigation | null = null;
+  #swapback = (() => {
+    const swapback = {
+      state: null as null | {start: Touch},
+      start: (e: TouchEvent) => {
+        if (!this.swapback) {
+          return;
+        }
+        const start = e.touches.length !== 1 ? null : e.touches[0];
+        if (start && start.clientX < 100) {
+          swapback.state = {start};
+          console.log('QAQ', 'swapback start!');
+        }
+      },
+      move: (e: TouchEvent) => {
+        const state = swapback.state;
+        if (state == null) {
+          return;
+        }
+        const {start} = state;
+        const touch = e.touches[0];
+        // TODO rtl 布局的支持
+        if (touch.clientX - start.clientX > 50) {
+          const nav = this.#nav;
+          if (nav == null) {
+            return;
+          }
+          console.log('QAQ', 'swapback emit!!');
+          const event = new AppnNavigateEvent({type: 'back', info: {by: 'swapback', start, page: this} satisfies AppnSwapbackInfo}, 'swapback');
+          this.dispatchEvent(event);
+          event.applyNavigate(nav, this.navigationEntry);
+
+          // end
+          swapback.end(e);
+        }
+      },
+      end: (e: Event) => {
+        if (swapback.state) {
+          console.log('QAQ', 'swapback end', e.type);
+          swapback.state = null;
+        }
+      },
+    };
+    return swapback;
+  })();
+
   override render() {
     this.inert = !this.open;
     return html`
@@ -95,19 +154,24 @@ export class AppnPageElement extends LitElement {
             --page-footer-height: ${this.#footerHeight}px;
           }`}
       </style>
-      <div class="layer" part="layer">
-        <appn-scroll-view class="root" part="root">
-          <div class="header stuck-top" part="header" ${this.__headerSize.observe()}>
-            <slot name="header"></slot>
-          </div>
-          <div class="body" part="body">
-            <slot></slot>
-          </div>
-          <div class="footer stuck-bottom" part="footer" ${this.__footerSize.observe()}>
-            <slot name="footer"></slot>
-          </div>
-        </appn-scroll-view>
-      </div>
+      <appn-scroll-view
+        class="root"
+        part="root"
+        @touchstart=${this.#swapback.start}
+        @touchmove=${this.#swapback.move}
+        @touchend=${this.#swapback.end}
+        @scroll=${this.#swapback.end}
+      >
+        <div class="header stuck-top" part="header" ${this.__headerSize.observe()}>
+          <slot name="header"></slot>
+        </div>
+        <div class="body" part="body">
+          <slot></slot>
+        </div>
+        <div class="footer stuck-bottom" part="footer" ${this.__footerSize.observe()}>
+          <slot name="footer"></slot>
+        </div>
+      </appn-scroll-view>
     `;
   }
 }

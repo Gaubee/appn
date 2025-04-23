@@ -13,9 +13,7 @@ for (const area of ['header', 'footer']) {
 export const appnPageStyles = [
   css`
     :host {
-      display: contents;
-    }
-    .layer {
+      display: block;
       margin: 0;
       border: 0;
       padding: 0;
@@ -29,16 +27,16 @@ export const appnPageStyles = [
       box-shadow: 0 0 2px -1px var(--color-canvas-text);
     }
 
-    :host([mode='block']) .layer {
+    :host([mode='block']) {
       position: relative;
     }
 
-    :host([mode='screen']) .layer {
+    :host([mode='screen']) {
       width: 100%;
       height: 100%;
     }
 
-    :host([mode='screen']) .layer::backdrop {
+    :host([mode='screen'])::backdrop {
       background-color: var(--color-canvas-text);
       background-color: color-mix(in hsl, var(--color-canvas-text), transparent 80%);
     }

@@ -162,7 +162,6 @@ export class AppnNavTitleElement extends LitElement {
     const navigationEntry = this.#navigationEntry;
     if (navigationEntry) {
       this.dataset.sharedElement = `appn-title-${navigationEntry.index}`;
-      // this.dataset.sharedElementStyle = `z-index:${navigationEntry.index + 1};`;
     }
   }
   protected override render() {
@@ -183,5 +182,6 @@ declare global {
     'appn-top-bar': AppnTopBarElement;
     'appn-nav-back': AppnNavBackElement;
     'appn-nav-back-text': AppnNavBackTextElement;
+    'appn-nav-title': AppnNavTitleElement;
   }
 }

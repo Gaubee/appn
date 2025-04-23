@@ -13,7 +13,7 @@ export default class Page {
   render(data) {
     const css = String.raw;
     const styleText = css`
-      appn-page::part(layer) {
+      appn-page {
         outline: solid 1px blue;
         margin: 8px;
         width: 280px;
@@ -25,7 +25,7 @@ export default class Page {
 
         position: relative;
       }
-      appn-page::part(layer)::after {
+      appn-page::after {
         content: ' ';
         display: block;
         position: absolute;
