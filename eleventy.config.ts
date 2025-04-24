@@ -2,15 +2,16 @@ import type {UserConfig as EleventyUserConfig} from '@11ty/eleventy';
 import syntaxHighlight from '@11ty/eleventy-plugin-syntaxhighlight';
 import EleventyVitePlugin from '@11ty/eleventy-plugin-vite';
 import {func_throttle} from '@gaubee/util';
+import chokidar from 'chokidar';
 import fs from 'node:fs';
 import path from 'node:path';
 import {renderToStaticMarkup} from 'react-dom/server';
 import 'tsx/esm';
-import type {UserConfig as ViteUserConfig} from 'vite';
+import type {PluginOption, UserConfig as ViteUserConfig} from 'vite';
 const resolve = (to: string) => path.resolve(import.meta.dirname, to);
 
 export default function (eleventyConfig: EleventyUserConfig) {
-  const isWatch = process.argv.includes('--watch');
+  // const isWatch = process.argv.includes('--watch');
   fs.rmSync(resolve('docs'), {recursive: true, force: true});
   fs.mkdirSync(resolve('docs/public'), {recursive: true});
 
@@ -45,10 +46,92 @@ export default function (eleventyConfig: EleventyUserConfig) {
       server: {
         watch: {},
       },
+      plugins: [
+        (() => {
+          const bundleDir = resolve('bundle');
+          const getModuleId = (bundle_filename: string) => {
+            const moduleId = '/' + path.relative(import.meta.dirname, bundle_filename).replaceAll('\\', '/');
+            return moduleId;
+          };
+          return {
+            enforce: 'pre',
+            name: 'bundle-resolver',
+            configureServer(server) {
+              const ws = server.ws;
+              if (!ws) {
+                return;
+              }
+              console.log('start watching', bundleDir);
+
+              const watcher = chokidar.watch(bundleDir, {
+                persistent: true, // 持续监听
+                ignoreInitial: true, // 忽略初始扫描时的 'add' 和 'addDir' 事件
+                awaitWriteFinish: {
+                  // 等待写入完成，有助于减少因写入不完整而触发的事件
+                  stabilityThreshold: 500, // 文件大小稳定时间 (ms)
+                  pollInterval: 100, // 轮询间隔 (ms)
+                },
+              });
+              const reload = func_throttle(() => {
+                ws.send({
+                  type: 'full-reload',
+                  // path: '*' 告诉 Vite 客户端重新加载整个页面
+                  // 可以具体指定路径，但对于 Eleventy 集成，'*' 通常更合适
+                  path: '*',
+                });
+              }, 200);
+              watcher.on('all', async (event, bundle_filename, state) => {
+                if (event == 'unlink') {
+                  return;
+                }
+                const moduleId = getModuleId(bundle_filename);
+                const moduleNode = await server.moduleGraph.getModuleById(moduleId);
+                if (moduleNode) {
+                  server.moduleGraph.invalidateModule(moduleNode, undefined, undefined, true);
+                  ws.send({
+                    type: 'update',
+                    updates: [
+                      {
+                        type: 'js-update',
+                        path: moduleNode.url,
+                        acceptedPath: moduleNode.url,
+                        timestamp: Date.now(),
+                      },
+                    ],
+                  });
+                  reload();
+                }
+              });
+              ws.on('close', () => {
+                return watcher.close();
+              });
+            },
+            resolveId(source, importer, options) {
+              let bundle_filename: string | undefined;
+              if (source.startsWith('/bundle/')) {
+                bundle_filename = path.resolve(bundleDir, source.slice('/bundle/'.length));
+              }
+              if (source.startsWith('.') && importer?.startsWith('/bundle/')) {
+                bundle_filename = path.resolve(bundleDir, importer.slice('/bundle/'.length), '../', source);
+              }
+              if (bundle_filename) {
+                const moduleId = getModuleId(bundle_filename);
+                return moduleId;
+              }
+            },
+            load(moduleId, _options) {
+              if (moduleId.startsWith('/bundle/')) {
+                const bundle_filename = path.resolve(bundleDir, moduleId.slice('/bundle/'.length));
+                return fs.readFileSync(bundle_filename, 'utf-8');
+              }
+            },
+          } satisfies PluginOption;
+        })(),
+      ],
     } satisfies ViteUserConfig,
   });
   eleventyConfig.setServerPassthroughCopyBehavior('copy');
-  eleventyConfig.addPassthroughCopy('bundle');
+  // eleventyConfig.addPassthroughCopy('bundle');
   eleventyConfig.addPassthroughCopy({'imgs/logo.webp': 'favicon.ico'});
   eleventyConfig.addPassthroughCopy('components');
   eleventyConfig.addPassthroughCopy('docs-src/docs.css');
@@ -61,19 +144,9 @@ export default function (eleventyConfig: EleventyUserConfig) {
   eleventyConfig.addPassthroughCopy('imgs');
   eleventyConfig.addPassthroughCopy('node_modules/lit/polyfill-support.js');
   eleventyConfig.ignores.delete('README.md');
-
   // eleventyConfig.addWatchTarget('bundle');
-  // 这里 bundle 的监听不生效，所以这里手动关闭进程，让node --watch 自动重启
-  if (isWatch) {
-    const exit = func_throttle(() => process.exit(0), 1000);
-    fs.watch(resolve('bundle'), {}, (event, filename) => {
-      exit();
-    });
-  }
-  // eleventyConfig.addWatchTarget('src', {
-  //   resetConfig: true,
-  // });
   eleventyConfig.addWatchTarget('docs-src/**/*.html');
+
   // add support for TypeScript and JSX:
   eleventyConfig.addExtension(['11ty.jsx', '11ty.tsx'], {
     key: '11ty.js',

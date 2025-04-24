@@ -17,7 +17,7 @@ const navDb = await openDB<AppnNavigationDB>('appn-navigation', 1, {
   },
 });
 export const enable_token = '--appn-navigation-reload--';
-if (sessionStorage.getItem(enable_token) == enable_token) {
+if (sessionStorage.getItem(enable_token) == enable_token && false) {
   console.log('QAQ start history.state', history.state);
   while (history.state?.sessionKey == null) {
     history.back();
