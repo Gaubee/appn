@@ -1,5 +1,7 @@
-export * from './components/appn-navigation/appn-navigation-context';
+import './shim/promise-with-wesolvers.polyfill';
+
 export * from './components/appn-navigation/appn-navigation';
+export * from './components/appn-navigation/appn-navigation-context';
 export * from './components/appn-theme-provider/appn-theme-context';
 export * from './components/appn-theme-provider/appn-theme-provider';
 
@@ -14,7 +16,7 @@ export * from './components/appn-view/appn-view';
 export * from './components/css-color-mix/css-color-mix';
 export * from './components/css-starting-style/css-starting-style';
 
-export * from './ponyfill/scrollend';
+export * from './shim/scrollend.ponyfill';
 
 export * from './utils/auto-boolean-property-converter';
 export * from './utils/event-property';

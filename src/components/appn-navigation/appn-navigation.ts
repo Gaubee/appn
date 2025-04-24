@@ -13,7 +13,8 @@ import {safeProperty} from '../../utils/safe-property';
 import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
 import {AppnPageElement, type AppnSwapbackInfo} from '../appn-page/appn-page';
 import '../css-starting-style/css-starting-style';
-import {appnNavigationContext, appnNavigationHistoryEntryContext, type AppnNavigation} from './appn-navigation-context';
+import {appnNavigationContext, appnNavigationHistoryEntryContext} from './appn-navigation-context';
+import type {AppnNavigation, NavigationBase} from './appn-navigation-types';
 import {
   appnNavigationHistoryEntryStyle,
   appnNavigationStyle,
@@ -28,6 +29,12 @@ export type ViewTransitionLifecycle = 'prepare' | 'started' | 'finished';
 
 const APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES = [null, 'horizontal', 'vertical'] as const;
 export type AppnNavigationStackDirection = (typeof APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES)[number];
+
+const navApi: NavigationBase =
+  // native support
+  // window.navigation ??
+  // mini ponyfill
+  await import('./internal/min-navigation-ponyfill/index').then((r) => r.navigation);
 /**
  * @attr {boolean} stack - enable stack view mode
  * @attr {AppnNavigationStackDirection} stack-direction - The direction of the navigation stack.
@@ -35,11 +42,11 @@ export type AppnNavigationStackDirection = (typeof APPN_NAVIGATION_STACK_DIRECTI
 @customElement('appn-navigation-provider')
 export class AppnNavigationProviderElement extends LitElement implements AppnNavigation {
   static override styles = appnNavigationStyle;
+  static nav = navApi;
 
   //#region AppnNavigation
-  private __nav = window.navigation;
   private __previousEntry: NavigationHistoryEntry | null = null;
-  private __currentEntry: NavigationHistoryEntry | null = this.__nav.currentEntry;
+  private __currentEntry: NavigationHistoryEntry | null = navApi.currentEntry;
   constructor() {
     super();
     new ContextProvider(this, {
@@ -47,29 +54,29 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       initialValue: this,
     });
     /// 这里独立写，是为了方便调试
-    this.__nav.addEventListener('navigate', (event) => {
+    navApi.addEventListener('navigate', (event) => {
       if (!event.canIntercept) {
         return;
       }
       event.info;
-      this.__previousEntry = this.__nav.currentEntry;
+      this.__previousEntry = navApi.currentEntry;
       event.intercept({
         handler: () => {
-          this.__currentEntry = this.__nav.currentEntry!;
+          this.__currentEntry = navApi.currentEntry!;
           return this.__effectRoutes(event.navigationType, event.info);
         },
       });
     });
-    this.__nav.addEventListener('currententrychange', (_event) => {
-      this.currentEntry = this.__nav.currentEntry;
+    navApi.addEventListener('currententrychange', (_event) => {
+      this.currentEntry = navApi.currentEntry;
     });
   }
 
   @property({type: String, reflect: true, attribute: 'base-uri'})
   override accessor baseURI: string = location.href;
   /** Returns a snapshot of the joint session history entries. */
-  async entries(): Promise<NavigationHistoryEntry[]> {
-    const entries = this.__nav.entries();
+  entries(): NavigationHistoryEntry[] {
+    const entries = navApi.entries();
     const match_entries = entries.filter((entry) => (entry.url ? baseurl_relative_parts(entry.url, this.baseURI) : false));
     return match_entries;
   }
@@ -102,66 +109,60 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
 
   // /** The current NavigationHistoryEntry. */
   // get currentEntry() {
-  //   return this.__nav.currentEntry;
+  //   return navApi.currentEntry;
   // }
 
   @provide({context: appnNavigationHistoryEntryContext})
-  accessor currentEntry: NavigationHistoryEntry | null = this.__nav.currentEntry;
+  accessor currentEntry: NavigationHistoryEntry | null = navApi.currentEntry;
 
-  #currentEntryIndex = -1; //this.currentEntry ? this.__nav.entries().indexOf(this.currentEntry) : -1;
+  #currentEntryIndex = -1; //this.currentEntry ? navApi.entries().indexOf(this.currentEntry) : -1;
   get currentEntryIndex() {
     return this.#currentEntryIndex;
   }
 
   /** Updates the state object of the current NavigationHistoryEntry. */
   updateCurrentEntry(options: NavigationUpdateCurrentEntryOptions): void {
-    this.__nav.updateCurrentEntry(options);
+    navApi.updateCurrentEntry(options);
   }
 
   /** Represents the currently ongoing navigation or null if none. */
   get transition(): NavigationTransition | null {
-    return this.__nav.transition;
-  }
-
-  /** Represents the activation details if the navigation was triggered by same-origin prerendering or bfcache restoration. */
-  get activation(): NavigationActivation | null {
-    // @ts-expect-error
-    return this.__nav.activation ?? null;
+    return navApi.transition;
   }
 
   /** Indicates if it's possible to navigate backwards. */
   get canGoBack(): boolean {
-    return this.__nav.canGoBack;
+    return navApi.canGoBack;
   }
 
   /** Indicates if it's possible to navigate forwards. */
   get canGoForward(): boolean {
-    return this.__nav.canGoForward;
+    return navApi.canGoForward;
   }
 
   /** Navigates to the specified URL. */
   navigate(url: string, options?: NavigationNavigateOptions): NavigationResult {
-    return this.__nav.navigate(url, options);
+    return navApi.navigate(url, options);
   }
 
   /** Reloads the current entry. */
   reload(options?: NavigationReloadOptions): NavigationResult {
-    return this.__nav.reload(options);
+    return navApi.reload(options);
   }
 
   /** Navigates to a specific history entry identified by its key. */
   traverseTo(key: string, options?: NavigationOptions): NavigationResult {
-    return this.__nav.traverseTo(key, options);
+    return navApi.traverseTo(key, options);
   }
 
   /** Navigates back one entry in the joint session history. */
   back(options?: NavigationOptions): NavigationResult {
-    return this.__nav.back(options);
+    return navApi.back(options);
   }
 
   /** Navigates forward one entry in the joint session history. */
   forward(options?: NavigationOptions): NavigationResult {
-    return this.__nav.forward(options);
+    return navApi.forward(options);
   }
 
   // Event Handlers (using specific event types is better if available)
@@ -225,7 +226,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
 
     const effectRoutes = async (lifecycle: ViewTransitionLifecycle) => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
-      const allEntries = this.__nav.entries();
+      const allEntries = await navApi.entries();
       const currentEntry = lifecycle === 'prepare' ? this.__previousEntry : this.__currentEntry;
       const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
       this.#currentEntryIndex = currentEntryIndex;

@@ -17,6 +17,9 @@ patchedDependencies:
   '@open-wc/testing':
     hash: 4bb5aae5f7477453da97eb801fc6972e89bee9b1790a047f18ca32fba3f7506b
     path: patches/@open-wc__testing.patch
+  idb:
+    hash: e6f7074a60cf86f8841e4981d3f0e71207a01e5b686a59ffaafca701fa876cee
+    path: patches/idb.patch
   minify-literals:
     hash: 749bcfd3f7708a140fce939df59f167f361c864d7413f433026df4d79ed3ac57
     path: patches/minify-literals.patch
@@ -29,11 +32,11 @@ importers:
   .:
     dependencies:
       '@gaubee/util':
-        specifier: ^0.26.4
-        version: 0.26.4
+        specifier: ^0.28.2
+        version: 0.28.2
       '@gaubee/web':
         specifier: ^0.7.1
-        version: 0.7.1(@gaubee/util@0.26.4)
+        version: 0.7.1(@gaubee/util@0.28.2)
       '@lit-labs/observers':
         specifier: ^2.0.5
         version: 2.0.5
@@ -58,6 +61,9 @@ importers:
       culori:
         specifier: ^4.0.1
         version: 4.0.1
+      idb:
+        specifier: ^8.0.2
+        version: 8.0.2(patch_hash=e6f7074a60cf86f8841e4981d3f0e71207a01e5b686a59ffaafca701fa876cee)
       lit:
         specifier: ^3.2.1
         version: 3.2.1
@@ -995,8 +1001,8 @@ packages:
   '@esm-bundle/chai@4.3.4-fix.0':
     resolution: {integrity: sha512-26SKdM4uvDWlY8/OOOxSB1AqQWeBosCX3wRYUZO7enTAj03CtVxIiCimYVG2WpULcyV51qapK4qTovwkUr5Mlw==}
 
-  '@gaubee/util@0.26.4':
-    resolution: {integrity: sha512-Upnl+MUKHDwFoREDF2onuAy7J/MrI82qKSMcRBddCUNkgzsXvcfqIZ8aqVs8AJUhvtDkWrqwAIPkdH657o7+aQ==}
+  '@gaubee/util@0.28.2':
+    resolution: {integrity: sha512-mxk6iXAycZfZOlAZEBJFLoE3SalN9mSGpV9iaUDMokNgvSAIJCvmy+rSPDyDo2IrAZBm5d6FGeY+mNKwHfTn5w==}
 
   '@gaubee/web@0.7.1':
     resolution: {integrity: sha512-kikm7/6gT5xxfOGjbUZDyRTJIktjWYcfa0ytRFP5JaimGybOZa0D4k2ZeVwp/92fO59acVYwHpsn5u7N4/kcVA==}
@@ -2511,6 +2517,9 @@ packages:
   iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
     engines: {node: '>=0.10.0'}
+
+  idb@8.0.2:
+    resolution: {integrity: sha512-CX70rYhx7GDDQzwwQMDwF6kDRQi5vVs6khHUumDrMecBylKkwvZ8HWvKV08AGb7VbpoGCWUQ4aHzNDgoUiOIUg==}
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
@@ -4745,13 +4754,13 @@ snapshots:
     dependencies:
       '@types/chai': 5.2.1
 
-  '@gaubee/util@0.26.4':
+  '@gaubee/util@0.28.2':
     dependencies:
       tslib: 2.8.1
 
-  '@gaubee/web@0.7.1(@gaubee/util@0.26.4)':
+  '@gaubee/web@0.7.1(@gaubee/util@0.28.2)':
     dependencies:
-      '@gaubee/util': 0.26.4
+      '@gaubee/util': 0.28.2
       tslib: 2.8.1
 
   '@github/catalyst@1.7.0': {}
@@ -6494,6 +6503,8 @@ snapshots:
   iconv-lite@0.4.24:
     dependencies:
       safer-buffer: 2.1.2
+
+  idb@8.0.2(patch_hash=e6f7074a60cf86f8841e4981d3f0e71207a01e5b686a59ffaafca701fa876cee): {}
 
   ignore@5.3.2: {}
 

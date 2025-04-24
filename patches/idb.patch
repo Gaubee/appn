@@ -1,0 +1,13 @@
+diff --git a/build/entry.d.ts b/build/entry.d.ts
+index 4ff7b0c32afd538158ee56ba175ce767e05ab717..5279394579a4a687d44132e45afd4cfbf88bf412 100644
+--- a/build/entry.d.ts
++++ b/build/entry.d.ts
+@@ -122,7 +122,7 @@ export interface TypedDOMStringList<T extends string> extends DOMStringList {
+     contains(string: T): boolean;
+     item(index: number): T | null;
+     [index: number]: T;
+-    [Symbol.iterator](): IterableIterator<T>;
++    [Symbol.iterator](): ArrayIterator<T>;
+ }
+ interface IDBTransactionOptions {
+     /**

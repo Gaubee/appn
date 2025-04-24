@@ -1,6 +1,6 @@
 import {noChange, type ElementPart, type ReactiveController, type ReactiveControllerHost} from 'lit';
 import {Directive, type PartInfo, PartType, directive} from 'lit/directive.js';
-import {addScrollendEventListener, removeScrollendEventListener} from '../ponyfill/scrollend';
+import {addScrollendEventListener, removeScrollendEventListener} from '../shim/scrollend.ponyfill';
 
 class ScrollDirective extends Directive {
   constructor(partInfo: PartInfo) {

@@ -1,4 +1,4 @@
-import type {AppnNavigation} from '../appn-navigation-context';
+import type {AppnNavigation} from '../appn-navigation-types';
 
 /**
  * 向当前 state 中，写入一对 key-value 数组
