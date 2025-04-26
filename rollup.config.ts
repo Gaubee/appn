@@ -21,7 +21,7 @@ const {getComponentsEntry} = await import('./docs-src/custom-elements-metadata.t
 const inputFiles = getComponentsEntry().map((entry) => entry.dist);
 export default defineConfig((env) => {
   return {
-    input: inputFiles,
+    input: ['./dist/index.js', './dist/polyfill.js', ...inputFiles],
     output: {
       dir: 'bundle',
       format: 'esm',

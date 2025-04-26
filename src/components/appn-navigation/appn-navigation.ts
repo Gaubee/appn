@@ -32,10 +32,11 @@ export type ViewTransitionLifecycle = 'prepare' | 'started' | 'finished';
 const APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES = [null, 'horizontal', 'vertical'] as const;
 export type AppnNavigationStackDirection = (typeof APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES)[number];
 
-const enable_min_navigation = getFlags().has('min-navigation');
+const enable_min_navigation_ponyfill = getFlags().has('min-navigation');
+// const enable_shared_element_ponyfill = getFlags().has('shared-element');
 
 const navApi: NavigationBase =
-  enable_min_navigation || !window.navigation
+  enable_min_navigation_ponyfill || !window.navigation
     ? // mini ponyfill
       await import('../../shim/min-navigation.ponyfill/index').then((r) => r.navigation)
     : // native support

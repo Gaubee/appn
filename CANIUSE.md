@@ -70,7 +70,11 @@
    - 无垫片
    - chrome 88+
    - chrome 14+
-1. ✅ 🧩[`JavaScript built-in: Promise: withResolvers`](https://caniuse.com/mdn-javascript_builtins_promise_withresolvers)
+1. ✅ 🧩 [`JavaScript built-in: Promise: withResolvers`](https://caniuse.com/mdn-javascript_builtins_promise_withresolvers)
    - 有垫片
    - chrome 119+
    - safari 17.4+
+1. ✅ 🧩 [`HTMLElement API: inert`](https://caniuse.com/mdn-api_htmlelement_inert)
+   - 有垫片
+   - chrome 102+
+   - safari 15.5+
