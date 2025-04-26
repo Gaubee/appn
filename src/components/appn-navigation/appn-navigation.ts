@@ -15,7 +15,8 @@ import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-conver
 import {AppnPageElement, type AppnSwapbackInfo} from '../appn-page/appn-page';
 import '../css-starting-style/css-starting-style';
 import {appnNavigationContext, appnNavigationHistoryEntryContext} from './appn-navigation-context';
-import type {AppnNavigation, NavigationBase} from './appn-navigation-types';
+import type {AppnNavigation} from './appn-navigation-types';
+import type { NavigationBase } from '../../shim/min-navigation.ponyfill/types';
 import {
   appnNavigationHistoryEntryStyle,
   appnNavigationStyle,

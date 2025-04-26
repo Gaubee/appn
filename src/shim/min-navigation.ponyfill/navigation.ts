@@ -1,7 +1,7 @@
 import {func_remember} from '@gaubee/util';
 import {match, P} from 'ts-pattern';
 import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
-import type {NavigationBase} from '../../components/appn-navigation/appn-navigation-types';
+import type { NavigationBase } from './types';
 import {MinNavigateEvent} from './navigate-event';
 import {MinNavigationCurrentEntryChangeEvent} from './navigation-current-entry-change-event';
 import {MinNavigationDestination} from './navigation-destination';
