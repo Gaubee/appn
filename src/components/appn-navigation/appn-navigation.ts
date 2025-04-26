@@ -36,7 +36,7 @@ const enable_min_navigation = getFlags().has('min-navigation');
 const navApi: NavigationBase =
   enable_min_navigation || !window.navigation
     ? // mini ponyfill
-      await import('./internal/min-navigation-ponyfill/index').then((r) => r.navigation)
+      await import('../../shim/min-navigation.ponyfill/index').then((r) => r.navigation)
     : // native support
       window.navigation;
 

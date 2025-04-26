@@ -1,4 +1,4 @@
-import {event, type PropertyEventListener} from '../../../../utils/event-property';
+import {event, type PropertyEventListener} from '../../utils/event-property';
 
 export class MinNavigationHistoryEntry extends EventTarget implements NavigationHistoryEntry {
   get id(): string {

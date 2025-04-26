@@ -1,4 +1,4 @@
-import './shim/promise-with-wesolvers.polyfill';
+import './shim/promise-with-resolvers.polyfill';
 
 export * from './components/appn-navigation/appn-navigation';
 export * from './components/appn-navigation/appn-navigation-context';
@@ -17,6 +17,8 @@ export * from './components/css-color-mix/css-color-mix';
 export * from './components/css-starting-style/css-starting-style';
 
 export * from './shim/scrollend.ponyfill';
+export * from './shim/promise-with-resolvers.polyfill';
+export * from './shim/min-navigation.ponyfill/index';
 
 export * from './utils/auto-boolean-property-converter';
 export * from './utils/event-property';
