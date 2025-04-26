@@ -263,7 +263,11 @@ export class MinNavigation extends EventTarget implements NavigationBase {
           }
         })
         .with('traverse', () => {
-          history.go(toEntryInit.index - fromEntry.index);
+          if (info instanceof PopStateEvent) {
+            // from popstateevent ignore history-go
+          } else {
+            history.go(toEntryInit.index - fromEntry.index);
+          }
           updateEntryInit(toEntryInit);
         })
         .with('reload', async () => {
