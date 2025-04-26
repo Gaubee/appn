@@ -1,5 +1,5 @@
 import {func_remember} from '@gaubee/util';
-import {match} from 'ts-pattern';
+import {match, P} from 'ts-pattern';
 import {promise_with_resolvers} from '../../../../shim/promise-with-wesolvers.polyfill';
 import type {NavigationBase} from '../../appn-navigation-types';
 import {MinNavigateEvent} from './navigate-event';
@@ -7,14 +7,16 @@ import {MinNavigationCurrentEntryChangeEvent} from './navigation-current-entry-c
 import {MinNavigationDestination} from './navigation-destination';
 import {MinNavigationHistoryEntry, type MinNavigationEntryInit} from './navigation-history-entry';
 import {MinNavigationTransition} from './navigation-transition';
-import {addEntry, enable_token, getAllEntryInits, getCurrentEntry, sessionKey, updateAllEntries, updateAllEntryInits, updateEntryInit} from './storage';
+import {addEntry, getAllEntryInits, sessionKey, updateAllEntries, updateAllEntryInits, updateEntryInit} from './storage';
+
+//#region prepare navigation state
+const uuid_reg = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
 
 const getState = func_remember(async () => {
-  sessionStorage.setItem(enable_token, enable_token);
   const entryInits = await getAllEntryInits();
   let entries = entryInits.map((init) => new MinNavigationHistoryEntry(init));
-  const currentId = await getCurrentEntry();
-  let currentEntry = currentId && entries.find((entry) => entry.id === currentId);
+  const currentEntryInitId = history.state?.id as string;
+  let currentEntry = currentEntryInitId && uuid_reg.test(currentEntryInitId) ? entries.find((entry) => entry.id === currentEntryInitId) : void 0;
   if (!currentEntry) {
     const currentEntryInit: MinNavigationEntryInit = {
       id: crypto.randomUUID(),
@@ -29,7 +31,7 @@ const getState = func_remember(async () => {
 
     /// 初始化模式，绑定到 history.state 中，更新到数据库中
     history.replaceState(currentEntryInit, '', currentEntryInit.url);
-    await updateAllEntryInits([currentEntryInit]);
+    void updateAllEntryInits([currentEntryInit]);
   }
 
   return {
@@ -37,12 +39,38 @@ const getState = func_remember(async () => {
     currentEntry,
   };
 });
+//#endregion
+
+//#region navigation-api
 
 export class MinNavigation extends EventTarget implements NavigationBase {
-  #state;
+  readonly #state;
   constructor(state: Awaited<ReturnType<typeof getState>>) {
     super();
     this.#state = state;
+    window.addEventListener('popstate', async (event) => {
+      console.log('QAQ popstate', event.state);
+      match(event.state)
+        .with(
+          {
+            id: P.string.regex(uuid_reg),
+            index: P.number.gte(0),
+            key: P.string.regex(uuid_reg),
+            url: P.string.startsWith(location.origin),
+            state: P.any,
+            sessionKey: P.string.regex(uuid_reg),
+          },
+          (toEntryInit) => {
+            if (toEntryInit.id === state.currentEntry.id) {
+              console.log('QAQ popstate', 'traverseTo ignore');
+              return;
+            }
+            console.log('QAQ popstate', 'traverseTo start');
+            this.traverseTo(toEntryInit.key, {info: event});
+          }
+        )
+        .otherwise(() => {});
+    });
   }
   entries(): NavigationHistoryEntry[] {
     return this.#state.entries;
@@ -62,10 +90,11 @@ export class MinNavigation extends EventTarget implements NavigationBase {
       '',
       location.href
     );
+    const newEntryInit = history.state as MinNavigationEntryInit;
     // 如果成功，再绑定到 currentEntryInit 中
-    currentEntry.__setState(history.state.state);
+    currentEntry.__setInit(newEntryInit);
     // 最终再更新到数据库中
-    void updateEntryInit(history.state);
+    void updateEntryInit(newEntryInit);
   }
   #transition: MinNavigationTransition | null = null;
   get transition(): NavigationTransition | null {
@@ -133,7 +162,10 @@ export class MinNavigation extends EventTarget implements NavigationBase {
   traverseTo(key: string, options?: NavigationOptions): NavigationResult {
     const toEntry = this.#state.entries.find((entry) => entry.key === key);
     const results = new MinNavigationResults();
-    if (!toEntry) {
+    if (toEntry === this.currentEntry) {
+      results.committer.resolve(toEntry);
+      results.finisher.resolve(toEntry);
+    } else if (!toEntry) {
       results.abort.abort(new DOMException('Invalid key', 'InvalidStateError'));
     } else {
       const navigationType = 'traverse' satisfies NavigationType;
@@ -163,6 +195,7 @@ export class MinNavigation extends EventTarget implements NavigationBase {
     throw new Error('Method not implemented.');
   }
 
+  //#region applyNavigate
   static #applyNavigate(
     navApi: MinNavigation,
     results: MinNavigationResults,
@@ -201,7 +234,8 @@ export class MinNavigation extends EventTarget implements NavigationBase {
       results.committer.resolve(toEntry);
       match(navigationType)
         .with('push', () => {
-          history.pushState(toEntryInit.state, '', toEntryInit.url || location.href);
+          history.pushState(toEntryInit, '', toEntryInit.url || location.href);
+
           const afterFromIndex = entries.indexOf(fromEntry) + 1;
           if (afterFromIndex === 0) {
             entries.length = 0;
@@ -216,8 +250,8 @@ export class MinNavigation extends EventTarget implements NavigationBase {
           }
         })
         .with('replace', () => {
-          history.replaceState(toEntryInit.state, '', toEntryInit.url || location.href);
-          void updateEntryInit(toEntryInit);
+          history.replaceState(toEntryInit, '', toEntryInit.url || location.href);
+
           const fromIndex = entries.indexOf(fromEntry);
           if (fromIndex === -1) {
             entries.length = 0;
@@ -225,7 +259,7 @@ export class MinNavigation extends EventTarget implements NavigationBase {
             void updateAllEntries(entries);
           } else {
             entries[fromIndex] = toEntry;
-            updateEntryInit(toEntryInit);
+            void updateEntryInit(toEntryInit);
           }
         })
         .with('traverse', () => {
@@ -265,7 +299,19 @@ export class MinNavigation extends EventTarget implements NavigationBase {
       results.abort.abort(error);
     }
   }
+  //#endregion
 }
+export const navigation = new MinNavigation(await getState());
+
+Object.assign(globalThis, {
+  minNavigation: navigation,
+  MinNavigation: MinNavigation,
+});
+
+//#endregion
+
+//#region  navigate-results
+
 class MinNavigationResults {
   committer = promise_with_resolvers<MinNavigationHistoryEntry>();
   finisher = promise_with_resolvers<MinNavigationHistoryEntry>();
@@ -279,7 +325,4 @@ class MinNavigationResults {
     });
   }
 }
-
-export const navigation = new MinNavigation(await getState());
-//@ts-ignore
-globalThis.minNavigation = navigation;
+//#endregion

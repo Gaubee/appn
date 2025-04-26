@@ -17,14 +17,21 @@ export class MinNavigationHistoryEntry extends EventTarget implements Navigation
     return this.__init.url;
   }
 
+  get __debug() {
+    return `${this.index}/${this.id.split('-')[0]}/${this.key.split('-')[0]}`;
+  }
+
   getState(): unknown {
     return this.__init.state;
   }
   __getInit() {
     return this.__init;
   }
-  __setState(state: unknown) {
-    this.__init.state = state;
+  // __setState(state: unknown) {
+  //   this.__init.state = state;
+  // }
+  __setInit(init: MinNavigationEntryInit) {
+    this.__init = init;
   }
 
   @event()

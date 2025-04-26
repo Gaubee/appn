@@ -7,6 +7,7 @@ import {html, LitElement} from 'lit';
 import {customElement, property, queryAssignedElements} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {match, P, Pattern} from 'ts-pattern';
+import {getFlags} from '../../utils/env';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {baseurl_relative_parts} from '../../utils/relative-path';
 import {safeProperty} from '../../utils/safe-property';
@@ -30,11 +31,15 @@ export type ViewTransitionLifecycle = 'prepare' | 'started' | 'finished';
 const APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES = [null, 'horizontal', 'vertical'] as const;
 export type AppnNavigationStackDirection = (typeof APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES)[number];
 
+const enable_min_navigation = getFlags().has('min-navigation');
+
 const navApi: NavigationBase =
-  // native support
-  // window.navigation ??
-  // mini ponyfill
-  await import('./internal/min-navigation-ponyfill/index').then((r) => r.navigation);
+  enable_min_navigation || !window.navigation
+    ? // mini ponyfill
+      await import('./internal/min-navigation-ponyfill/index').then((r) => r.navigation)
+    : // native support
+      window.navigation;
+
 /**
  * @attr {boolean} stack - enable stack view mode
  * @attr {AppnNavigationStackDirection} stack-direction - The direction of the navigation stack.
