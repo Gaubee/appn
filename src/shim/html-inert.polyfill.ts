@@ -1,6 +1,6 @@
 import {getAdoptedStyleSheets} from '../utils/css-helper';
 
-if ('inert' in document.documentElement) {
+if (!('inert' in document.documentElement)) {
   const css = String.raw;
   const cssSheet = new CSSStyleSheet();
   cssSheet.replace(css`
