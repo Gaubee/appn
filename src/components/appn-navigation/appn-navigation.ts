@@ -53,8 +53,6 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   static nav = navApi;
 
   //#region AppnNavigation
-  private __previousEntry: NavigationHistoryEntry | null = null;
-  private __currentEntry: NavigationHistoryEntry | null = navApi.currentEntry;
   constructor() {
     super();
     new ContextProvider(this, {
@@ -66,12 +64,11 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       if (!event.canIntercept) {
         return;
       }
-      event.info;
-      this.__previousEntry = navApi.currentEntry;
+      // event.destination;
+      const fromEntry = this.currentEntry;
       event.intercept({
         handler: () => {
-          this.__currentEntry = navApi.currentEntry!;
-          return this.__effectRoutes(event.navigationType, event.info);
+          return this.__effectRoutes(fromEntry, event);
         },
       });
     });
@@ -207,14 +204,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   /**
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
-  private __effectRoutes = async (navigationType?: NavigationTypeString, info?: unknown) => {
-    /**
-     * 手势返回模式
-     */
-    const swapbackInfo = match(info)
-      .with({by: 'swapback', start: P.instanceOf(Touch), page: P.instanceOf(AppnPageElement)}, (info) => info satisfies AppnSwapbackInfo)
-      .otherwise(() => null);
-
+  private __effectRoutes = async (fromEntry: NavigationHistoryEntry | null, event?: NavigateEvent) => {
     /**
      * 所有`<appn-nabigation-history-entry>`元素索引
      */
@@ -232,16 +222,47 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
      */
     const unuseEntryNodes = new Set(allNavHistoryEntryNodeMap.values());
 
+    if (!event) {
+      debugger;
+      /// 路由改变，重新映射元素
+      const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
+      const allEntries = await navApi.entries();
+      const currentEntry = this.currentEntry;
+      for (const navEntry of allEntries) {
+        const ele = await this.__effectRoute(navEntry, routersElements, allNavHistoryEntryNodeMap, {
+          allEntries,
+          currentEntry: currentEntry,
+          currentEntryIndex: currentEntry?.index ?? -1,
+          navigationType: undefined,
+        });
+        if (ele) {
+          unuseEntryNodes.delete(ele);
+        }
+      }
+
+      // 移除废弃的元素
+      for (const ele of unuseEntryNodes) {
+        ele.remove();
+      }
+      return;
+    }
+    /**
+     * 手势返回模式
+     */
+    const swapbackInfo = match(event?.info)
+      .with({by: 'swapback', start: P.instanceOf(Touch), page: P.instanceOf(AppnPageElement)}, (info) => info satisfies AppnSwapbackInfo)
+      .otherwise(() => null);
+
     const effectRoutes = async (lifecycle: SharedElementLifecycle) => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = await navApi.entries();
-      const currentEntry = lifecycle === 'first' ? this.__previousEntry : this.__currentEntry;
+      const currentEntry = lifecycle === 'first' ? fromEntry : this.currentEntry;
       const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
       this.#currentEntryIndex = currentEntryIndex;
       if (currentEntryIndex === -1) {
         return;
       }
-      this.style.setProperty('--present-index', `${currentEntryIndex}`);
+      // this.style.setProperty('--present-index', `${currentEntryIndex}`);
 
       // TODO 未来 mode === 'finished' 时，需要通知元素生命周期
       if (lifecycle !== 'finish') {
@@ -250,7 +271,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
             allEntries,
             currentEntry,
             currentEntryIndex,
-            navigationType,
+            navigationType: event.navigationType,
           });
           if (ele) {
             unuseEntryNodes.delete(ele);
@@ -262,9 +283,11 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           ele.remove();
         }
       }
-      sharedElementNative.effectPagesSharedElement(this, {
-        previousEntry: this.__previousEntry,
-        subsequentEntry: this.__currentEntry,
+
+      sharedElementNative.effectPagesSharedElement({
+        from: fromEntry,
+        destination: event.destination, // this.__currentEntry,
+        queryPageNode: (navEntry) => this.querySelector<HTMLElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`),
         lifecycle,
       });
     };
@@ -414,7 +437,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     return this.__html;
   }
   private __html = cache(html`
-    <slot name="router" @slotchange=${() => this.__effectRoutes()}></slot>
+    <slot name="router" @slotchange=${() => this.__effectRoutes(this.currentEntry)}></slot>
     <slot></slot>
     <css-starting-style
       slotted=""

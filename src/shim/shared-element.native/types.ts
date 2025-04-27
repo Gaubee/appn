@@ -33,6 +33,7 @@ export interface SharedElementTransition {
 
 export interface SharedElementStyles {
   group: string;
+  imagePair: string;
   old: string;
   new: string;
 }

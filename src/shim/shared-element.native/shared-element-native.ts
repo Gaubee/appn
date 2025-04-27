@@ -6,7 +6,7 @@ import {type SharedElement, type SharedElementConfig, type SharedElementLifecycl
 
 export class SharedElementNative implements SharedElement {
   readonly selectorPrefix = '::view-transition' as const;
-  getSelector(type: 'group' | 'old' | 'new', name: string) {
+  getSelector(type: 'group' | 'image-pair' | 'old' | 'new', name: string) {
     return `${this.selectorPrefix}-${type}(${name})`;
   }
 
@@ -41,41 +41,40 @@ export class SharedElementNative implements SharedElement {
     await callbacks.finish?.(transition);
   }
 
-  effectPagesSharedElement = (
-    navRoot: Element,
-    context: {
-      /** 导航的起始页 */
-      previousEntry: NavigationHistoryEntry | null;
-      /** 导航的目标页 */
-      subsequentEntry: NavigationHistoryEntry | null;
-      /** 生命周期 */
-      lifecycle: SharedElementLifecycle;
-    }
-  ) => {
+  effectPagesSharedElement = (context: {
+    /** 导航的起始页 */
+    from: NavigationHistoryEntry | null;
+    /** 导航的目标页 */
+    destination: NavigationDestination | null;
+    /** 根据导航对象返回页面节点 */
+    queryPageNode: (entry: NavigationHistoryEntry | NavigationDestination) => HTMLElement | null;
+    /** 生命周期 */
+    lifecycle: SharedElementLifecycle;
+  }) => {
     if (context.lifecycle === 'start') {
       // nothing to do
       return;
     }
-    type PageItem = {node: HTMLElement; navEntry: NavigationHistoryEntry};
+    type PageItem = {node: HTMLElement; navEntry: NavigationHistoryEntry | NavigationDestination};
     const sharedElementPagesContext: {
-      [key in 'previous' | 'subsequent']?: PageItem;
+      [key in 'from' | 'dest']?: PageItem;
     } = {};
     /// 获取过渡元素
-    const queryPageItem = (navEntry: NavigationHistoryEntry | null): PageItem | undefined => {
+    const queryPageItem = (navEntry: NavigationHistoryEntry | NavigationDestination | null): PageItem | undefined => {
       if (navEntry) {
-        const node = navRoot.querySelector<HTMLElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`);
+        const node = context.queryPageNode(navEntry);
         if (node) {
           return {node, navEntry};
         }
       }
       return;
     };
-    sharedElementPagesContext.previous = queryPageItem(context.previousEntry);
-    sharedElementPagesContext.subsequent = queryPageItem(context.subsequentEntry);
+    sharedElementPagesContext.from = queryPageItem(context.from);
+    sharedElementPagesContext.dest = queryPageItem(context.destination);
 
     /// 最后，处理过渡元素
     if (context.lifecycle === 'finish') {
-      for (const pageItem of [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent]) {
+      for (const pageItem of [sharedElementPagesContext.from, sharedElementPagesContext.dest]) {
         if (pageItem) {
           sharedElementLifecycle.delete(pageItem.node);
           /// 清理所有 viewTransitionName
@@ -89,18 +88,18 @@ export class SharedElementNative implements SharedElement {
     } else {
       const sharedElementCss = this.css;
       const sharedElementMap = new Map<string, HTMLElement>();
-      const indexs = [sharedElementPagesContext.previous?.navEntry.index ?? 0, sharedElementPagesContext.subsequent?.navEntry.index ?? 0].sort((a, b) => a - b);
+      const indexs = [sharedElementPagesContext.from?.navEntry.index ?? 0, sharedElementPagesContext.dest?.navEntry.index ?? 0].sort((a, b) => a - b);
       const [minIndex, maxIndex] = indexs;
       const sharedElementIndex = (maxIndex - minIndex + 1) * 10 + 1;
       const sharedElementPages = match(context.lifecycle)
-        .with('first', () => [sharedElementPagesContext.subsequent, sharedElementPagesContext.previous])
-        .with('last', () => [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent])
+        .with('first', () => [sharedElementPagesContext.dest, sharedElementPagesContext.from])
+        .with('last', () => [sharedElementPagesContext.from, sharedElementPagesContext.dest])
         .exhaustive();
 
       for (const pageItem of sharedElementPages) {
         if (pageItem) {
           sharedElementLifecycle.set(pageItem.node, context.lifecycle);
-          const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
+          const appnNavVtn = (pageItem.node.style.viewTransitionName = '--shared-page-' + pageItem.navEntry.index);
           const zIndexStart = (pageItem.navEntry.index - minIndex + 1) * 10;
           sharedElementCss.setRule(`group(${appnNavVtn})`, `${this.getSelector('group', appnNavVtn)}{z-index:${zIndexStart};}`);
           for (const sharedItem of sharedElements.queryAllWithConfig(pageItem.node)) {
@@ -127,6 +126,9 @@ export class SharedElementNative implements SharedElement {
     element.style.viewTransitionName = vtn;
     element.dataset.sharedElementState = 'new';
     sharedElementCss.setRule(`group(${vtn})`, `${this.getSelector('group', vtn)}{${zIndexCssText}${styles.group ?? ''}}`);
+    if (styles.imagePair) {
+      sharedElementCss.setRule(`imagePair(${vtn})`, `${this.getSelector('image-pair', vtn)}{${styles.imagePair}}`);
+    }
     if (styles.old) {
       sharedElementCss.setRule(`old(${vtn})`, `${this.getSelector('old', vtn)}{${styles.old}}`);
     }

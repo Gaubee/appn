@@ -91,8 +91,8 @@ export const appnNavigationStyle = css`
 
   /* 动态生成卡片堆叠偏移 */
   ::slotted(*) {
-    --page-translate-z: calc((var(--present-index, -1) - var(--index, 0)) * -36px);
-    translate: var(--page-translate-x, 0) var(--page-translate-y, 0) var(--page-translate-z);
+    /* --page-translate-z: calc((var(--present-index, -1) - var(--index, 0)) * -36px); */
+    translate: var(--page-translate-x, 0) var(--page-translate-y, 0) var(--page-translate-z, 0);
     scale: var(--page-scale-x, 100%) var(--page-scale-y, 100%);
   }
 `;

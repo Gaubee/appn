@@ -16,6 +16,7 @@ const STYLES = [
   {key: 'group', alias: null, prop: 'sharedElementGroupStyle'},
   {key: 'new', alias: 'both', prop: 'sharedElementNewStyle'},
   {key: 'old', alias: 'both', prop: 'sharedElementOldStyle'},
+  {key: 'imagePair', alias: null, prop: 'sharedElementImagePairStyle'},
 ] as const;
 class SharedElementRegistry {
   set(element: HTMLElement, sharedName: string, styles: Partial<SharedElementStyles> & {both?: string}): void {

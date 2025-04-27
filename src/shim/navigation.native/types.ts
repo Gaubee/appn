@@ -7,6 +7,7 @@
  * > 3. 避免 @types/dom-navigation 发生更新追加新的功能，导致编译问题
  */
 export interface NavigationBase extends EventTarget {
+  // activation?: NavigationActivation | null;
   /** Returns a snapshot of the joint session history entries. */
   entries(): NavigationHistoryEntry[];
 
