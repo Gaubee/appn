@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies and build
         run: |
           pnpm install
-          pnpm run docs
+          pnpm build
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4

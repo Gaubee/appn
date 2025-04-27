@@ -134,13 +134,12 @@ export default function (eleventyConfig: EleventyUserConfig) {
   // eleventyConfig.addPassthroughCopy('bundle');
   eleventyConfig.addPassthroughCopy({'imgs/logo.webp': 'favicon.ico'});
   eleventyConfig.addPassthroughCopy('components');
-  eleventyConfig.addPassthroughCopy('docs-src/docs.css');
   eleventyConfig.addPassthroughCopy('docs-src/css');
   eleventyConfig.addPassthroughCopy('docs-src/.nojekyll');
   eleventyConfig.addPassthroughCopy('docs-src/components');
   eleventyConfig.addPassthroughCopy('docs-src/public');
-  eleventyConfig.addPassthroughCopy('node_modules/@webcomponents/webcomponentsjs');
-  eleventyConfig.addPassthroughCopy('node_modules/prismjs/themes');
+  // eleventyConfig.addPassthroughCopy({'node_modules/@webcomponents/webcomponentsjs': 'public/webcomponentsjs'});
+  eleventyConfig.addPassthroughCopy({'node_modules/prismjs/themes': 'prismjs'});
   eleventyConfig.addPassthroughCopy('imgs');
   eleventyConfig.addPassthroughCopy('node_modules/lit/polyfill-support.js');
   eleventyConfig.ignores.delete('README.md');
