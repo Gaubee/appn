@@ -28,6 +28,7 @@ export default function (data: EleventyData): string {
         <link rel="stylesheet" href="${safeUrl('/docs.css')}" />
         ${polyfill} ${scripts?.map((script_src) => html`<script type="module" src=${script_src}></script>`).join('') ?? ''}
         ${links?.map((link_href) => html`<link rel="stylesheet" href=${link_href} />`) ?? ''}
+        <script type="module" src="/bundle/polyfill.js"></script>
         ${getComponentsEntry()
           .map((entry) => {
             return html`<script type="module" src="${entry.bundle}"></script>`;
