@@ -221,18 +221,21 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
      * 存储那些没有被使用到的`<appn-nabigation-history-entry>`元素，在finished的时候会被移除掉
      */
     const unuseEntryNodes = new Set(allNavHistoryEntryNodeMap.values());
+    const removeAllUnusedEntryNodes = () => {
+      for (const node of unuseEntryNodes) {
+        node.remove();
+      }
+    };
 
     if (!event) {
-      debugger;
       /// 路由改变，重新映射元素
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = await navApi.entries();
-      const currentEntry = this.currentEntry;
       for (const navEntry of allEntries) {
         const ele = await this.__effectRoute(navEntry, routersElements, allNavHistoryEntryNodeMap, {
           allEntries,
-          currentEntry: currentEntry,
-          currentEntryIndex: currentEntry?.index ?? -1,
+          currentEntry: fromEntry,
+          currentEntryIndex: fromEntry?.index ?? -1,
           navigationType: undefined,
         });
         if (ele) {
@@ -241,9 +244,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       }
 
       // 移除废弃的元素
-      for (const ele of unuseEntryNodes) {
-        ele.remove();
-      }
+      removeAllUnusedEntryNodes();
       return;
     }
     /**
@@ -279,9 +280,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         }
       } else {
         // 移除废弃的元素
-        for (const ele of unuseEntryNodes) {
-          ele.remove();
-        }
+        removeAllUnusedEntryNodes();
       }
 
       sharedElementNative.effectPagesSharedElement({
