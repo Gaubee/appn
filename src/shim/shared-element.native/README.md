@@ -7,3 +7,5 @@
 
 因此这个库的目的是对 ViewTransitionAPI 的能力进行定向封装，专门用于满足 SharedElement 这个需求。
 这样可以降低 polyfill 成本，同时也能确保 polyfill 方案的性能。
+
+> 注意，SharedElement 的设计与 appn 进行了深度绑定，不建议独立使用

@@ -8,6 +8,7 @@ import {consume} from '@lit/context';
 import {LitElement, css, html, type PropertyValues} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 import {when} from 'lit/directives/when.js';
+import {sharedElements} from '../../shim/shared-element.native/common';
 import '../appn-icon/appn-icon';
 import '../appn-link/appn-link';
 import {appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';
@@ -65,8 +66,9 @@ export class AppnNavBackElement extends LitElement {
     super.firstUpdated(_changedProperties);
     const navEntry = this.#preNavs.navigationEntry;
     if (navEntry) {
-      this.dataset.sharedElement = 'appn-nav-back';
-      this.dataset.sharedElementNewStyle = this.dataset.sharedElementOldStyle = `width: fit-content; height: 100%;`;
+      sharedElements.set(this, 'appn-nav-back', {
+        both: `width: fit-content; height: 100%;`,
+      });
     }
   }
   override render() {
@@ -121,8 +123,9 @@ export class AppnNavBackTextElement extends LitElement {
     const navigationEntry = this.#preNavs.navigationEntry;
     if (navigationEntry) {
       const pre_index = navigationEntry.index - 1;
-      this.dataset.sharedElement = `appn-title-${pre_index}`;
-      this.dataset.sharedElementNewStyle = this.dataset.sharedElementOldStyle = `width:fit-content;`;
+      sharedElements.set(this, `appn-title-${pre_index}`, {
+        both: `width:fit-content;`,
+      });
     }
   }
   protected override render() {

@@ -1,12 +1,14 @@
 import 'urlpattern-polyfill';
 
-import {func_remember, iter_map_not_null, math_clamp} from '@gaubee/util';
-import {CssSheetArray} from '@gaubee/web';
+import {iter_map_not_null, math_clamp} from '@gaubee/util';
 import {ContextProvider, provide} from '@lit/context';
 import {html, LitElement} from 'lit';
 import {customElement, property, queryAssignedElements} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {match, P, Pattern} from 'ts-pattern';
+import type {NavigationBase} from '../../shim/navigation.native/types';
+import {sharedElementNative} from '../../shim/shared-element.native';
+import type {SharedElementLifecycle} from '../../shim/shared-element.native/types';
 import {getFlags} from '../../utils/env';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {baseurl_relative_parts} from '../../utils/relative-path';
@@ -16,7 +18,6 @@ import {AppnPageElement, type AppnSwapbackInfo} from '../appn-page/appn-page';
 import '../css-starting-style/css-starting-style';
 import {appnNavigationContext, appnNavigationHistoryEntryContext} from './appn-navigation-context';
 import type {AppnNavigation} from './appn-navigation-types';
-import type { NavigationBase } from '../../shim/navigation.native/types';
 import {
   appnNavigationHistoryEntryStyle,
   appnNavigationStyle,
@@ -231,10 +232,10 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
      */
     const unuseEntryNodes = new Set(allNavHistoryEntryNodeMap.values());
 
-    const effectRoutes = async (lifecycle: ViewTransitionLifecycle) => {
+    const effectRoutes = async (lifecycle: SharedElementLifecycle) => {
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = await navApi.entries();
-      const currentEntry = lifecycle === 'prepare' ? this.__previousEntry : this.__currentEntry;
+      const currentEntry = lifecycle === 'first' ? this.__previousEntry : this.__currentEntry;
       const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
       this.#currentEntryIndex = currentEntryIndex;
       if (currentEntryIndex === -1) {
@@ -243,7 +244,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       this.style.setProperty('--present-index', `${currentEntryIndex}`);
 
       // TODO 未来 mode === 'finished' 时，需要通知元素生命周期
-      if (lifecycle !== 'finished') {
+      if (lifecycle !== 'finish') {
         for (const navEntry of allEntries) {
           const ele = await this.__effectRoute(navEntry, routersElements, allNavHistoryEntryNodeMap, {
             allEntries,
@@ -261,75 +262,74 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           ele.remove();
         }
       }
-      this.__effectPagesSharedElement({
+      sharedElementNative.effectPagesSharedElement(this, {
         previousEntry: this.__previousEntry,
         subsequentEntry: this.__currentEntry,
         lifecycle,
       });
     };
-    const viewTransitionCss = this.__viewTransitionCss();
+    const sharedElementCss = sharedElementNative.css;
     if (swapbackInfo) {
-      viewTransitionCss.setAnimation('linear');
+      sharedElementCss.setAnimation('linear');
     } else {
-      viewTransitionCss.setAnimation();
+      sharedElementCss.setAnimation();
     }
 
-    await effectRoutes('prepare');
-    const tran = document.startViewTransition(() => {
-      return effectRoutes('started');
-    });
-    if (swapbackInfo) {
-      const pageWidth = swapbackInfo.page.clientWidth;
-      await tran.ready;
-      const htmlEle = document.documentElement;
-      const onTouchMove = (e: TouchEvent) => {
-        const touch = e.touches[0]!;
-        const move = touch.clientX - swapbackInfo.start.clientX;
-        const p = math_clamp(0, move / pageWidth, 1);
-        const currentTime = Math.min(totalDuration * p);
-        // console.log('onTouchMove', touch.clientX, swapbackInfo.start.clientX, move, pageWidth, currentTime);
-        animations.forEach((ctor) => (ctor.currentTime = currentTime));
-      };
-      const onTouchEnd = (_e: TouchEvent) => {
-        // const touch = e.touches[0]!;
-        // const move = touch.clientX - swapbackInfo.start.clientX;
-        // console.log('onTouchEnd');
-        // if (touch.clientX < pageWidth / 2) {
-        //   // TODO cancel
-        // }
+    sharedElementNative.transition({
+      first: () => effectRoutes('first'),
+      last: () => effectRoutes('last'),
+      start: async (tran) => {
+        if (swapbackInfo) {
+          const pageWidth = swapbackInfo.page.clientWidth;
+          await tran.ready;
+          const htmlEle = document.documentElement;
+          const onTouchMove = (e: TouchEvent) => {
+            const touch = e.touches[0]!;
+            const move = touch.clientX - swapbackInfo.start.clientX;
+            const p = math_clamp(0, move / pageWidth, 1);
+            const currentTime = Math.min(totalDuration * p);
+            // console.log('onTouchMove', touch.clientX, swapbackInfo.start.clientX, move, pageWidth, currentTime);
+            animations.forEach((ctor) => (ctor.currentTime = currentTime));
+          };
+          const onTouchEnd = (_e: TouchEvent) => {
+            // const touch = e.touches[0]!;
+            // const move = touch.clientX - swapbackInfo.start.clientX;
+            // console.log('onTouchEnd');
+            // if (touch.clientX < pageWidth / 2) {
+            //   // TODO cancel
+            // }
 
-        // TODO 这里应该支持继续使用原本的动画曲线，viewTransitionCss.setAnimation();
-        animations.forEach((ani) => ani.play());
-      };
-      htmlEle.addEventListener('touchmove', onTouchMove);
-      htmlEle.addEventListener('touchend', onTouchEnd);
-      tran.finished.finally(() => {
-        htmlEle.removeEventListener('touchmove', onTouchEnd);
-        htmlEle.removeEventListener('touchend', onTouchMove);
-      });
+            // TODO 这里应该支持继续使用原本的动画曲线，viewTransitionCss.setAnimation();
+            animations.forEach((ani) => ani.play());
+          };
+          htmlEle.addEventListener('touchmove', onTouchMove);
+          htmlEle.addEventListener('touchend', onTouchEnd);
+          tran.finished.finally(() => {
+            htmlEle.removeEventListener('touchmove', onTouchEnd);
+            htmlEle.removeEventListener('touchend', onTouchMove);
+          });
 
-      let totalDuration = 1000;
-      const animations = iter_map_not_null(htmlEle.getAnimations({subtree: true}), (ani) => {
-        const {effect} = ani;
-        if (effect instanceof KeyframeEffect && effect.pseudoElement?.startsWith('::view-transition')) {
-          if (effect.pseudoElement === '::view-transition-group(root)') {
-            totalDuration = effect.getTiming().duration as number;
-          }
+          let totalDuration = 1000;
+          const animations = iter_map_not_null(htmlEle.getAnimations({subtree: true}), (ani) => {
+            const {effect} = ani;
+            if (effect instanceof KeyframeEffect && effect.pseudoElement?.startsWith(sharedElementNative.selectorPrefix)) {
+              if (effect.pseudoElement === sharedElementNative.getSelector('group', 'root')) {
+                totalDuration = effect.getTiming().duration as number;
+              }
 
-          ani.pause();
-          return ani as Animation & {effect: KeyframeEffect & {pseudoElement: `::view-transition${string}`}};
+              ani.pause();
+              return ani as Animation & {effect: KeyframeEffect & {pseudoElement: string}};
+            }
+            return;
+          });
+          // @ts-ignore
+          globalThis.animationControllers = animations;
+          // @ts-ignore
+          globalThis.swapbackInfo = swapbackInfo;
         }
-        return;
-      });
-      // @ts-ignore
-      globalThis.animationControllers = animations;
-      // @ts-ignore
-      globalThis.swapbackInfo = swapbackInfo;
-    }
-    await tran.finished;
-    await effectRoutes('finished');
-
-    // effectRoutes();
+      },
+      finish: () => effectRoutes('finish'),
+    });
   };
 
   private __effectRoute = async (
@@ -408,121 +408,6 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     }
     return;
   };
-  private __effectPagesSharedElement = async (context: {
-    /** 导航的起始页 */
-    previousEntry: NavigationHistoryEntry | null;
-    /** 导航的目标页 */
-    subsequentEntry: NavigationHistoryEntry | null;
-    /** 生命周期 */
-    lifecycle: ViewTransitionLifecycle;
-  }) => {
-    type PageItem = {node: AppnNavigationHistoryEntryElement; navEntry: NavigationHistoryEntry};
-    const sharedElementPagesContext: {
-      [key in 'previous' | 'subsequent']?: PageItem;
-    } = {};
-    /// 获取过渡元素
-    const queryPageItem = (navEntry: NavigationHistoryEntry | null): PageItem | undefined => {
-      if (navEntry) {
-        const node = this.querySelector<AppnNavigationHistoryEntryElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`);
-        if (node) {
-          return {node, navEntry};
-        }
-      }
-      return;
-    };
-    sharedElementPagesContext.previous = queryPageItem(context.previousEntry);
-    sharedElementPagesContext.subsequent = queryPageItem(context.subsequentEntry);
-
-    const querySharedElement = (pageItem: PageItem) => {
-      return pageItem.node.querySelectorAll<HTMLElement>('[data-shared-element],[data-shared-element-old],[data-shared-element-new]');
-    };
-
-    /// 最后，处理过渡元素
-    if (context.lifecycle === 'finished') {
-      for (const pageItem of [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent]) {
-        if (pageItem) {
-          pageItem.node.removeAttribute('data-view-transition-lifecycle');
-          const sharedElements = querySharedElement(pageItem);
-          /// 清理所有 viewTransitionName
-          pageItem.node.style.viewTransitionName = '';
-          for (const sharedElement of sharedElements) {
-            sharedElement.style.viewTransitionName = '';
-            sharedElement.removeAttribute('data-shared-element-state');
-          }
-        }
-      }
-    } else {
-      const sharedElementCss = this.__viewTransitionCss();
-      const sharedElementMap = new Map<string, HTMLElement>();
-      const indexs = [sharedElementPagesContext.previous?.navEntry.index ?? 0, sharedElementPagesContext.subsequent?.navEntry.index ?? 0].sort((a, b) => a - b);
-      const [minIndex, maxIndex] = indexs;
-      const sharedElementIndex = (maxIndex - minIndex + 1) * 10 + 1;
-      const sharedElementPages = match(context.lifecycle)
-        .with('prepare', () => [sharedElementPagesContext.subsequent, sharedElementPagesContext.previous])
-        .with('started', () => [sharedElementPagesContext.previous, sharedElementPagesContext.subsequent])
-        .exhaustive();
-
-      for (const pageItem of sharedElementPages) {
-        if (pageItem) {
-          pageItem.node.dataset.viewTransitionLifecycle = context.lifecycle;
-          const sharedElements = querySharedElement(pageItem);
-          const appnNavVtn = (pageItem.node.style.viewTransitionName = 'appn-' + pageItem.navEntry.index);
-          const zIndexStart = (pageItem.navEntry.index - minIndex + 1) * 10;
-          sharedElementCss.setRule(`group(${appnNavVtn})`, `::view-transition-group(${appnNavVtn}){z-index:${zIndexStart};}`);
-          for (const sharedElement of sharedElements) {
-            const {dataset} = sharedElement;
-            const vtn = dataset.sharedElement;
-            if (vtn) {
-              this.__setSharedElement(sharedElementCss, vtn, sharedElement, sharedElementMap, `z-index:${sharedElementIndex};`);
-            }
-          }
-        }
-      }
-    }
-  };
-
-  /**
-   * 这里注入一些全局样式，所以不放在 appnNavigationStyle 里头。
-   */
-  private __viewTransitionCss = func_remember(() => {
-    const cssArray = new CssSheetArray();
-    /**
-     * state=old的情况出现在， previousPage 和 subsequentPage 都存在，但是由于 previousPage 页面共同拥有一个 sharedElement。
-     * 这就意味着元素是从 previousPage 获取的 old 状态，然后再 subsequentPage 获取的 new 状态。那么原本的 previousPage 页面的元素，在被获取完 old 状态后，就应该隐藏。
-     * 否则它在 transition 的时候，会被其它 view-transition 给捕获。
-     */
-    cssArray.addRule(`[data-shared-element-state='old'] { visibility: hidden !important; }`);
-
-    const setAnimation = (timelineFunction?: string) => {
-      cssArray.setRule(
-        'timeline-function',
-        `::view-transition-group(*){animation-timing-function:${timelineFunction ?? 'cubic-bezier(0.2, 0.9, 0.5, 1)'};animation-duration:350ms}`
-      );
-    };
-    return Object.assign(cssArray, {setAnimation});
-  });
-
-  private __setSharedElement(sharedElementCss: CssSheetArray, vtn: string, element: HTMLElement, sharedElementMap: Map<string, HTMLElement>, zIndexCssText: string) {
-    const oldElement = sharedElementMap.get(vtn);
-    if (oldElement) {
-      oldElement.style.viewTransitionName = '';
-      oldElement.dataset.sharedElementState = 'old';
-    }
-    sharedElementMap.set(vtn, element);
-    element.style.viewTransitionName = vtn;
-    element.dataset.sharedElementState = 'new';
-    const dataset = element.dataset;
-    const cssText = dataset.sharedElementStyle;
-    sharedElementCss.setRule(`group(${vtn})`, `::view-transition-group(${vtn}){${zIndexCssText}${cssText ?? ''}}`);
-    const oldCssText = dataset.sharedElementOldStyle;
-    if (oldCssText) {
-      sharedElementCss.setRule(`old(${vtn})`, `::view-transition-old(${vtn}){${oldCssText}}`);
-    }
-    const newCssText = dataset.sharedElementNewStyle;
-    if (newCssText) {
-      sharedElementCss.setRule(`new(${vtn})`, `::view-transition-new(${vtn}){${newCssText}}`);
-    }
-  }
   //#endregion
 
   override render() {
@@ -614,8 +499,6 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
             .otherwise(() => (selfIndex < presentIndex ? 'past' : 'future'));
     this.dataset.tense = tense;
 
-    // const vtn = `vtn-${selfIndex}`;
-    // this.style.setProperty('--view-transition-name', vtn);
     this.inert = tense !== 'present';
 
     return html`<slot></slot>`;

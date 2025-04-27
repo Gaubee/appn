@@ -121,8 +121,8 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null([
       --page-scale-y: ${pagePastScaleY};
       --page-opacity: ${pagePastOpacity};
     }
-    :host([data-tense='future']:not([data-view-transition-lifecycle])),
-    :host([data-tense='past']:not([data-view-transition-lifecycle])) {
+    :host([data-tense='future']:not([data-shared-element-lifecycle])),
+    :host([data-tense='past']:not([data-shared-element-lifecycle])) {
       display: none;
     }
   `,
