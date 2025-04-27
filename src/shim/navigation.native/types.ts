@@ -1,3 +1,11 @@
+/// <reference types="@types/dom-navigation"/>
+
+/**
+ * > 与 NavigationAPI 基本保持一致的类型定义，这里独立定义一份，原因有3:
+ * > 1. 原本的 Navigation 是 class 定义，这里改成用 interface，同时增强通用性质，方便polyfill的实现
+ * > 2. 少量的裁剪(`on*` 属性)。
+ * > 3. 避免 @types/dom-navigation 发生更新追加新的功能，导致编译问题
+ */
 export interface NavigationBase extends EventTarget {
   /** Returns a snapshot of the joint session history entries. */
   entries(): NavigationHistoryEntry[];
@@ -35,16 +43,8 @@ export interface NavigationBase extends EventTarget {
   /** Navigates forward one entry in the joint session history. */
   forward(options?: NavigationOptions): NavigationResult;
 
-  addEventListener<K extends keyof NavigationEventMap>(
-    type: K,
-    listener: (this: NavigationBase, ev: NavigationEventMap[K]) => any,
-    options?: boolean | AddEventListenerOptions
-  ): void;
+  addEventListener<K extends keyof NavigationEventMap>(type: K, listener: (this: this, ev: NavigationEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
   addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-  removeEventListener<K extends keyof NavigationEventMap>(
-    type: K,
-    listener: (this: NavigationBase, ev: NavigationEventMap[K]) => any,
-    options?: boolean | EventListenerOptions
-  ): void;
+  removeEventListener<K extends keyof NavigationEventMap>(type: K, listener: (this: this, ev: NavigationEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
   removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }

@@ -1,6 +1,6 @@
 import type {Pattern} from 'ts-pattern';
 import type {AppnNavigationProviderElement} from './appn-navigation';
-import type { NavigationBase } from '../../shim/min-navigation.ponyfill/types';
+import type { NavigationBase } from '../../shim/navigation.native/types';
 export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationProviderElement> extends NavigationBase {
   readonly baseURI: string;
 

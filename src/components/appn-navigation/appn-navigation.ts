@@ -16,7 +16,7 @@ import {AppnPageElement, type AppnSwapbackInfo} from '../appn-page/appn-page';
 import '../css-starting-style/css-starting-style';
 import {appnNavigationContext, appnNavigationHistoryEntryContext} from './appn-navigation-context';
 import type {AppnNavigation} from './appn-navigation-types';
-import type { NavigationBase } from '../../shim/min-navigation.ponyfill/types';
+import type { NavigationBase } from '../../shim/navigation.native/types';
 import {
   appnNavigationHistoryEntryStyle,
   appnNavigationStyle,
