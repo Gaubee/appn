@@ -1,6 +1,4 @@
-import {iter_map_not_null} from '@gaubee/util';
 import {css} from 'lit';
-import {isSupportViewTransition} from '../../utils/css-helper';
 import {cssLiteral} from '../../utils/lit-helper';
 export const pageFutureTranslateX = cssLiteral('100%');
 export const pageFutureTranslateY = cssLiteral('0%');
@@ -97,7 +95,7 @@ export const appnNavigationStyle = css`
   }
 `;
 
-export const appnNavigationHistoryEntryStyle = iter_map_not_null([
+export const appnNavigationHistoryEntryStyle = [
   css`
     :host {
       /** 充满grid容器 */
@@ -126,16 +124,4 @@ export const appnNavigationHistoryEntryStyle = iter_map_not_null([
       display: none;
     }
   `,
-  isSupportViewTransition
-    ? null
-    : css`
-        :host([data-from-tense='present']) {
-          transition-duration: var(--page-leave-duration);
-          transition-timing-function: var(--page-leave-ease);
-        }
-        :host([data-tense='present']) {
-          transition-duration: var(--page-enter-duration);
-          transition-timing-function: var(--page-enter-ease);
-        }
-      `,
-]);
+];

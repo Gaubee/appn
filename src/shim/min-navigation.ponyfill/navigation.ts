@@ -1,45 +1,13 @@
-import {func_remember} from '@gaubee/util';
 import {match, P} from 'ts-pattern';
 import type {NavigationBase} from '../navigation.native/types';
 import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
+import {uuid_reg} from '../../utils/uuid-helper';
 import {MinNavigateEvent} from './navigate-event';
 import {MinNavigationCurrentEntryChangeEvent} from './navigation-current-entry-change-event';
 import {MinNavigationDestination} from './navigation-destination';
 import {MinNavigationHistoryEntry, type MinNavigationEntryInit} from './navigation-history-entry';
 import {MinNavigationTransition} from './navigation-transition';
-import {addEntry, getAllEntryInits, sessionKey, updateAllEntries, updateAllEntryInits, updateEntryInit} from './storage';
-
-//#region prepare navigation state
-const uuid_reg = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
-
-const getState = func_remember(async () => {
-  const entryInits = await getAllEntryInits();
-  let entries = entryInits.map((init) => new MinNavigationHistoryEntry(init));
-  const currentEntryInitId = history.state?.id as string;
-  let currentEntry = currentEntryInitId && uuid_reg.test(currentEntryInitId) ? entries.find((entry) => entry.id === currentEntryInitId) : void 0;
-  if (!currentEntry) {
-    const currentEntryInit: MinNavigationEntryInit = {
-      id: crypto.randomUUID(),
-      index: 0,
-      key: crypto.randomUUID(),
-      url: location.href,
-      state: undefined,
-      sessionKey: sessionKey,
-    };
-    currentEntry = new MinNavigationHistoryEntry(currentEntryInit);
-    entries = [currentEntry];
-
-    /// 初始化模式，绑定到 history.state 中，更新到数据库中
-    history.replaceState(currentEntryInit, '', currentEntryInit.url);
-    void updateAllEntryInits([currentEntryInit]);
-  }
-
-  return {
-    entries,
-    currentEntry,
-  };
-});
-//#endregion
+import {addEntry, getState, sessionKey, updateAllEntries, updateEntryInit} from './storage';
 
 //#region navigation-api
 
@@ -305,12 +273,6 @@ export class MinNavigation extends EventTarget implements NavigationBase {
   }
   //#endregion
 }
-export const navigation = new MinNavigation(await getState());
-
-Object.assign(globalThis, {
-  minNavigation: navigation,
-  MinNavigation: MinNavigation,
-});
 
 //#endregion
 

@@ -9,6 +9,7 @@ import {match, P, Pattern} from 'ts-pattern';
 import {caniuseNavigation, type NavigationBase} from '../../shim/navigation.native/types';
 import {sharedElement as sharedElementNative} from '../../shim/shared-element.native';
 import {caniuseSharedElement, type SharedElementLifecycle} from '../../shim/shared-element.native/types';
+import {isSupportTouch} from '../../utils/css-helper';
 import {getFlags} from '../../utils/env';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {baseurl_relative_parts} from '../../utils/relative-path';
@@ -249,9 +250,11 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     /**
      * 手势返回模式
      */
-    const swapbackInfo = match(event?.info)
-      .with({by: 'swapback', start: P.instanceOf(Touch), page: P.instanceOf(AppnPageElement)}, (info) => info satisfies AppnSwapbackInfo)
-      .otherwise(() => null);
+    const swapbackInfo = isSupportTouch
+      ? match(event?.info)
+          .with({by: 'swapback', start: P.instanceOf(Touch), page: P.instanceOf(AppnPageElement)}, (info) => info satisfies AppnSwapbackInfo)
+          .otherwise(() => null)
+      : null;
 
     const effectRoutes = async (lifecycle: SharedElementLifecycle) => {
       // TODO 未来 mode === 'finished' 时，需要通知元素生命周期
@@ -273,16 +276,6 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         // 移除废弃的元素
         removeAllUnusedEntryNodes();
       }
-
-      sharedElement.effectPagesSharedElement(this, {
-        from: fromEntry,
-        /** 不要用 event.destination
-         * 在push模式下，它是“空”的（index=-1）
-         */
-        dest: this.currentEntry, // this.__currentEntry,
-        queryPageNode: (navEntry) => this.querySelector<HTMLElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`),
-        lifecycle,
-      });
     };
 
     const selector = sharedElement.getSelector('group', '*');
@@ -294,61 +287,65 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       sharedElement.setAnimationStyle(selector, null);
     }
 
-    sharedElement.transition({
-      first: () => effectRoutes('first'),
-      last: () => effectRoutes('last'),
-      start: async (tran) => {
-        if (swapbackInfo) {
-          const pageWidth = swapbackInfo.page.clientWidth;
-          await tran.ready;
-          const htmlEle = document.documentElement;
-          const onTouchMove = (e: TouchEvent) => {
-            const touch = e.touches[0]!;
-            const move = touch.clientX - swapbackInfo.start.clientX;
-            const p = math_clamp(0, move / pageWidth, 1);
-            const currentTime = Math.min(totalDuration * p);
-            // console.log('onTouchMove', touch.clientX, swapbackInfo.start.clientX, move, pageWidth, currentTime);
-            animations.forEach((ctor) => (ctor.currentTime = currentTime));
-          };
-          const onTouchEnd = (_e: TouchEvent) => {
-            // const touch = e.touches[0]!;
-            // const move = touch.clientX - swapbackInfo.start.clientX;
-            // console.log('onTouchEnd');
-            // if (touch.clientX < pageWidth / 2) {
-            //   // TODO cancel
-            // }
+    await sharedElement.transition(
+      this,
+      {
+        first: () => effectRoutes('first'),
+        last: () => effectRoutes('last'),
+        start: async (tran) => {
+          if (swapbackInfo) {
+            const pageWidth = swapbackInfo.page.clientWidth;
+            await tran.ready;
+            const htmlEle = document.documentElement;
+            const onTouchMove = (e: TouchEvent) => {
+              const touch = e.touches[0]!;
+              const move = touch.clientX - swapbackInfo.start.clientX;
+              const p = math_clamp(0, move / pageWidth, 1);
+              const currentTime = Math.min(totalDuration * p);
+              // console.log('onTouchMove', touch.clientX, swapbackInfo.start.clientX, move, pageWidth, currentTime);
+              animations.forEach((ctor) => (ctor.currentTime = currentTime));
+            };
+            const onTouchEnd = (_e: TouchEvent) => {
+              // const touch = e.touches[0]!;
+              // const move = touch.clientX - swapbackInfo.start.clientX;
+              // console.log('onTouchEnd');
+              // if (touch.clientX < pageWidth / 2) {
+              //   // TODO cancel
+              // }
 
-            // TODO 这里应该支持继续使用原本的动画曲线，viewTransitionCss.setAnimation();
-            animations.forEach((ani) => ani.play());
-          };
-          htmlEle.addEventListener('touchmove', onTouchMove);
-          htmlEle.addEventListener('touchend', onTouchEnd);
-          tran.finished.finally(() => {
-            htmlEle.removeEventListener('touchmove', onTouchEnd);
-            htmlEle.removeEventListener('touchend', onTouchMove);
-          });
+              // TODO 这里应该支持继续使用原本的动画曲线，viewTransitionCss.setAnimation();
+              animations.forEach((ani) => ani.play());
+            };
+            htmlEle.addEventListener('touchmove', onTouchMove);
+            htmlEle.addEventListener('touchend', onTouchEnd);
+            tran.finished.finally(() => {
+              htmlEle.removeEventListener('touchmove', onTouchEnd);
+              htmlEle.removeEventListener('touchend', onTouchMove);
+            });
 
-          let totalDuration = 1000;
-          const animations = iter_map_not_null(htmlEle.getAnimations({subtree: true}), (ani) => {
-            const {effect} = ani;
-            if (effect instanceof KeyframeEffect && effect.pseudoElement?.startsWith(sharedElement.selectorPrefix)) {
-              if (effect.pseudoElement === sharedElement.getSelector('group', 'root')) {
-                totalDuration = effect.getTiming().duration as number;
-              }
-
-              ani.pause();
-              return ani as Animation & {effect: KeyframeEffect & {pseudoElement: string}};
-            }
-            return;
-          });
-          // @ts-ignore
-          globalThis.animationControllers = animations;
-          // @ts-ignore
-          globalThis.swapbackInfo = swapbackInfo;
-        }
+            const totalDuration = sharedElement.pageAnimationDuration;
+            const animations = iter_map_not_null(htmlEle.getAnimations({subtree: true}), (animation) => {
+              const sharedAni = sharedElement.isSharedElementAnimation(animation);
+              sharedAni?.pause();
+              return sharedAni;
+            });
+            // @ts-ignore
+            globalThis.__debug__animationControllers = animations;
+            // @ts-ignore
+            globalThis.__debug__swapbackInfo = swapbackInfo;
+          }
+        },
+        finish: () => effectRoutes('finish'),
       },
-      finish: () => effectRoutes('finish'),
-    });
+      {
+        from: fromEntry,
+        /** 不要用 event.destination
+         * 在push模式下，它是“空”的（index=-1）
+         */
+        dest: this.currentEntry, // this.__currentEntry,
+        queryPageNode: (navEntry) => this.querySelector<HTMLElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`),
+      }
+    );
   };
 
   private __effectRoute = async (

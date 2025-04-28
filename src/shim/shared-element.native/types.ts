@@ -1,7 +1,8 @@
 import type {PromiseMaybe} from '@gaubee/util';
+import type {CssSheetArray} from '@gaubee/web';
 import type {Properties} from 'csstype';
 
-export const caniuseSharedElement = 'startViewTransition' in document;
+export const caniuseSharedElement = /*@__PURE__*/ CSS.supports('view-transition-name: none'); // 'startViewTransition' in document;
 
 /**
  * 基于 FLIP 思想
@@ -22,9 +23,12 @@ export type AnimationProperties = Pick<
 >;
 
 export type SharedElementSelectorType = 'group' | 'image-pair' | 'old' | 'new';
+export interface SharedElementAnimation extends Animation {
+  effect: KeyframeEffect; //& {pseudoElement: string};
+}
 
 export interface SharedElementBase {
-  readonly selectorPrefix: string;
+  isSharedElementAnimation(animation: Animation): SharedElementAnimation | undefined;
   /**
    * get selector by shared-element name, "*" is an literal
    * @param type - default is 'group'
@@ -37,26 +41,37 @@ export interface SharedElementBase {
    * @param selector - default is getSelector('group','*)
    */
   setAnimationStyle(selector: string, style: AnimationProperties | null): void;
+  readonly pageAnimationDuration: number;
+
+  readonly css: CssSheetArray;
   /**
    * play transition animation
    * @param callbacks
    */
-  transition(callbacks: SharedElementLifecycleCallbacks): Promise<void>;
-
-  /**
-   * the effect of shared-element 'navigate' event fired.
-   * @param rootNode
-   * @param context
-   */
-  effectPagesSharedElement(
+  transition(
     scopeElement: HTMLElement,
+    callbacks: SharedElementLifecycleCallbacks,
     context: {
       from: NavigationHistoryEntry | null;
       dest: NavigationHistoryEntry | null;
-      queryPageNode: (entry: NavigationHistoryEntry) => HTMLElement | null;
-      lifecycle: SharedElementLifecycle;
+      queryPageNode: (entry: NavigationHistoryEntry, lifecycle: SharedElementLifecycle) => HTMLElement | null;
     }
-  ): void;
+  ): Promise<void>
+
+  // /**
+  //  * the effect of shared-element 'navigate' event fired.
+  //  * @param rootNode
+  //  * @param context
+  //  */
+  // effectPagesSharedElement(
+  //   scopeElement: HTMLElement,
+  //   context: {
+  //     from: NavigationHistoryEntry | null;
+  //     dest: NavigationHistoryEntry | null;
+  //     queryPageNode: (entry: NavigationHistoryEntry) => HTMLElement | null;
+  //     lifecycle: SharedElementLifecycle;
+  //   }
+  // ): void;
 }
 
 export interface SharedElementLifecycleCallbacks {

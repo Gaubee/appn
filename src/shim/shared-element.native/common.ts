@@ -1,4 +1,16 @@
-import type {SharedElementConfig, SharedElementLifecycle, SharedElementStyles} from './types';
+import {func_remember} from '@gaubee/util';
+import {CssSheetArray} from '@gaubee/web';
+import {styleToCss} from '../../utils/css-helper';
+import type {
+  AnimationProperties,
+  SharedElementAnimation,
+  SharedElementBase,
+  SharedElementConfig,
+  SharedElementLifecycle,
+  SharedElementLifecycleCallbacks,
+  SharedElementSelectorType,
+  SharedElementStyles,
+} from './types';
 
 export const sharedElementLifecycle = {
   set(element: HTMLElement, value: SharedElementLifecycle) {
@@ -66,3 +78,70 @@ class SharedElementRegistry {
   }
 }
 export const sharedElements = new SharedElementRegistry();
+
+export abstract class SharedElementBaseImpl implements SharedElementBase {
+  readonly selectorPrefix = '::view-transition' as const;
+  abstract isSharedElementAnimation(animation: Animation): SharedElementAnimation | undefined;
+
+  getSelector(type: SharedElementSelectorType = 'group', name: string = '*') {
+    return `${this.selectorPrefix}-${type}(${name})`;
+  }
+  setAnimationStyle(selector: string = this.getSelector(), style: AnimationProperties | null = null) {
+    const key = `--user-${selector}`;
+    if (style == null) {
+      this.css.deleteRule(key);
+    } else {
+      this.css.setRule(key, `${selector}{${styleToCss(style)}}`);
+    }
+  }
+  readonly pageAnimationDuration: number = 350;
+
+  /**
+   * 这里注入一些全局样式，所以不放在 appnNavigationStyle 里头。
+   */
+  #css = func_remember(() => {
+    const css = String.raw;
+    const cssArray = new CssSheetArray();
+    /**
+     * state=old的情况出现在， previousPage 和 subsequentPage 都存在，但是由于 previousPage 页面共同拥有一个 sharedElement。
+     * 这就意味着元素是从 previousPage 获取的 old 状态，然后再 subsequentPage 获取的 new 状态。那么原本的 previousPage 页面的元素，在被获取完 old 状态后，就应该隐藏。
+     * 否则它在 transition 的时候，会被其它 view-transition 给捕获。
+     */
+    cssArray.addRule(css`
+      [data-shared-element-state='old'] {
+        visibility: hidden !important;
+      }
+    `);
+
+    cssArray.addRule(css`
+      ${this.getSelector('group', '*')} {
+        animation-timing-function: cubic-bezier(0.2, 0.9, 0.5, 1);
+        animation-duration: ${this.pageAnimationDuration}ms;
+      }
+    `);
+
+    return cssArray;
+  });
+  get css() {
+    return this.#css();
+  }
+
+  abstract transition(
+    scopeElement: HTMLElement,
+    callbacks: SharedElementLifecycleCallbacks,
+    context: {
+      from: NavigationHistoryEntry | null;
+      dest: NavigationHistoryEntry | null;
+      queryPageNode: (entry: NavigationHistoryEntry, lifecycle: SharedElementLifecycle) => HTMLElement | null;
+    }
+  ): Promise<void>;
+  // abstract effectPagesSharedElement(
+  //   scopeElement: HTMLElement,
+  //   context: {
+  //     from: NavigationHistoryEntry | null;
+  //     dest: NavigationHistoryEntry | null;
+  //     queryPageNode: (entry: NavigationHistoryEntry) => HTMLElement | null;
+  //     lifecycle: SharedElementLifecycle;
+  //   }
+  // ): void;
+}

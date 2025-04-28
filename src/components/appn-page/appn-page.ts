@@ -103,44 +103,53 @@ export class AppnPageElement extends LitElement {
   #swapback = (() => {
     const swapback = {
       state: null as null | {start: Touch},
-      start: (e: TouchEvent) => {
-        if (!this.swapback) {
-          return;
-        }
-        const start = e.touches.length !== 1 ? null : e.touches[0];
-        if (start && start.clientX < 100) {
-          swapback.state = {start};
-          console.log('QAQ', 'swapback start!');
-        }
-      },
-      move: (e: TouchEvent) => {
-        const state = swapback.state;
-        if (state == null) {
-          return;
-        }
-        const {start} = state;
-        const touch = e.touches[0];
-        // TODO rtl 布局的支持
-        if (touch.clientX - start.clientX > 50) {
-          const nav = this.#nav;
-          if (nav == null) {
+      start: Object.assign(
+        (e: TouchEvent) => {
+          if (!this.swapback) {
             return;
           }
-          console.log('QAQ', 'swapback emit!!');
-          const event = new AppnNavigateEvent({type: 'back', info: {by: 'swapback', start, page: this} satisfies AppnSwapbackInfo}, 'swapback');
-          this.dispatchEvent(event);
-          event.applyNavigate(nav, this.navigationEntry);
+          const start = e.touches.length !== 1 ? null : e.touches[0];
+          if (start && start.clientX < 100) {
+            swapback.state = {start};
+            console.log('QAQ', 'swapback start!');
+          }
+        },
+        {passive: true}
+      ),
+      move: Object.assign(
+        (e: TouchEvent) => {
+          const state = swapback.state;
+          if (state == null) {
+            return;
+          }
+          const {start} = state;
+          const touch = e.touches[0];
+          // TODO rtl 布局的支持
+          if (touch.clientX - start.clientX > 50) {
+            const nav = this.#nav;
+            if (nav == null) {
+              return;
+            }
+            console.log('QAQ', 'swapback emit!!');
+            const event = new AppnNavigateEvent({type: 'back', info: {by: 'swapback', start, page: this} satisfies AppnSwapbackInfo}, 'swapback');
+            this.dispatchEvent(event);
+            event.applyNavigate(nav, this.navigationEntry);
 
-          // end
-          swapback.end(e);
-        }
-      },
-      end: (e: Event) => {
-        if (swapback.state) {
-          console.log('QAQ', 'swapback end', e.type);
-          swapback.state = null;
-        }
-      },
+            // end
+            swapback.end(e);
+          }
+        },
+        {passive: true}
+      ),
+      end: Object.assign(
+        (e: Event) => {
+          if (swapback.state) {
+            console.log('QAQ', 'swapback end', e.type);
+            swapback.state = null;
+          }
+        },
+        {passive: true}
+      ),
     };
     return swapback;
   })();

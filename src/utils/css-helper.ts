@@ -45,3 +45,4 @@ export const getAdoptedStyleSheets = (ele: Element | DocumentOrShadowRoot): Adop
 
 export const isSupportCssLayer = typeof CSSLayerBlockRule === 'function';
 export const isSupportViewTransition = /*@__PURE__*/ CSS.supports('view-transition-name: none');
+export const isSupportTouch = 'ontouchstart' in document.body && typeof TouchEvent !== 'undefined';

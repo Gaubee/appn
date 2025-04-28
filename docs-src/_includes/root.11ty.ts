@@ -22,11 +22,12 @@ export default function (data: EleventyData): string {
         ${scripts?.map((script_src) => html`<script type="module" src=${script_src}></script>`).join('') ?? ''}
         ${links?.map((link_href) => html`<link rel="stylesheet" href=${link_href} />`) ?? ''}
         <script type="module" src="/bundle/polyfill.js"></script>
-        ${getComponentsEntry()
+        <!-- ${getComponentsEntry()
           .map((entry) => {
             return html`<script type="module" src="${entry.bundle}"></script>`;
           })
-          .join('\n')}
+          .join('\n')} -->
+        <script type="module" src="/bundle/index.js"></script>
         <link rel="stylesheet" href="/prismjs/prism-okaidia.css" />
         <link rel="stylesheet" href="/css/index.css" />
       </head>
