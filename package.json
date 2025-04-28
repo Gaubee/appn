@@ -12,10 +12,11 @@
     "dist:watch": "tsc --watch",
     "react": "tsx scripts/react-generator.ts",
     "clean": "rimraf dist bundle docs",
-    "lint": "pnpm lint:lit-analyzer && pnpm lint:eslint",
+    "lint:all": "pnpm lint:lita && pnpm lint:eslint",
     "lint:eslint": "eslint 'src/**/*.ts'",
-    "lint:fix": "eslint 'src/**/*.ts'  --fix",
-    "lint:lit-analyzer": "lit-analyzer",
+    "lita": "lit-analyzer",
+    "lita:fix": "eslint 'src/**/*.ts'  --fix",
+    "lita:watch": "node --watch ./node_modules/lit-analyzer/cli.mjs",
     "format": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --ignore-path ./.eslintignore --write",
     "-docs": "pnpm docs:clean && pnpm dist && pnpm analyze && pnpm bundle && pnpm docs:assets && pnpm 11ty",
     "build": "pnpm dist --noCheck && pnpm analyze && pnpm bundle && pnpm 11ty",
@@ -81,7 +82,8 @@
       "prismjs": "patches/prismjs.patch",
       "@11ty/recursive-copy": "patches/@11ty__recursive-copy.patch",
       "minify-literals": "patches/minify-literals.patch",
-      "idb": "patches/idb.patch"
+      "idb": "patches/idb.patch",
+      "@jackolope/lit-analyzer": "patches/@jackolope__lit-analyzer.patch"
     }
   },
   "devDependencies": {

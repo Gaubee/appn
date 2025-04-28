@@ -17,9 +17,9 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     return;
   }
   async transition(
-    scopeElement: HTMLElement,
+    _scopeElement: HTMLElement,
     callbacks: SharedElementLifecycleCallbacks,
-    context: {
+    _context: {
       from: NavigationHistoryEntry | null;
       dest: NavigationHistoryEntry | null;
       queryPageNode: (entry: NavigationHistoryEntry, lifecycle: SharedElementLifecycle) => HTMLElement | null;

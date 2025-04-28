@@ -1,0 +1,37 @@
+diff --git a/lib/rules/no-noncallable-event-binding.js b/lib/rules/no-noncallable-event-binding.js
+index 39841175abbaa4c9b3c87c1817fd0b81cb5d8aa7..0f92d3d251d408e3c125007822bc7412dc264f1d 100644
+--- a/lib/rules/no-noncallable-event-binding.js
++++ b/lib/rules/no-noncallable-event-binding.js
+@@ -44,6 +44,10 @@ function isTypeBindableToEventListener(type) {
+     }
+     return (0, ts_simple_type_1.validateType)(type, simpleType => {
+         switch (simpleType.kind) {
++            // Intersection types can be used if one of the types is callable
++			case "INTERSECTION": {
++				return simpleType.types.some(t => isTypeBindableToEventListener(t));
++			}
+             // Object types with attributes for the setup function of the event listener can be used
+             case "OBJECT":
+             case "INTERFACE": {
+diff --git a/lib/rules/no-property-visibility-mismatch.js b/lib/rules/no-property-visibility-mismatch.js
+index c69e2a299fa964f7f597a26899dd5d2659e9dedb..f0e06ebbc11c11aa382d439aa77350f10b6bedf0 100644
+--- a/lib/rules/no-property-visibility-mismatch.js
++++ b/lib/rules/no-property-visibility-mismatch.js
+@@ -38,7 +38,7 @@ const rule = {
+         const hasInternalDecorator = decoratorName === "state";
+         const hasPropertyDecorator = decoratorName === "property";
+         // Handle cases where @state decorator is used, but the property is public
+-        if (hasInternalDecorator && (member.visibility === "public" || member.visibility == null)) {
++        if (hasInternalDecorator && (member.visibility === "public" || member.visibility == null) && member.propName[0] !== '#') {
+             const inJsFile = context.file.fileName.endsWith(".js");
+             context.report({
+                 location: (0, range_util_js_1.rangeFromNode)(decoratorIdentifier),
+@@ -97,7 +97,7 @@ const rule = {
+             });
+         }
+         // Handle cases where @property decorator is used, but the property is not public
+-        else if (hasPropertyDecorator && member.visibility !== "public") {
++        else if (hasPropertyDecorator && (member.visibility !== "public" || member.propName[0] === "#")) {
+             // If the Lit `state` option is set on the decorator, then that is also considered valid
+             if (member.meta?.state) {
+                 return;

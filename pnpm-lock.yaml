@@ -14,6 +14,9 @@ patchedDependencies:
   '@11ty/recursive-copy':
     hash: f43e0e72d2e141f75dcab21a65717326518e764122ac06d597e437711a8f1d08
     path: patches/@11ty__recursive-copy.patch
+  '@jackolope/lit-analyzer':
+    hash: c70d10022f21ab3d1ec052e85b6e0deaefd228da198cba99fb2320f394f5229b
+    path: patches/@jackolope__lit-analyzer.patch
   '@open-wc/testing':
     hash: 4bb5aae5f7477453da97eb801fc6972e89bee9b1790a047f18ca32fba3f7506b
     path: patches/@open-wc__testing.patch
@@ -187,7 +190,7 @@ importers:
         version: 2.4.2
       lit-analyzer:
         specifier: npm:@jackolope/lit-analyzer@^3.1.2
-        version: '@jackolope/lit-analyzer@3.1.2'
+        version: '@jackolope/lit-analyzer@3.1.2(patch_hash=c70d10022f21ab3d1ec052e85b6e0deaefd228da198cba99fb2320f394f5229b)'
       playwright:
         specifier: ^1.15.1
         version: 1.51.1
@@ -4792,7 +4795,7 @@ snapshots:
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: wrap-ansi@7.0.0
 
-  '@jackolope/lit-analyzer@3.1.2':
+  '@jackolope/lit-analyzer@3.1.2(patch_hash=c70d10022f21ab3d1ec052e85b6e0deaefd228da198cba99fb2320f394f5229b)':
     dependencies:
       '@jackolope/web-component-analyzer': 4.0.1
       '@vscode/web-custom-data': 0.5.0
@@ -4806,7 +4809,7 @@ snapshots:
 
   '@jackolope/ts-lit-plugin@3.1.2':
     dependencies:
-      '@jackolope/lit-analyzer': 3.1.2
+      '@jackolope/lit-analyzer': 3.1.2(patch_hash=c70d10022f21ab3d1ec052e85b6e0deaefd228da198cba99fb2320f394f5229b)
       '@jackolope/web-component-analyzer': 4.0.1
 
   '@jackolope/web-component-analyzer@4.0.1':
