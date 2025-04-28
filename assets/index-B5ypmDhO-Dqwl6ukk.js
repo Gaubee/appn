@@ -1,1 +1,0 @@
-class o{selectorPrefix;getSelector(e,t){throw new Error("Method not implemented.")}setAnimationStyle(e,t){throw new Error("Method not implemented.")}transition(e){throw new Error("Method not implemented.")}effectPagesSharedElement(e,t){throw new Error("Method not implemented.")}}const r=new o;export{o as SharedElementPonyfill,r as sharedElementPonyfill};
