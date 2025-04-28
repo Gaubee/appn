@@ -1,34 +1,56 @@
 import {func_remember} from '@gaubee/util';
 import {CssSheetArray} from '@gaubee/web';
 import {match} from 'ts-pattern';
+import {styleToCss} from '../../utils/css-helper';
 import {sharedElementLifecycle, sharedElements} from './common';
-import {type SharedElement, type SharedElementConfig, type SharedElementLifecycle, type SharedElementLifecycleCallbacks} from './types';
+import {
+  type AnimationProperties,
+  type SharedElementBase,
+  type SharedElementConfig,
+  type SharedElementLifecycle,
+  type SharedElementLifecycleCallbacks,
+  type SharedElementSelectorType,
+} from './types';
 
-export class SharedElementNative implements SharedElement {
+export class SharedElement implements SharedElementBase {
   readonly selectorPrefix = '::view-transition' as const;
-  getSelector(type: 'group' | 'image-pair' | 'old' | 'new', name: string) {
+  getSelector(type: SharedElementSelectorType = 'group', name: string = '*') {
     return `${this.selectorPrefix}-${type}(${name})`;
+  }
+  setAnimationStyle(selector: string = this.getSelector(), style: AnimationProperties | null = null) {
+    const key = `--user-${selector}`;
+    if (style == null) {
+      this.css.deleteRule(key);
+    } else {
+      this.css.setRule(key, styleToCss(style));
+    }
   }
 
   /**
    * 这里注入一些全局样式，所以不放在 appnNavigationStyle 里头。
    */
   #css = func_remember(() => {
+    const css = String.raw;
     const cssArray = new CssSheetArray();
     /**
      * state=old的情况出现在， previousPage 和 subsequentPage 都存在，但是由于 previousPage 页面共同拥有一个 sharedElement。
      * 这就意味着元素是从 previousPage 获取的 old 状态，然后再 subsequentPage 获取的 new 状态。那么原本的 previousPage 页面的元素，在被获取完 old 状态后，就应该隐藏。
      * 否则它在 transition 的时候，会被其它 view-transition 给捕获。
      */
-    cssArray.addRule(`[data-shared-element-state='old'] { visibility: hidden !important; }`);
+    cssArray.addRule(css`
+      [data-shared-element-state='old'] {
+        visibility: hidden !important;
+      }
+    `);
 
-    const setAnimation = (timelineFunction?: string) => {
-      cssArray.setRule(
-        'timeline-function',
-        `::view-transition-group(*){animation-timing-function:${timelineFunction ?? 'cubic-bezier(0.2, 0.9, 0.5, 1)'};animation-duration:350ms}`
-      );
-    };
-    return Object.assign(cssArray, {setAnimation});
+    cssArray.addRule(css`
+      ${this.getSelector('group', '*')} {
+        animation-timing-function: cubic-bezier(0.2, 0.9, 0.5, 1);
+        animation-duration: 350ms;
+      }
+    `);
+
+    return cssArray;
   });
   get css() {
     return this.#css();
@@ -41,16 +63,19 @@ export class SharedElementNative implements SharedElement {
     await callbacks.finish?.(transition);
   }
 
-  effectPagesSharedElement = (context: {
-    /** 导航的起始页 */
-    from: NavigationHistoryEntry | null;
-    /** 导航的目标页 */
-    destination: NavigationDestination | null;
-    /** 根据导航对象返回页面节点 */
-    queryPageNode: (entry: NavigationHistoryEntry | NavigationDestination) => HTMLElement | null;
-    /** 生命周期 */
-    lifecycle: SharedElementLifecycle;
-  }) => {
+  effectPagesSharedElement(
+    _scopeElement: HTMLElement,
+    context: {
+      /** 导航的起始页 */
+      from: NavigationHistoryEntry | null;
+      /** 导航的目标页 */
+      destination: NavigationDestination | null;
+      /** 根据导航对象返回页面节点 */
+      queryPageNode: (entry: NavigationHistoryEntry | NavigationDestination) => HTMLElement | null;
+      /** 生命周期 */
+      lifecycle: SharedElementLifecycle;
+    }
+  ): void {
     if (context.lifecycle === 'start') {
       // nothing to do
       return;
@@ -108,7 +133,7 @@ export class SharedElementNative implements SharedElement {
         }
       }
     }
-  };
+  }
   private __setSharedElement(
     sharedElementCss: CssSheetArray,
     element: HTMLElement,
@@ -137,4 +162,4 @@ export class SharedElementNative implements SharedElement {
     }
   }
 }
-export const sharedElementNative = new SharedElementNative();
+export const sharedElement = new SharedElement();

@@ -96,7 +96,7 @@ CSS.registerProperty({
   name: '--dpx',
   syntax: '<length>',
   inherits: true,
-  initialValue: `${1 / window.devicePixelRatio}px`,
+  initialValue: `${1 / self.devicePixelRatio}px`,
 });
 //#endregion
 

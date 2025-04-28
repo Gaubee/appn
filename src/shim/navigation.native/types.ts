@@ -1,5 +1,5 @@
 /// <reference types="@types/dom-navigation"/>
-
+export const caniuseNavigation = 'navigation' in self;
 /**
  * > 与 NavigationAPI 基本保持一致的类型定义，这里独立定义一份，原因有3:
  * > 1. 原本的 Navigation 是 class 定义，这里改成用 interface，同时增强通用性质，方便polyfill的实现

@@ -358,9 +358,9 @@
         mixedColorShim.style.setProperty('background-color', shimColorMixResult);
 
         mixedOutputText.innerHTML = `
-        native: <b>${window.getComputedStyle(mixedColorNative).backgroundColor}</b> by <i>${nativeColorMixResult}</i>
+        native: <b>${getComputedStyle(mixedColorNative).backgroundColor}</b> by <i>${nativeColorMixResult}</i>
         <hr/>
-        shim: <b>${window.getComputedStyle(mixedColorShim).backgroundColor}</b> by <i>${shimColorMixResult}</i>
+        shim: <b>${getComputedStyle(mixedColorShim).backgroundColor}</b> by <i>${shimColorMixResult}</i>
         `;
       }
 

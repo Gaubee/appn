@@ -1,7 +1,7 @@
 import {func_remember} from '@gaubee/util';
 import {match, P} from 'ts-pattern';
+import type {NavigationBase} from '../navigation.native/types';
 import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
-import type { NavigationBase } from '../navigation.native/types';
 import {MinNavigateEvent} from './navigate-event';
 import {MinNavigationCurrentEntryChangeEvent} from './navigation-current-entry-change-event';
 import {MinNavigationDestination} from './navigation-destination';
@@ -48,7 +48,7 @@ export class MinNavigation extends EventTarget implements NavigationBase {
   constructor(state: Awaited<ReturnType<typeof getState>>) {
     super();
     this.#state = state;
-    window.addEventListener('popstate', async (event) => {
+    self.addEventListener('popstate', async (event) => {
       console.log('QAQ popstate', event.state);
       match(event.state)
         .with(

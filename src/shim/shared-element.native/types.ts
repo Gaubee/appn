@@ -1,4 +1,8 @@
 import type {PromiseMaybe} from '@gaubee/util';
+import type {Properties} from 'csstype';
+
+export const caniuseSharedElement = 'startViewTransition' in document;
+
 /**
  * 基于 FLIP 思想
  * - first: 准备首帧（First）的样式
@@ -8,8 +12,51 @@ import type {PromiseMaybe} from '@gaubee/util';
  */
 export type SharedElementLifecycle = 'first' | 'last' | 'start' | 'finish';
 
-export interface SharedElement {
+export type AnimationProperties = Pick<
+  Properties,
+  NonNullable<
+    {
+      [P in keyof Properties]: P extends `animation${string}` ? P : never;
+    }[keyof Properties]
+  >
+>;
+
+export type SharedElementSelectorType = 'group' | 'image-pair' | 'old' | 'new';
+
+export interface SharedElementBase {
+  readonly selectorPrefix: string;
+  /**
+   * get selector by shared-element name, "*" is an literal
+   * @param type - default is 'group'
+   * @param name - default is '*'
+   */
+  getSelector(type: SharedElementSelectorType, name: string): string;
+  /**
+   * default or delete animation style
+   * @param style - animation style
+   * @param selector - default is getSelector('group','*)
+   */
+  setAnimationStyle(selector: string, style: AnimationProperties | null): void;
+  /**
+   * play transition animation
+   * @param callbacks
+   */
   transition(callbacks: SharedElementLifecycleCallbacks): Promise<void>;
+
+  /**
+   * the effect of shared-element 'navigate' event fired.
+   * @param rootNode
+   * @param context
+   */
+  effectPagesSharedElement(
+    scopeElement: HTMLElement,
+    context: {
+      from: NavigationHistoryEntry | null;
+      destination: NavigationDestination | null;
+      queryPageNode: (entry: NavigationHistoryEntry | NavigationDestination) => HTMLElement | null;
+      lifecycle: SharedElementLifecycle;
+    }
+  ): void;
 }
 
 export interface SharedElementLifecycleCallbacks {

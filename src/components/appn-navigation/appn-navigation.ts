@@ -6,9 +6,9 @@ import {html, LitElement} from 'lit';
 import {customElement, property, queryAssignedElements} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {match, P, Pattern} from 'ts-pattern';
-import type {NavigationBase} from '../../shim/navigation.native/types';
-import {sharedElementNative} from '../../shim/shared-element.native';
-import type {SharedElementLifecycle} from '../../shim/shared-element.native/types';
+import {caniuseNavigation, type NavigationBase} from '../../shim/navigation.native/types';
+import {sharedElement as sharedElementNative} from '../../shim/shared-element.native';
+import {caniuseSharedElement, type SharedElementLifecycle} from '../../shim/shared-element.native/types';
 import {getFlags} from '../../utils/env';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {baseurl_relative_parts} from '../../utils/relative-path';
@@ -34,14 +34,22 @@ const APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES = [null, 'horizontal', 'vertic
 export type AppnNavigationStackDirection = (typeof APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES)[number];
 
 const enable_min_navigation_ponyfill = getFlags().has('min-navigation');
-// const enable_shared_element_ponyfill = getFlags().has('shared-element');
 
 const navApi: NavigationBase =
-  enable_min_navigation_ponyfill || !window.navigation
+  enable_min_navigation_ponyfill || !caniuseNavigation
     ? // mini ponyfill
       await import('../../shim/min-navigation.ponyfill/index').then((r) => r.navigation)
     : // native support
-      window.navigation;
+      self.navigation;
+
+const enable_shared_element_ponyfill = getFlags().has('shared-element-ponyfill');
+
+const sharedElement =
+  enable_shared_element_ponyfill || !caniuseSharedElement
+    ? // shared-element-ponyfill
+      await import('../../shim/shared-element.ponyfill/index').then((r) => r.sharedElementPonyfill)
+    : // native support
+      sharedElementNative;
 
 /**
  * @attr {boolean} stack - enable stack view mode
@@ -283,21 +291,24 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         removeAllUnusedEntryNodes();
       }
 
-      sharedElementNative.effectPagesSharedElement({
+      sharedElement.effectPagesSharedElement(this, {
         from: fromEntry,
         destination: event.destination, // this.__currentEntry,
         queryPageNode: (navEntry) => this.querySelector<HTMLElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`),
         lifecycle,
       });
     };
-    const sharedElementCss = sharedElementNative.css;
+
+    const selector = sharedElement.getSelector('group', '*');
     if (swapbackInfo) {
-      sharedElementCss.setAnimation('linear');
+      sharedElement.setAnimationStyle(selector, {
+        animationTimeline: 'linear',
+      });
     } else {
-      sharedElementCss.setAnimation();
+      sharedElement.setAnimationStyle(selector, null);
     }
 
-    sharedElementNative.transition({
+    sharedElement.transition({
       first: () => effectRoutes('first'),
       last: () => effectRoutes('last'),
       start: async (tran) => {
@@ -334,8 +345,8 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           let totalDuration = 1000;
           const animations = iter_map_not_null(htmlEle.getAnimations({subtree: true}), (ani) => {
             const {effect} = ani;
-            if (effect instanceof KeyframeEffect && effect.pseudoElement?.startsWith(sharedElementNative.selectorPrefix)) {
-              if (effect.pseudoElement === sharedElementNative.getSelector('group', 'root')) {
+            if (effect instanceof KeyframeEffect && effect.pseudoElement?.startsWith(sharedElement.selectorPrefix)) {
+              if (effect.pseudoElement === sharedElement.getSelector('group', 'root')) {
                 totalDuration = effect.getTiming().duration as number;
               }
 
