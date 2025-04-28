@@ -10,6 +10,7 @@ import type {
   SharedElementLifecycleCallbacks,
   SharedElementSelectorType,
   SharedElementStyles,
+  SharedElementTransitionContext,
 } from './types';
 
 export const sharedElementLifecycle = {
@@ -47,10 +48,19 @@ class SharedElementRegistry {
     const {dataset} = element;
     const sharedName = dataset.sharedElement;
     if (sharedName) {
-      const styles = {} as SharedElementStyles;
-      for (const styleItem of STYLES) {
-        styles[styleItem.key] = dataset[styleItem.prop] ?? '';
-      }
+      const obj_build_lazify = <T extends object>(obj: Partial<T>, get: <K extends keyof T>(target: Partial<T>, prop: K) => T[K], target = obj): T => {
+        return new Proxy(target, {
+          get(target, prop) {
+            if (prop in target) {
+              return target[prop as keyof T];
+            }
+            return (target[prop as keyof T] = get(target, prop as keyof T));
+          },
+        }) as T;
+      };
+
+      const styles = obj_build_lazify<SharedElementStyles>({}, (_target, prop) => dataset[prop] ?? '');
+
       return {name: sharedName, styles};
     }
     return;
@@ -126,22 +136,25 @@ export abstract class SharedElementBaseImpl implements SharedElementBase {
     return this.#css();
   }
 
-  abstract transition(
-    scopeElement: HTMLElement,
-    callbacks: SharedElementLifecycleCallbacks,
-    context: {
-      from: NavigationHistoryEntry | null;
-      dest: NavigationHistoryEntry | null;
-      queryPageNode: (entry: NavigationHistoryEntry, lifecycle: SharedElementLifecycle) => HTMLElement | null;
-    }
-  ): Promise<void>;
-  // abstract effectPagesSharedElement(
-  //   scopeElement: HTMLElement,
-  //   context: {
-  //     from: NavigationHistoryEntry | null;
-  //     dest: NavigationHistoryEntry | null;
-  //     queryPageNode: (entry: NavigationHistoryEntry) => HTMLElement | null;
-  //     lifecycle: SharedElementLifecycle;
-  //   }
-  // ): void;
+  abstract transition(scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void>;
+
+  protected __getPagesContext(lifecycle: SharedElementLifecycle, context: SharedElementTransitionContext) {
+    type PageItem = {node: HTMLElement; navEntry: NavigationHistoryEntry};
+    const sharedElementPagesContext: {
+      [key in 'from' | 'dest']?: PageItem;
+    } = {};
+    /// 获取过渡元素
+    const queryPageItem = (navEntry: NavigationHistoryEntry | null): PageItem | undefined => {
+      if (navEntry) {
+        const node = context.queryPageNode(navEntry, lifecycle);
+        if (node) {
+          return {node, navEntry};
+        }
+      }
+      return;
+    };
+    sharedElementPagesContext.from = queryPageItem(context.from);
+    sharedElementPagesContext.dest = queryPageItem(context.dest);
+    return sharedElementPagesContext;
+  }
 }

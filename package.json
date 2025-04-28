@@ -51,7 +51,7 @@
     "dist"
   ],
   "dependencies": {
-    "@gaubee/util": "^0.28.2",
+    "@gaubee/util": "^0.29.4",
     "@gaubee/web": "^0.7.1",
     "@lit-labs/observers": "^2.0.5",
     "@lit/context": "^1.1.4",

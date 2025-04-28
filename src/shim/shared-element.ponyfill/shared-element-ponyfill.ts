@@ -1,12 +1,19 @@
 import {iter_first_not_null} from '@gaubee/util';
 import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
-import {SharedElementBaseImpl} from '../shared-element.native';
-import type {SharedElementAnimation, SharedElementBase, SharedElementLifecycle, SharedElementLifecycleCallbacks, SharedElementSelectorType} from '../shared-element.native/types';
+import {SharedElementBaseImpl, sharedElements} from '../shared-element.native';
+import type {
+  SharedElementAnimation,
+  SharedElementBase,
+  SharedElementLifecycleCallbacks,
+  SharedElementSelectorType,
+  SharedElementTransitionContext,
+} from '../shared-element.native/types';
 import {SharedElementTransitionPonyfill} from './shared-element-transition';
 
+type SharedElementStyleMap = Map<string, {boudingRect: DOMRect}>;
 export class SharedElementPonyfill extends SharedElementBaseImpl implements SharedElementBase {
   override getSelector(type?: SharedElementSelectorType, name?: string) {
-    return super.getSelector(type, name).replace(/[:(*)]/g, (c) => `\\${c}`);
+    return '.' + super.getSelector(type, name).replace(/[:(*)]/g, (c) => `\\${c}`);
   }
   isSharedElementAnimation(animation: Animation): SharedElementAnimation | undefined {
     const {effect} = animation;
@@ -16,38 +23,69 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     }
     return;
   }
-  async transition(
-    _scopeElement: HTMLElement,
-    callbacks: SharedElementLifecycleCallbacks,
-    _context: {
-      from: NavigationHistoryEntry | null;
-      dest: NavigationHistoryEntry | null;
-      queryPageNode: (entry: NavigationHistoryEntry, lifecycle: SharedElementLifecycle) => HTMLElement | null;
-    }
-  ): Promise<void> {
+
+  async transition(_scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void> {
+    const firstStyle: SharedElementStyleMap = new Map();
+    const lastStyle: SharedElementStyleMap = new Map();
+
     /// first
     await callbacks?.first?.();
+    {
+      const sharedElementPagesContext = this.__getPagesContext('first', context);
+      for (const key of ['from', 'dest'] as const) {
+        const ele = sharedElementPagesContext[key]?.node;
+        if (ele) {
+          this.__captureSharedElementsStyle(ele, firstStyle);
+        }
+      }
+    }
 
     /// last
     const finishedJob = promise_with_resolvers<void>();
     const readyJob = promise_with_resolvers<void>();
     const updateCallbackDoneJob = promise_with_resolvers<void>();
+    const abort = (reason: unknown) => {
+      updateCallbackDoneJob.reject(reason);
+      readyJob.reject(reason);
+      finishedJob.reject(reason);
+    };
     const transition = new SharedElementTransitionPonyfill(finishedJob.promise, readyJob.promise, updateCallbackDoneJob.promise, () => {});
-    (async () => {
-      try {
-        await callbacks.last?.();
-        updateCallbackDoneJob.resolve();
-      } catch (err) {
-        updateCallbackDoneJob.reject(err);
-      }
-    })();
+    try {
+      void (async () => {
+        try {
+          await callbacks.last?.();
+          {
+            const sharedElementPagesContext = this.__getPagesContext('last', context);
+            for (const key of ['dest', 'from'] as const) {
+              const ele = sharedElementPagesContext[key]?.node;
+              if (ele) {
+                this.__captureSharedElementsStyle(ele, lastStyle);
+              }
+            }
+          }
+          updateCallbackDoneJob.resolve();
 
-    /// start
-    await callbacks?.start?.(transition);
+          /// 开始构建动画
+          const animations: Animation[] = [];
 
-    /// finish
-    await transition.finished;
-    await callbacks.finish?.(transition);
+          readyJob.resolve();
+
+          /// 等待动画完成
+          Promise.all(animations.map((ani) => ani.finished)).then(() => finishedJob.resolve());
+        } catch (err) {
+          abort(err);
+        }
+      })();
+
+      /// start
+      await callbacks?.start?.(transition);
+
+      /// finish
+      await transition.finished;
+      await callbacks.finish?.(transition);
+    } catch (err) {
+      abort(err);
+    }
   }
   constructor() {
     super();
@@ -64,15 +102,12 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     `);
   }
 
-  effectPagesSharedElement(
-    _scopeElement: HTMLElement,
-    _context: {
-      from: NavigationHistoryEntry | null;
-      dest: NavigationHistoryEntry | null;
-      queryPageNode: (entry: NavigationHistoryEntry, lifecycle: SharedElementLifecycle) => HTMLElement | null;
-      lifecycle: SharedElementLifecycle;
+  private __captureSharedElementsStyle(scopeElement: HTMLElement, store: SharedElementStyleMap) {
+    for (const {element, config} of sharedElements.queryAllWithConfig(scopeElement)) {
+      const boudingRect = element.getBoundingClientRect();
+      store.set(config.name, {
+        boudingRect,
+      });
     }
-  ): void {
-    throw new Error('Method not implemented.');
   }
 }

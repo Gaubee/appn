@@ -48,15 +48,7 @@ export interface SharedElementBase {
    * play transition animation
    * @param callbacks
    */
-  transition(
-    scopeElement: HTMLElement,
-    callbacks: SharedElementLifecycleCallbacks,
-    context: {
-      from: NavigationHistoryEntry | null;
-      dest: NavigationHistoryEntry | null;
-      queryPageNode: (entry: NavigationHistoryEntry, lifecycle: SharedElementLifecycle) => HTMLElement | null;
-    }
-  ): Promise<void>
+  transition(scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void>;
 
   // /**
   //  * the effect of shared-element 'navigate' event fired.
@@ -72,6 +64,14 @@ export interface SharedElementBase {
   //     lifecycle: SharedElementLifecycle;
   //   }
   // ): void;
+}
+export interface SharedElementTransitionContext {
+  /** 导航的起始页 */
+  from: NavigationHistoryEntry | null;
+  /** 导航的目标页 */
+  dest: NavigationHistoryEntry | null;
+  /** 根据导航对象返回页面节点 */
+  queryPageNode: (entry: NavigationHistoryEntry, lifecycle: SharedElementLifecycle) => HTMLElement | null;
 }
 
 export interface SharedElementLifecycleCallbacks {
