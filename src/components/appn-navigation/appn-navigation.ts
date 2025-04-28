@@ -28,8 +28,6 @@ import {
   pageFutureTranslateY,
 } from './appn-navigation.css';
 
-export type ViewTransitionLifecycle = 'prepare' | 'started' | 'finished';
-
 const APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES = [null, 'horizontal', 'vertical'] as const;
 export type AppnNavigationStackDirection = (typeof APPN_NAVIGATION_STACK_DIRECTION_ENUM_VALUES)[number];
 
@@ -69,10 +67,9 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     });
     /// 这里独立写，是为了方便调试
     navApi.addEventListener('navigate', (event) => {
-      if (!event.canIntercept) {
+      if (!event.canIntercept || event.navigationType == 'reload') {
         return;
       }
-      // event.destination;
       const fromEntry = this.currentEntry;
       event.intercept({
         handler: () => {
@@ -127,11 +124,6 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
 
   @provide({context: appnNavigationHistoryEntryContext})
   accessor currentEntry: NavigationHistoryEntry | null = navApi.currentEntry;
-
-  #currentEntryIndex = -1; //this.currentEntry ? navApi.entries().indexOf(this.currentEntry) : -1;
-  get currentEntryIndex() {
-    return this.#currentEntryIndex;
-  }
 
   /** Updates the state object of the current NavigationHistoryEntry. */
   updateCurrentEntry(options: NavigationUpdateCurrentEntryOptions): void {
@@ -235,7 +227,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       }
     };
 
-    if (!event) {
+    if (!event || event.hasUAVisualTransition) {
       /// 路由改变，重新映射元素
       const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
       const allEntries = await navApi.entries();
@@ -243,7 +235,6 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         const ele = await this.__effectRoute(navEntry, routersElements, allNavHistoryEntryNodeMap, {
           allEntries,
           currentEntry: fromEntry,
-          currentEntryIndex: fromEntry?.index ?? -1,
           navigationType: undefined,
         });
         if (ele) {
@@ -263,23 +254,15 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       .otherwise(() => null);
 
     const effectRoutes = async (lifecycle: SharedElementLifecycle) => {
-      const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
-      const allEntries = await navApi.entries();
-      const currentEntry = lifecycle === 'first' ? fromEntry : this.currentEntry;
-      const currentEntryIndex = currentEntry ? allEntries.indexOf(currentEntry) : -1;
-      this.#currentEntryIndex = currentEntryIndex;
-      if (currentEntryIndex === -1) {
-        return;
-      }
-      // this.style.setProperty('--present-index', `${currentEntryIndex}`);
-
       // TODO 未来 mode === 'finished' 时，需要通知元素生命周期
       if (lifecycle !== 'finish') {
+        const routersElements = this.routersElements.filter((ele) => ele instanceof HTMLTemplateElement);
+        const allEntries = await navApi.entries();
+        const currentEntry = lifecycle === 'first' ? fromEntry : this.currentEntry;
         for (const navEntry of allEntries) {
           const ele = await this.__effectRoute(navEntry, routersElements, allNavHistoryEntryNodeMap, {
             allEntries,
             currentEntry,
-            currentEntryIndex,
             navigationType: event.navigationType,
           });
           if (ele) {
@@ -293,7 +276,10 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
 
       sharedElement.effectPagesSharedElement(this, {
         from: fromEntry,
-        destination: event.destination, // this.__currentEntry,
+        /** 不要用 event.destination
+         * 在push模式下，它是“空”的（index=-1）
+         */
+        dest: this.currentEntry, // this.__currentEntry,
         queryPageNode: (navEntry) => this.querySelector<HTMLElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`),
         lifecycle,
       });
@@ -372,7 +358,6 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     context: {
       allEntries: NavigationHistoryEntry[];
       currentEntry: NavigationHistoryEntry | null;
-      currentEntryIndex: number;
       navigationType?: NavigationTypeString;
     }
   ): Promise<AppnNavigationHistoryEntryElement | undefined> => {
@@ -429,7 +414,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         }
 
         navHistoryEntryNode.navigationType = context.navigationType ?? null; // 它可能一开始的时候就在 future 里，所以 navigationType 默认为 null
-        navHistoryEntryNode.presentEntryIndex = context.currentEntryIndex;
+        navHistoryEntryNode.presentEntryIndex = context.currentEntry?.index ?? -1;
 
         if (!navHistoryEntryNode.parentElement) {
           // 这里await一下，是给自定义元素完成自己的生命周期留时间

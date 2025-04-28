@@ -52,8 +52,8 @@ export interface SharedElementBase {
     scopeElement: HTMLElement,
     context: {
       from: NavigationHistoryEntry | null;
-      destination: NavigationDestination | null;
-      queryPageNode: (entry: NavigationHistoryEntry | NavigationDestination) => HTMLElement | null;
+      dest: NavigationHistoryEntry | null;
+      queryPageNode: (entry: NavigationHistoryEntry) => HTMLElement | null;
       lifecycle: SharedElementLifecycle;
     }
   ): void;

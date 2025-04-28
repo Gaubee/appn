@@ -89,7 +89,7 @@ export class AppnPageElement extends LitElement {
     if (navigationEntry != this.__activatedNavigationEntry) {
       this.__activatedNavigationEntry = navigationEntry;
       if (navigationEntry) {
-        console.log('activated', navigationEntry);
+        // console.debug('activated', navigationEntry);
         this.dispatchEvent(new AppnPageActivatedEvent(navigationEntry));
       }
     }

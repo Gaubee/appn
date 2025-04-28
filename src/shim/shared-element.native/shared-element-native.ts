@@ -69,9 +69,9 @@ export class SharedElement implements SharedElementBase {
       /** 导航的起始页 */
       from: NavigationHistoryEntry | null;
       /** 导航的目标页 */
-      destination: NavigationDestination | null;
+      dest: NavigationHistoryEntry | null;
       /** 根据导航对象返回页面节点 */
-      queryPageNode: (entry: NavigationHistoryEntry | NavigationDestination) => HTMLElement | null;
+      queryPageNode: (entry: NavigationHistoryEntry) => HTMLElement | null;
       /** 生命周期 */
       lifecycle: SharedElementLifecycle;
     }
@@ -80,12 +80,12 @@ export class SharedElement implements SharedElementBase {
       // nothing to do
       return;
     }
-    type PageItem = {node: HTMLElement; navEntry: NavigationHistoryEntry | NavigationDestination};
+    type PageItem = {node: HTMLElement; navEntry: NavigationHistoryEntry};
     const sharedElementPagesContext: {
       [key in 'from' | 'dest']?: PageItem;
     } = {};
     /// 获取过渡元素
-    const queryPageItem = (navEntry: NavigationHistoryEntry | NavigationDestination | null): PageItem | undefined => {
+    const queryPageItem = (navEntry: NavigationHistoryEntry | null): PageItem | undefined => {
       if (navEntry) {
         const node = context.queryPageNode(navEntry);
         if (node) {
@@ -95,7 +95,7 @@ export class SharedElement implements SharedElementBase {
       return;
     };
     sharedElementPagesContext.from = queryPageItem(context.from);
-    sharedElementPagesContext.dest = queryPageItem(context.destination);
+    sharedElementPagesContext.dest = queryPageItem(context.dest);
 
     /// 最后，处理过渡元素
     if (context.lifecycle === 'finish') {
