@@ -1,4 +1,4 @@
-import {func_remember} from '@gaubee/util';
+import {func_remember, obj_lazy_builder} from '@gaubee/util';
 import {CssSheetArray} from '@gaubee/web';
 import {styleToCss} from '../../utils/css-helper';
 import type {
@@ -48,20 +48,14 @@ class SharedElementRegistry {
     const {dataset} = element;
     const sharedName = dataset.sharedElement;
     if (sharedName) {
-      const obj_build_lazify = <T extends object>(obj: Partial<T>, get: <K extends keyof T>(target: Partial<T>, prop: K) => T[K], target = obj): T => {
-        return new Proxy(target, {
-          get(target, prop) {
-            if (prop in target) {
-              return target[prop as keyof T];
-            }
-            return (target[prop as keyof T] = get(target, prop as keyof T));
-          },
-        }) as T;
+      let styles: SharedElementStyles | undefined;
+
+      return {
+        name: sharedName,
+        get styles() {
+          return (styles ??= obj_lazy_builder<SharedElementStyles>({}, (_target, prop) => dataset[prop] ?? ''));
+        },
       };
-
-      const styles = obj_build_lazify<SharedElementStyles>({}, (_target, prop) => dataset[prop] ?? '');
-
-      return {name: sharedName, styles};
     }
     return;
   }
@@ -79,10 +73,10 @@ class SharedElementRegistry {
   }
   queryAllWithConfig(scope: HTMLElement) {
     const elements = this.queryAll(scope);
-    const arr: Array<{element: HTMLElement; config: SharedElementConfig}> = [];
+    const arr: Array<SharedElementConfig & {element: HTMLElement}> = [];
     for (const element of elements) {
       const config = this.get(element)!;
-      arr.push({element, config});
+      arr.push(Object.assign(config, {element}));
     }
     return arr;
   }

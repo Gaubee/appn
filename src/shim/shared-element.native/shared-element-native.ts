@@ -38,7 +38,7 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
   private __effectPagesSharedElement(
     /** 生命周期 */
     lifecycle: SharedElementLifecycle,
-    context: SharedElementTransitionContext
+    context: SharedElementTransitionContext,
   ): void {
     if (lifecycle === 'start') {
       // nothing to do
@@ -77,7 +77,7 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
           const zIndexStart = (pageItem.navEntry.index - minIndex + 1) * 10;
           sharedElementCss.setRule(`group(${appnNavVtn})`, `${this.getSelector('group', appnNavVtn)}{z-index:${zIndexStart};}`);
           for (const sharedItem of sharedElements.queryAllWithConfig(pageItem.node)) {
-            this.__setSharedElement(sharedElementCss, sharedItem.element, sharedItem.config, sharedElementMap, `z-index:${sharedElementIndex};`);
+            this.__setSharedElement(sharedElementCss, sharedItem.element, sharedItem, sharedElementMap, `z-index:${sharedElementIndex};`);
           }
         }
       }
@@ -88,7 +88,7 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
     element: HTMLElement,
     config: SharedElementConfig,
     sharedElementMap: Map<string, HTMLElement>,
-    zIndexCssText: string
+    zIndexCssText: string,
   ) {
     const {name: vtn} = config;
     const oldElement = sharedElementMap.get(vtn);

@@ -17,7 +17,6 @@ export class MinNavigation extends EventTarget implements NavigationBase {
     super();
     this.#state = state;
     self.addEventListener('popstate', async (event) => {
-      console.log('QAQ popstate', event.state);
       match(event.state)
         .with(
           {
@@ -30,10 +29,8 @@ export class MinNavigation extends EventTarget implements NavigationBase {
           },
           (toEntryInit) => {
             if (toEntryInit.id === state.currentEntry.id) {
-              console.log('QAQ popstate', 'traverseTo ignore');
               return;
             }
-            console.log('QAQ popstate', 'traverseTo start');
             this.traverseTo(toEntryInit.key, {info: event});
           }
         )

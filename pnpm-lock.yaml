@@ -35,11 +35,11 @@ importers:
   .:
     dependencies:
       '@gaubee/util':
-        specifier: ^0.30.0
-        version: 0.30.0
+        specifier: ^0.30.2
+        version: 0.30.2
       '@gaubee/web':
         specifier: ^0.8.0
-        version: 0.8.0(@gaubee/util@0.30.0)
+        version: 0.8.0(@gaubee/util@0.30.2)
       '@lit-labs/observers':
         specifier: ^2.0.5
         version: 2.0.5
@@ -1007,8 +1007,8 @@ packages:
   '@esm-bundle/chai@4.3.4-fix.0':
     resolution: {integrity: sha512-26SKdM4uvDWlY8/OOOxSB1AqQWeBosCX3wRYUZO7enTAj03CtVxIiCimYVG2WpULcyV51qapK4qTovwkUr5Mlw==}
 
-  '@gaubee/util@0.30.0':
-    resolution: {integrity: sha512-8zRbjFrqc2kSAFFusgn05e3HRGT2pv+9x476gecorAjeCLKqc4rd3tpJuMkv4Jmx7pZYuDUDyxMkI1NICUw20g==}
+  '@gaubee/util@0.30.2':
+    resolution: {integrity: sha512-n9Q4PJ5EVdhtpil15mbWCDwHr/ZH/e4db5Q1vgbLRvmpyU2hIE3XRxFisUy9yy8OGcF9nQT1zJ6Ub2N0xWu1Lw==}
 
   '@gaubee/web@0.8.0':
     resolution: {integrity: sha512-WYf0CC7HPgHWO3k3k/2nDRay/VkieDwQB04XVsFFatlVwI6xGSdZmIY6/+wHbHpxOvtZ/0yrgpq8TL2UB/lBHw==}
@@ -4760,13 +4760,13 @@ snapshots:
     dependencies:
       '@types/chai': 5.2.1
 
-  '@gaubee/util@0.30.0':
+  '@gaubee/util@0.30.2':
     dependencies:
       tslib: 2.8.1
 
-  '@gaubee/web@0.8.0(@gaubee/util@0.30.0)':
+  '@gaubee/web@0.8.0(@gaubee/util@0.30.2)':
     dependencies:
-      '@gaubee/util': 0.30.0
+      '@gaubee/util': 0.30.2
       tslib: 2.8.1
 
   '@github/catalyst@1.7.0': {}
