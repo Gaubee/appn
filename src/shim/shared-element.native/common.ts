@@ -32,11 +32,14 @@ const STYLES = [
   {key: 'imagePair', alias: null, prop: 'sharedElementImagePairStyle'},
 ] as const;
 class SharedElementRegistry {
-  set(element: HTMLElement, sharedName: string, styles: Partial<SharedElementStyles> & {both?: string}): void {
+  set(element: HTMLElement, sharedName: string | null = null, styles?: Partial<SharedElementStyles> & {both?: string}): void {
+    if (sharedName == null) {
+      return this.unset(element);
+    }
     const {dataset} = element;
     dataset.sharedElement = sharedName;
     for (const styleItem of STYLES) {
-      const style = styles[styleItem.key] || (styleItem.alias && styles[styleItem.alias]);
+      const style = styles ? styles[styleItem.key] || (styleItem.alias && styles[styleItem.alias]) : null;
       if (style) {
         dataset[styleItem.prop] = style;
       } else {
@@ -68,12 +71,12 @@ class SharedElementRegistry {
       }
     }
   }
-  queryAll(scope: HTMLElement) {
-    return scope.querySelectorAll<HTMLElement>('[data-shared-element]');
+  queryAll<T extends HTMLElement = HTMLElement>(scope: HTMLElement, selector = '[data-shared-element]') {
+    return scope.querySelectorAll<T>(selector);
   }
-  queryAllWithConfig(scope: HTMLElement) {
-    const elements = this.queryAll(scope);
-    const arr: Array<SharedElementConfig & {element: HTMLElement}> = [];
+  queryAllWithConfig<T extends HTMLElement = HTMLElement>(scope: HTMLElement, selector?: string) {
+    const elements = this.queryAll<T>(scope, selector);
+    const arr: Array<SharedElementConfig & {element: T}> = [];
     for (const element of elements) {
       const config = this.get(element)!;
       arr.push(Object.assign(config, {element}));
@@ -130,7 +133,7 @@ export abstract class SharedElementBaseImpl implements SharedElementBase {
     return this.#css();
   }
 
-  abstract transition(scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void>;
+  abstract startTransition(scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void>;
 
   protected __getPagesContext(lifecycle: SharedElementLifecycle, context: SharedElementTransitionContext) {
     type PageItem = {node: HTMLElement; navEntry: NavigationHistoryEntry};

@@ -75,9 +75,9 @@ export default class Page {
                   <appn-link mode="replace" to="#page3">
                     replace as page3
                   </appn-link>
-                  <div className="qaq" data-shared-element="qaq">
-                    QAQ
-                  </div>
+                  <appn-shared-contents name="card">
+                    <div className="qaq">QAQ</div>
+                  </appn-shared-contents>
                 </appn-view>
               </appn-page>
             </template>
@@ -91,9 +91,23 @@ export default class Page {
                   </appn-top-bar>
                 </appn-header>
                 <appn-view>
-                  <div className="qaq" data-shared-element="qaq" style={{backgroundColor: 'rgba(0, 255, 0, 0.5)', color: 'blue', alignSelf: 'center', width: '200px'}}>
-                    QAQ
-                  </div>
+                  <appn-shared-contents
+                    name="card"
+                    style={{
+                      alignSelf: 'center',
+                    }}
+                  >
+                    <div
+                      className="qaq"
+                      style={{
+                        backgroundColor: 'rgba(0, 255, 0, 0.5)',
+                        color: 'blue',
+                        width: '200px',
+                      }}
+                    >
+                      QAQ
+                    </div>
+                  </appn-shared-contents>
                   <appn-link mode="back">
                     返回
                     <appn-nav-back-text style={{color: 'red'}}></appn-nav-back-text>

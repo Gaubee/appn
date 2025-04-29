@@ -37,7 +37,7 @@ const enable_min_navigation_ponyfill = getFlags().has('min-navigation');
 const navApi: NavigationBase =
   enable_min_navigation_ponyfill || !caniuseNavigation
     ? // mini ponyfill
-      await import('../../shim/min-navigation.ponyfill/index').then((r) => r.navigation)
+      await import('../../shim/min-navigation.ponyfill/index').then((r) => r.minNavigation)
     : // native support
       self.navigation;
 
@@ -287,7 +287,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       sharedElement.setAnimationStyle(selector, null);
     }
 
-    await sharedElement.transition(
+    await sharedElement.startTransition(
       this,
       {
         first: () => effectRoutes('first'),

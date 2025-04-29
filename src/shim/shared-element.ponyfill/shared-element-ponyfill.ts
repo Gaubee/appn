@@ -1,7 +1,9 @@
 import {iter_first_not_null} from '@gaubee/util';
+import {AppnSharedElement} from '../../components/appn-shared-contents/appn-shared-contents';
+import {abort_throw_if_aborted} from '../abort.polyfill';
 import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
 import {set_intersection} from '../set.polyfill';
-import {SharedElementBaseImpl, sharedElements} from '../shared-element.native';
+import {SharedElementBaseImpl, sharedElementLifecycle, sharedElements} from '../shared-element.native';
 import type {
   SharedElementAnimation,
   SharedElementBase,
@@ -14,9 +16,8 @@ import {SharedElementTransitionPonyfill} from './shared-element-transition';
 
 type SharedElementStyleMap = Map<string, SharedElementStyle>;
 type SharedElementStyle = {
-  element: HTMLElement;
+  element: AppnSharedElement;
   boudingRect: DOMRect;
-  popover: string | null;
 };
 export class SharedElementPonyfill extends SharedElementBaseImpl implements SharedElementBase {
   override getSelector(type?: SharedElementSelectorType, name?: string) {
@@ -31,7 +32,7 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     return;
   }
 
-  async transition(_scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void> {
+  async startTransition(_scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void> {
     const firstStyleStore: SharedElementStyleMap = new Map();
     const lastStyleStore: SharedElementStyleMap = new Map();
     new Set(firstStyleStore.keys()).intersection(lastStyleStore);
@@ -44,53 +45,69 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     const finishedJob = promise_with_resolvers<void>();
     const readyJob = promise_with_resolvers<void>();
     const updateCallbackDoneJob = promise_with_resolvers<void>();
-    const abort = (reason: unknown) => {
+    const abort = new AbortController();
+    abort.signal.addEventListener('abort', () => {
+      const reason = abort.signal.reason;
       updateCallbackDoneJob.reject(reason);
       readyJob.reject(reason);
       finishedJob.reject(reason);
-    };
-    const transition = new SharedElementTransitionPonyfill(finishedJob.promise, readyJob.promise, updateCallbackDoneJob.promise, () => {});
+    });
+
+    const transition = new SharedElementTransitionPonyfill(finishedJob.promise, readyJob.promise, updateCallbackDoneJob.promise, () => {
+      abort.abort('skip');
+    });
     try {
       void (async () => {
         try {
           await callbacks.last?.();
+          abort_throw_if_aborted(abort.signal);
+
           this.__captureLifecycleSharedElementsStyle(context, 'last', lastStyleStore);
           updateCallbackDoneJob.resolve();
 
           /// 开始构建动画
           const animations = this.__buildSharedElementAnimations(firstStyleStore, lastStyleStore);
-
+          abort.signal.addEventListener('abort', () => {
+            animations.forEach((ani) => {
+              ani.cancel();
+            });
+          });
           readyJob.resolve();
 
           /// 等待动画完成
           Promise.all(animations.map((ani) => ani.finished)).then(() => finishedJob.resolve());
         } catch (err) {
-          abort(err);
+          abort.abort(err);
         }
       })();
 
       /// start
       await callbacks?.start?.(transition);
+      abort_throw_if_aborted(abort.signal);
 
       /// finish
       await transition.finished;
+      abort_throw_if_aborted(abort.signal);
       await callbacks.finish?.(transition);
+      abort_throw_if_aborted(abort.signal);
+      this.__captureLifecycleSharedElementsStyle(context, 'finish', lastStyleStore);
     } catch (err) {
-      abort(err);
+      abort.abort(err);
     }
   }
   constructor() {
     super();
     const css = String.raw;
+    // TODO 使用手动构建 animation 替代，否则会影响样式的计算
     this.css.addRules(css`
-      appn-navigation-history-entry[data-from-tense='present'] {
+      /* appn-navigation-history-entry[data-from-tense='present'] {
         transition-duration: var(--page-leave-duration);
         transition-timing-function: var(--page-leave-ease);
       }
       appn-navigation-history-entry[data-tense='present'] {
         transition-duration: var(--page-enter-duration);
         transition-timing-function: var(--page-enter-ease);
-      }
+      } */
     `);
   }
 
@@ -99,21 +116,28 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     const {dest, from} = sharedElementPagesContext;
     // 必须确保两个page都存在
     if (dest == null || from == null) return store;
+    if (lifecycle === 'finish') {
+      sharedElementLifecycle.delete(dest.node);
+      sharedElementLifecycle.delete(from.node);
+      return;
+    }
+    sharedElementLifecycle.set(dest.node, lifecycle);
+    sharedElementLifecycle.set(from.node, lifecycle);
 
     // 必须确保同一个name在两个page都都存在
-    const fromSharedElementMap = new Map(sharedElements.queryAllWithConfig(from.node).map((item) => [item.name, item]));
-    const destSharedElementMap = new Map(sharedElements.queryAllWithConfig(dest.node).map((item) => [item.name, item]));
+    const selector = 'appn-shared-contents';
+    const fromSharedElementMap = new Map(sharedElements.queryAllWithConfig<AppnSharedElement>(from.node, selector).map((item) => [item.name, item]));
+    const destSharedElementMap = new Map(sharedElements.queryAllWithConfig<AppnSharedElement>(dest.node, selector).map((item) => [item.name, item]));
     const sharedElementNames = set_intersection(new Set(fromSharedElementMap.keys()), destSharedElementMap);
     // 根据生命周期捕捉对应的page元素信息
     const sharedElementMap = lifecycle === 'first' ? fromSharedElementMap : destSharedElementMap;
     for (const sharedName of sharedElementNames) {
       const {element} = sharedElementMap.get(sharedName)!;
-      const boudingRect = element.getBoundingClientRect();
+      const boudingRect = element.getContentBoundingClientRect();
       if (typeof element.showPopover === 'function') {
         store.set(sharedName, {
           element,
           boudingRect,
-          popover: element.popover,
         });
       }
     }
@@ -122,8 +146,6 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
 
   private __doAni(item: SharedElementStyle, fromBoudingRect: DOMRect, toBoudingRect: DOMRect) {
     const element = item.element;
-    element.popover = 'manual';
-    element.showPopover();
 
     const baseStyle = {
       margin: 0,
@@ -134,7 +156,7 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
       inset: 0,
     };
 
-    const elementAnimation = element.animate(
+    const elementAnimation = element.viewTransition(
       [
         {
           ...baseStyle,
@@ -148,11 +170,13 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
                 width: fromBoudingRect.width + 'px',
                 height: fromBoudingRect.height + 'px',
                 scale: '1 1',
+                opacity: 1,
               }
             : {
                 width: toBoudingRect.width + 'px',
                 height: toBoudingRect.height + 'px',
                 scale: `${fromBoudingRect.width / toBoudingRect.width} ${fromBoudingRect.height / toBoudingRect.height}`,
+                opacity: 0,
               }),
         },
         {
@@ -165,20 +189,17 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
           ...(item.boudingRect === fromBoudingRect
             ? {
                 scale: `${toBoudingRect.width / fromBoudingRect.width} ${toBoudingRect.height / fromBoudingRect.height}`,
+                opacity: 0,
               }
             : {
                 scale: '1 1',
+                opacity: 1,
               }),
         },
       ],
       {duration: this.pageAnimationDuration},
     );
-    elementAnimation.finished.finally(() => {
-      if (item.popover) {
-        element.hidePopover();
-      }
-      element.popover = item.popover;
-    });
+
     return elementAnimation;
   }
 

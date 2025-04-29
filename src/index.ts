@@ -11,6 +11,7 @@ export * from './components/appn-icon/appn-icon';
 export * from './components/appn-link/appn-link';
 export * from './components/appn-page/appn-page';
 export * from './components/appn-scroll-view/appn-scroll-view';
+export * from './components/appn-shared-contents/appn-shared-contents';
 export * from './components/appn-top-bar/appn-top-bar';
 export * from './components/appn-view/appn-view';
 export * from './components/css-color-mix/css-color-mix';

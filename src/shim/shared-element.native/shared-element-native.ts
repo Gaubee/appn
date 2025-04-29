@@ -19,7 +19,7 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
     return;
   }
 
-  async transition(_scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void> {
+  async startTransition(_scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void> {
     try {
       await callbacks?.first?.();
       this.__effectPagesSharedElement('first', context);

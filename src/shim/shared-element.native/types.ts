@@ -48,7 +48,7 @@ export interface SharedElementBase {
    * play transition animation
    * @param callbacks
    */
-  transition(scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void>;
+  startTransition(scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void>;
 
   // /**
   //  * the effect of shared-element 'navigate' event fired.
