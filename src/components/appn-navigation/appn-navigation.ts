@@ -7,7 +7,7 @@ import {customElement, property, queryAssignedElements} from 'lit/decorators.js'
 import {cache} from 'lit/directives/cache.js';
 import {match, P, Pattern} from 'ts-pattern';
 import {caniuseNavigation, type NavigationBase} from '../../shim/navigation.native/types';
-import {sharedElement as sharedElementNative} from '../../shim/shared-element.native';
+import {sharedElement as sharedElementNative, sharedElements} from '../../shim/shared-element.native';
 import {caniuseSharedElement, type SharedElementLifecycle} from '../../shim/shared-element.native/types';
 import {isSupportTouch} from '../../utils/css-helper';
 import {getFlags} from '../../utils/env';
@@ -16,6 +16,7 @@ import {baseurl_relative_parts} from '../../utils/relative-path';
 import {safeProperty} from '../../utils/safe-property';
 import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
 import {AppnPageElement, type AppnSwapbackInfo} from '../appn-page/appn-page';
+import type {CommonSharedAbleContentsElement} from '../appn-shared-contents/appn-shared-contents-types';
 import '../css-starting-style/css-starting-style';
 import {appnNavigationContext, appnNavigationHistoryEntryContext} from './appn-navigation-context';
 import type {AppnNavigation} from './appn-navigation-types';
@@ -344,7 +345,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
          */
         dest: this.currentEntry, // this.__currentEntry,
         queryPageNode: (navEntry) => this.querySelector<HTMLElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`),
-      }
+      },
     );
   };
 
@@ -356,7 +357,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       allEntries: NavigationHistoryEntry[];
       currentEntry: NavigationHistoryEntry | null;
       navigationType?: NavigationTypeString;
-    }
+    },
   ): Promise<AppnNavigationHistoryEntryElement | undefined> => {
     const current_url = navEntry.url;
     if (!current_url) {
@@ -376,7 +377,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           ? match(routerElement.ownerDocument.getElementById(routerElement.dataset.target))
               .when(
                 (ele) => ele instanceof HTMLTemplateElement,
-                (ele) => ele
+                (ele) => ele,
               )
               .otherwise(() => {
                 console.warn(`no found templateElement by id: ${JSON.stringify(routerElement.dataset.target)}`);
@@ -445,7 +446,7 @@ const _NAVIGATION_HISTORY_ENTRY_TENSE_ENUM_VALUES = [undefined, 'past', 'present
 type NavigationHistoryEntryTense = (typeof _NAVIGATION_HISTORY_ENTRY_TENSE_ENUM_VALUES)[number];
 
 @customElement('appn-navigation-history-entry')
-export class AppnNavigationHistoryEntryElement extends LitElement {
+export class AppnNavigationHistoryEntryElement extends LitElement implements CommonSharedAbleContentsElement {
   static override styles = appnNavigationHistoryEntryStyle;
   @property({type: String, reflect: true, attribute: true})
   accessor pathname!: string;
@@ -462,10 +463,41 @@ export class AppnNavigationHistoryEntryElement extends LitElement {
   @provide({context: appnNavigationHistoryEntryContext})
   accessor navigationEntry: NavigationHistoryEntry | null = null;
 
+  //#region shared-element
+
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedName: string | undefined | null;
+
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedOldStyle: string | undefined | null;
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedNewStyle: string | undefined | null;
+
+  private accessor __sharedAnimation: Animation | null = null;
+
+  createSharedAnimation(...args: Parameters<HTMLElement['animate']>) {
+    let ani = this.__sharedAnimation;
+    if (!ani) {
+      ani = this.animate(...args);
+      this.__sharedAnimation = ani;
+      ani.finished.finally(() => {
+        this.__sharedAnimation = null;
+      });
+    }
+    return ani;
+  }
+  getSharedStyle() {
+    return {boudingRect: this.getBoundingClientRect()};
+  }
+  //#endregion
+
   override render() {
-    this.dataset.key = this.navigationEntry?.key;
+    const {navigationEntry} = this;
+    sharedElements.set(this, (this.sharedName = navigationEntry && `--shared-page-${navigationEntry.index}`));
+
+    this.dataset.key = navigationEntry?.key;
     /** 自身 index */
-    const selfIndex = this.navigationEntry?.index ?? -1;
+    const selfIndex = navigationEntry?.index ?? -1;
     /** 当前 NavigationHistoryEntry 的 index */
     const presentIndex = this.presentEntryIndex;
     this.style.setProperty('--index', (this.dataset.index = `${selfIndex}`));

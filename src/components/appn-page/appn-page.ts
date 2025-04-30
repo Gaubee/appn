@@ -5,7 +5,7 @@
  */
 
 import {consume} from '@lit/context';
-import {css, html, LitElement, type PropertyValues} from 'lit';
+import {html, LitElement, type PropertyValues} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {ResizeController} from '../../utils/resize-controller';
@@ -23,16 +23,14 @@ export type AppnSwapbackInfo = {
   page: AppnPageElement;
 };
 
+const css = String.raw;
 /**
  *
  */
 @customElement('appn-page')
 export class AppnPageElement extends LitElement {
-  private static __all: readonly AppnPageElement[] = Object.freeze([]);
-  static get all() {
-    return this.__all;
-  }
   static override styles = appnPageStyles;
+  //#region header footer
 
   @state()
   accessor #headerHeight = 0;
@@ -41,7 +39,7 @@ export class AppnPageElement extends LitElement {
     (entry) => {
       this.#headerHeight = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
     },
-    {box: 'border-box'}
+    {box: 'border-box'},
   );
   @state()
   accessor #footerHeight = 0;
@@ -50,8 +48,10 @@ export class AppnPageElement extends LitElement {
     (entry) => {
       this.#footerHeight = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
     },
-    {box: 'border-box'}
+    {box: 'border-box'},
   );
+
+  //#endregion
 
   /**
    * The name to say "Hello" to.
@@ -63,6 +63,8 @@ export class AppnPageElement extends LitElement {
 
   @consume({context: appnThemeContext, subscribe: true})
   accessor theme!: AppnTheme;
+
+  //#region navigation
 
   @property({type: String, reflect: true, attribute: true})
   accessor pathname = '*';
@@ -114,7 +116,7 @@ export class AppnPageElement extends LitElement {
             console.log('QAQ', 'swapback start!');
           }
         },
-        {passive: true}
+        {passive: true},
       ),
       move: Object.assign(
         (e: TouchEvent) => {
@@ -139,7 +141,7 @@ export class AppnPageElement extends LitElement {
             swapback.end(e);
           }
         },
-        {passive: true}
+        {passive: true},
       ),
       end: Object.assign(
         (e: Event) => {
@@ -148,11 +150,12 @@ export class AppnPageElement extends LitElement {
             swapback.state = null;
           }
         },
-        {passive: true}
+        {passive: true},
       ),
     };
     return swapback;
   })();
+  //#endregion
 
   override render() {
     this.inert = !this.open;

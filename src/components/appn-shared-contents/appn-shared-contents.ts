@@ -2,60 +2,57 @@ import {html, LitElement} from 'lit';
 import {customElement, property, query, state} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {sharedElements} from '../../shim/shared-element.native';
+import type {CommonSharedAbleContentsElement} from './appn-shared-contents-types';
 import {appnSharedStyle} from './appn-shared-contents.css';
 
 @customElement('appn-shared-contents')
-export class AppnSharedElement extends LitElement {
+export class AppnSharedContentsElement extends LitElement implements CommonSharedAbleContentsElement {
   static override styles = appnSharedStyle;
 
   @property({type: String, reflect: true, attribute: true})
-  accessor name!: string;
+  accessor sharedName!: string;
 
   @property({type: String, reflect: true, attribute: true})
-  accessor oldStyle!: string;
+  accessor sharedOldStyle!: string;
   @property({type: String, reflect: true, attribute: true})
-  accessor newStyle!: string;
+  accessor sharedNewStyle!: string;
+
+  private accessor __sharedAnimation: Animation | null = null;
 
   @state()
-  private accessor __startSize: DOMRect | null = null;
+  private accessor __startBounding: DOMRect | null = null;
 
   @query('dialog', true)
   private accessor __dialogEle!: HTMLDialogElement;
-  startViewTransition() {
-    if (this.__startSize) {
-      return;
+
+  createSharedAnimation(...args: Parameters<HTMLElement['animate']>) {
+    let ani = this.__sharedAnimation;
+    if (!ani) {
+      const dialogEle = this.__dialogEle;
+      this.__startBounding = dialogEle.getBoundingClientRect();
+      dialogEle.close();
+      dialogEle.showModal();
+      ani = dialogEle.animate(...args);
+      this.__sharedAnimation = ani;
+      ani.finished.finally(() => {
+        this.__sharedAnimation = null;
+        this.__startBounding = null;
+        dialogEle.close();
+        dialogEle.show();
+      });
     }
-    this.__startSize = this.__dialogEle.getBoundingClientRect();
-
-    this.__dialogEle.open = false;
-    this.__dialogEle.showModal();
-  }
-  stopViewTranstion() {
-    if (!this.__startSize) {
-      return;
-    }
-    this.__startSize = null;
-
-    this.__dialogEle.close();
-    this.__dialogEle.open = true;
-  }
-
-  viewTransition(...args: Parameters<HTMLElement['animate']>) {
-    this.startViewTransition();
-    const ani = this.__dialogEle.animate(...args);
-    ani.finished.finally(() => this.stopViewTranstion());
     return ani;
   }
-  getContentBoundingClientRect() {
-    return this.__startSize ?? this.__dialogEle.getBoundingClientRect();
+  getSharedStyle() {
+    return {boudingRect: this.__startBounding ?? this.__dialogEle.getBoundingClientRect()};
   }
 
   override render() {
-    sharedElements.set(this, this.name, {
-      old: this.oldStyle,
-      new: this.newStyle,
+    sharedElements.set(this, this.sharedName, {
+      old: this.sharedOldStyle,
+      new: this.sharedNewStyle,
     });
-    const startSize = this.__startSize;
+    const startSize = this.__startBounding;
     return html`${cache(
         startSize
           ? html`<style>

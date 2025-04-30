@@ -52,7 +52,7 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
         if (pageItem) {
           sharedElementLifecycle.delete(pageItem.node);
           /// 清理所有 viewTransitionName
-          pageItem.node.style.viewTransitionName = '';
+          // pageItem.node.style.viewTransitionName = '';
           for (const sharedElement of sharedElements.queryAll(pageItem.node)) {
             sharedElement.style.viewTransitionName = '';
             delete sharedElement.dataset.sharedElementState;
@@ -73,7 +73,8 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
       for (const pageItem of sharedElementPages) {
         if (pageItem) {
           sharedElementLifecycle.set(pageItem.node, lifecycle);
-          const appnNavVtn = (pageItem.node.style.viewTransitionName = '--shared-page-' + pageItem.navEntry.index);
+          //pageItem.node.style.viewTransitionName =
+          const appnNavVtn = '--shared-page-' + pageItem.navEntry.index;
           const zIndexStart = (pageItem.navEntry.index - minIndex + 1) * 10;
           sharedElementCss.setRule(`group(${appnNavVtn})`, `${this.getSelector('group', appnNavVtn)}{z-index:${zIndexStart};}`);
           for (const sharedItem of sharedElements.queryAllWithConfig(pageItem.node)) {

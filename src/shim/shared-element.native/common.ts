@@ -71,11 +71,15 @@ class SharedElementRegistry {
       }
     }
   }
-  queryAll<T extends HTMLElement = HTMLElement>(scope: HTMLElement, selector = '[data-shared-element]') {
-    return scope.querySelectorAll<T>(selector);
+  queryAll<T extends HTMLElement = HTMLElement>(scope: HTMLElement, options?: QueryOptions<T>) {
+    let eles = [].slice.call(scope.querySelectorAll<T>(options?.selector ?? '[data-shared-element]')) as T[];
+    if (options?.filter) {
+      eles = eles.filter(options.filter);
+    }
+    return eles;
   }
-  queryAllWithConfig<T extends HTMLElement = HTMLElement>(scope: HTMLElement, selector?: string) {
-    const elements = this.queryAll<T>(scope, selector);
+  queryAllWithConfig<T extends HTMLElement = HTMLElement>(scope: HTMLElement, options?: QueryOptions<T>) {
+    const elements = this.queryAll<T>(scope, options);
     const arr: Array<SharedElementConfig & {element: T}> = [];
     for (const element of elements) {
       const config = this.get(element)!;
@@ -84,6 +88,10 @@ class SharedElementRegistry {
     return arr;
   }
 }
+export type QueryOptions<T extends HTMLElement = HTMLElement> = {
+  selector?: string;
+  filter?: (ele: T) => boolean;
+};
 export const sharedElements = new SharedElementRegistry();
 
 export abstract class SharedElementBaseImpl implements SharedElementBase {

@@ -75,7 +75,7 @@ export default class Page {
                   <appn-link mode="replace" to="#page3">
                     replace as page3
                   </appn-link>
-                  <appn-shared-contents name="card">
+                  <appn-shared-contents sharedName="card">
                     <div className="qaq">QAQ</div>
                   </appn-shared-contents>
                 </appn-view>
@@ -92,7 +92,7 @@ export default class Page {
                 </appn-header>
                 <appn-view>
                   <appn-shared-contents
-                    name="card"
+                    sharedName="card"
                     style={{
                       alignSelf: 'center',
                     }}

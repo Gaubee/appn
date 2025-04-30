@@ -1,9 +1,9 @@
 import {iter_first_not_null} from '@gaubee/util';
-import {AppnSharedElement} from '../../components/appn-shared-contents/appn-shared-contents';
+import type {CommonSharedAbleContentsElement} from '../../components/appn-shared-contents/appn-shared-contents-types';
 import {abort_throw_if_aborted} from '../abort.polyfill';
 import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
 import {set_intersection} from '../set.polyfill';
-import {SharedElementBaseImpl, sharedElementLifecycle, sharedElements} from '../shared-element.native';
+import {SharedElementBaseImpl, sharedElementLifecycle, sharedElements, type QueryOptions} from '../shared-element.native';
 import type {
   SharedElementAnimation,
   SharedElementBase,
@@ -16,7 +16,7 @@ import {SharedElementTransitionPonyfill} from './shared-element-transition';
 
 type SharedElementStyleMap = Map<string, SharedElementStyle>;
 type SharedElementStyle = {
-  element: AppnSharedElement;
+  element: CommonSharedAbleContentsElement;
   boudingRect: DOMRect;
 };
 export class SharedElementPonyfill extends SharedElementBaseImpl implements SharedElementBase {
@@ -125,21 +125,22 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     sharedElementLifecycle.set(from.node, lifecycle);
 
     // 必须确保同一个name在两个page都都存在
-    const selector = 'appn-shared-contents';
-    const fromSharedElementMap = new Map(sharedElements.queryAllWithConfig<AppnSharedElement>(from.node, selector).map((item) => [item.name, item]));
-    const destSharedElementMap = new Map(sharedElements.queryAllWithConfig<AppnSharedElement>(dest.node, selector).map((item) => [item.name, item]));
+    const queryOpts: QueryOptions<CommonSharedAbleContentsElement> = {
+      selector: 'appn-shared-contents',
+      // filter: (ele: HTMLElement) => !!(ele as CommonSharedAbleContentsElement).sharedName,
+    };
+    const fromSharedElementMap = new Map(sharedElements.queryAllWithConfig(from.node, queryOpts).map((item) => [item.name, item]));
+    const destSharedElementMap = new Map(sharedElements.queryAllWithConfig(dest.node, queryOpts).map((item) => [item.name, item]));
     const sharedElementNames = set_intersection(new Set(fromSharedElementMap.keys()), destSharedElementMap);
     // 根据生命周期捕捉对应的page元素信息
     const sharedElementMap = lifecycle === 'first' ? fromSharedElementMap : destSharedElementMap;
     for (const sharedName of sharedElementNames) {
       const {element} = sharedElementMap.get(sharedName)!;
-      const boudingRect = element.getContentBoundingClientRect();
-      if (typeof element.showPopover === 'function') {
-        store.set(sharedName, {
-          element,
-          boudingRect,
-        });
-      }
+      const style = element.getSharedStyle();
+      store.set(sharedName, {
+        element,
+        ...style,
+      });
     }
     return store;
   }
@@ -156,7 +157,7 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
       inset: 0,
     };
 
-    const elementAnimation = element.viewTransition(
+    const elementAnimation = element.createSharedAnimation(
       [
         {
           ...baseStyle,

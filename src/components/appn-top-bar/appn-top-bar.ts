@@ -5,7 +5,7 @@
  */
 
 import {consume} from '@lit/context';
-import {LitElement, css, html, type PropertyValues} from 'lit';
+import {LitElement, html, type PropertyValues} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 import {when} from 'lit/directives/when.js';
 import {sharedElements} from '../../shim/shared-element.native/common';
@@ -25,6 +25,7 @@ const set_navigation_entry_page_title = (entry: NavigationHistoryEntry | null | 
     navigation_entry_page_title_wm.set(entry, page_title);
   }
 };
+const css = String.raw;
 
 /**
  * 顶部工具栏组件，参考了 material3-top-app-bar 的标准。
@@ -103,9 +104,9 @@ export class AppnNavBackElement extends LitElement {
                         </appn-link>
                       </li>
                       <hr />
-                    `
+                    `,
                   )}
-                </menu>`
+                </menu>`,
             )}
           `;
         },
