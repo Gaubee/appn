@@ -10,6 +10,8 @@ export const appnSharedStyle = css`
     padding: 0;
     margin: 0;
     border: 0;
+
+    position: static;
   }
   dialog::backdrop {
     background: transparent;
