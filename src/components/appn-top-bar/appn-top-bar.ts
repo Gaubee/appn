@@ -8,7 +8,7 @@ import {consume} from '@lit/context';
 import {LitElement, html, type PropertyValues} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 import {when} from 'lit/directives/when.js';
-import {sharedElements} from '../../shim/shared-element.native/common';
+import {sharedElements} from '../../shim/shared-element.native/shared-element-common';
 import '../appn-icon/appn-icon';
 import '../appn-link/appn-link';
 import {appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';

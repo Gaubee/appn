@@ -1,6 +1,7 @@
 import type {PromiseMaybe} from '@gaubee/util';
 import type {CssSheetArray} from '@gaubee/web';
 import type {Properties} from 'csstype';
+import type {AppnNavigationHistoryEntryElement} from '../../components/appn-navigation/appn-navigation';
 
 export const caniuseSharedElement = /*@__PURE__*/ CSS.supports('view-transition-name: none'); // 'startViewTransition' in document;
 
@@ -41,7 +42,7 @@ export interface SharedElementBase {
    * @param selector - default is getSelector('group','*)
    */
   setAnimationStyle(selector: string, style: AnimationProperties | null): void;
-  readonly pageAnimationDuration: number;
+  readonly animationDuration: number;
 
   readonly css: CssSheetArray;
   /**
@@ -71,7 +72,7 @@ export interface SharedElementTransitionContext {
   /** 导航的目标页 */
   dest: NavigationHistoryEntry | null;
   /** 根据导航对象返回页面节点 */
-  queryPageNode: (entry: NavigationHistoryEntry, lifecycle: SharedElementLifecycle) => HTMLElement | null;
+  queryNavEntryNode: (entry: NavigationHistoryEntry, lifecycle: SharedElementLifecycle) => AppnNavigationHistoryEntryElement | null;
 }
 
 export interface SharedElementLifecycleCallbacks {

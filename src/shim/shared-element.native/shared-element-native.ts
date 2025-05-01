@@ -1,6 +1,6 @@
 import {CssSheetArray} from '@gaubee/web';
 import {match} from 'ts-pattern';
-import {SharedElementBaseImpl, sharedElementLifecycle, sharedElements} from './common';
+import {SharedElementBaseImpl, sharedElementLifecycle, sharedElements} from './shared-element-common';
 import {
   type SharedElementAnimation,
   type SharedElementBase,
@@ -50,10 +50,10 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
     if (lifecycle === 'finish') {
       for (const pageItem of [sharedElementPagesContext.from, sharedElementPagesContext.dest]) {
         if (pageItem) {
-          sharedElementLifecycle.delete(pageItem.node);
+          sharedElementLifecycle.delete(pageItem.navEntryNode);
           /// 清理所有 viewTransitionName
           // pageItem.node.style.viewTransitionName = '';
-          for (const sharedElement of sharedElements.queryAll(pageItem.node)) {
+          for (const sharedElement of sharedElements.queryAll(pageItem.navEntryNode)) {
             sharedElement.style.viewTransitionName = '';
             delete sharedElement.dataset.sharedElementState;
           }
@@ -62,9 +62,7 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
     } else {
       const sharedElementCss = this.css;
       const sharedElementMap = new Map<string, HTMLElement>();
-      const indexs = [sharedElementPagesContext.from?.navEntry.index ?? 0, sharedElementPagesContext.dest?.navEntry.index ?? 0].sort((a, b) => a - b);
-      const [minIndex, maxIndex] = indexs;
-      const sharedElementIndex = (maxIndex - minIndex + 1) * 10 + 1;
+      const sharedElementIndex = Math.max(sharedElementPagesContext.from?.navEntryNode.sharedIndex ?? 0, sharedElementPagesContext.dest?.navEntryNode.sharedIndex ?? 0) + 1;
       const sharedElementPages = match(lifecycle)
         .with('first', () => [sharedElementPagesContext.dest, sharedElementPagesContext.from])
         .with('last', () => [sharedElementPagesContext.from, sharedElementPagesContext.dest])
@@ -72,12 +70,11 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
 
       for (const pageItem of sharedElementPages) {
         if (pageItem) {
-          sharedElementLifecycle.set(pageItem.node, lifecycle);
-          //pageItem.node.style.viewTransitionName =
-          const appnNavVtn = '--shared-page-' + pageItem.navEntry.index;
-          const zIndexStart = (pageItem.navEntry.index - minIndex + 1) * 10;
-          sharedElementCss.setRule(`group(${appnNavVtn})`, `${this.getSelector('group', appnNavVtn)}{z-index:${zIndexStart};}`);
-          for (const sharedItem of sharedElements.queryAllWithConfig(pageItem.node)) {
+          sharedElementLifecycle.set(pageItem.navEntryNode, lifecycle);
+          const navEntryNode = pageItem.navEntryNode;
+          const zIndexStart = navEntryNode.sharedIndex;
+          this.__setSharedElement(sharedElementCss, navEntryNode, sharedElements.get(navEntryNode)!, sharedElementMap, `z-index:${zIndexStart};`);
+          for (const sharedItem of sharedElements.queryAllWithConfig(pageItem.navEntryNode)) {
             this.__setSharedElement(sharedElementCss, sharedItem.element, sharedItem, sharedElementMap, `z-index:${sharedElementIndex};`);
           }
         }
@@ -102,7 +99,10 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
     element.dataset.sharedElementState = 'new';
 
     const {group, imagePair, old, new: newStyle} = config.styles;
-    sharedElementCss.setRule(`group(${vtn})`, `${this.getSelector('group', vtn)}{${zIndexCssText}${group ?? ''}}`);
+    const groupStyle = zIndexCssText + group;
+    if (groupStyle) {
+      sharedElementCss.setRule(`group(${vtn})`, `${this.getSelector('group', vtn)}{${groupStyle}}`);
+    }
     if (imagePair) {
       sharedElementCss.setRule(`imagePair(${vtn})`, `${this.getSelector('image-pair', vtn)}{${imagePair}}`);
     }

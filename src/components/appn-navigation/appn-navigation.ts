@@ -324,7 +324,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
               htmlEle.removeEventListener('touchend', onTouchMove);
             });
 
-            const totalDuration = sharedElement.pageAnimationDuration;
+            const totalDuration = sharedElement.animationDuration;
             const animations = iter_map_not_null(htmlEle.getAnimations({subtree: true}), (animation) => {
               const sharedAni = sharedElement.isSharedElementAnimation(animation);
               sharedAni?.pause();
@@ -344,7 +344,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
          * 在push模式下，它是“空”的（index=-1）
          */
         dest: this.currentEntry, // this.__currentEntry,
-        queryPageNode: (navEntry) => this.querySelector<HTMLElement>(`appn-navigation-history-entry[data-index="${navEntry.index}"]`),
+        queryNavEntryNode: (navEntry) => this.querySelector(`appn-navigation-history-entry[data-index="${navEntry.index}"]`),
       },
     );
   };
@@ -468,6 +468,11 @@ export class AppnNavigationHistoryEntryElement extends LitElement implements Com
   @property({type: String, reflect: true, attribute: true})
   accessor sharedName: string | undefined | null;
 
+  #sharedIndex = 0;
+  get sharedIndex() {
+    return this.#sharedIndex;
+  }
+
   @property({type: String, reflect: true, attribute: true})
   accessor sharedOldStyle: string | undefined | null;
   @property({type: String, reflect: true, attribute: true})
@@ -493,8 +498,6 @@ export class AppnNavigationHistoryEntryElement extends LitElement implements Com
 
   override render() {
     const {navigationEntry} = this;
-    sharedElements.set(this, (this.sharedName = navigationEntry && `--shared-page-${navigationEntry.index}`));
-
     this.dataset.key = navigationEntry?.key;
     /** 自身 index */
     const selfIndex = navigationEntry?.index ?? -1;
@@ -502,6 +505,11 @@ export class AppnNavigationHistoryEntryElement extends LitElement implements Com
     const presentIndex = this.presentEntryIndex;
     this.style.setProperty('--index', (this.dataset.index = `${selfIndex}`));
 
+    /// 配置 sharedElement
+
+    sharedElements.set(this, (this.sharedName = navigationEntry && `--shared-page-${navigationEntry.index}`), {
+      group: `z-index:${(this.#sharedIndex = selfIndex * 1000)};`,
+    });
     let fromTense = this.dataset.tense as NavigationHistoryEntryTense;
     /**
      * 如果 present 在最后，那么：

@@ -1,5 +1,6 @@
 import {func_remember, obj_lazy_builder} from '@gaubee/util';
 import {CssSheetArray} from '@gaubee/web';
+import type {AppnNavigationHistoryEntryElement} from '../../components/appn-navigation/appn-navigation';
 import {styleToCss} from '../../utils/css-helper';
 import type {
   AnimationProperties,
@@ -109,7 +110,8 @@ export abstract class SharedElementBaseImpl implements SharedElementBase {
       this.css.setRule(key, `${selector}{${styleToCss(style)}}`);
     }
   }
-  readonly pageAnimationDuration: number = 350;
+  readonly animationDuration: number = 350;
+  readonly animationEasing: string = 'cubic-bezier(0.2, 0.9, 0.5, 1)';
 
   /**
    * 这里注入一些全局样式，所以不放在 appnNavigationStyle 里头。
@@ -130,8 +132,8 @@ export abstract class SharedElementBaseImpl implements SharedElementBase {
 
     cssArray.addRule(css`
       ${this.getSelector('group', '*')} {
-        animation-timing-function: cubic-bezier(0.2, 0.9, 0.5, 1);
-        animation-duration: ${this.pageAnimationDuration}ms;
+        animation-timing-function: ${this.animationEasing};
+        animation-duration: ${this.animationDuration}ms;
       }
     `);
 
@@ -144,16 +146,16 @@ export abstract class SharedElementBaseImpl implements SharedElementBase {
   abstract startTransition(scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void>;
 
   protected __getPagesContext(lifecycle: SharedElementLifecycle, context: SharedElementTransitionContext) {
-    type PageItem = {node: HTMLElement; navEntry: NavigationHistoryEntry};
+    type PageItem = {navEntryNode: AppnNavigationHistoryEntryElement; navEntry: NavigationHistoryEntry};
     const sharedElementPagesContext: {
       [key in 'from' | 'dest']?: PageItem;
     } = {};
     /// 获取过渡元素
     const queryPageItem = (navEntry: NavigationHistoryEntry | null): PageItem | undefined => {
       if (navEntry) {
-        const node = context.queryPageNode(navEntry, lifecycle);
-        if (node) {
-          return {node, navEntry};
+        const navEntryNode = context.queryNavEntryNode(navEntry, lifecycle);
+        if (navEntryNode) {
+          return {navEntryNode, navEntry};
         }
       }
       return;

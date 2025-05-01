@@ -283,8 +283,9 @@ class MinNavigationResults {
   constructor() {
     const abort = this.abort;
     abort.signal.addEventListener('abort', () => {
-      this.committer.reject(abort.signal.reason);
-      this.finisher.reject(abort.signal.reason);
+      const reason = abort.signal.reason
+      this.committer.reject(reason);
+      this.finisher.reject(reason);
     });
   }
 }

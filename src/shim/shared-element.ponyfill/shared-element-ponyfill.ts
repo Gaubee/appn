@@ -14,8 +14,8 @@ import type {
 } from '../shared-element.native/types';
 import {SharedElementTransitionPonyfill} from './shared-element-transition';
 
-type SharedElementStyleMap = Map<string, SharedElementStyle>;
-type SharedElementStyle = {
+type SharedElementSnapMap = Map<string, SharedElementSnap>;
+type SharedElementSnap = {
   element: CommonSharedAbleContentsElement;
   boudingRect: DOMRect;
 };
@@ -33,13 +33,13 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
   }
 
   async startTransition(_scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void> {
-    const firstStyleStore: SharedElementStyleMap = new Map();
-    const lastStyleStore: SharedElementStyleMap = new Map();
-    new Set(firstStyleStore.keys()).intersection(lastStyleStore);
+    const firstSnaps: SharedElementSnapMap = new Map();
+    const lastSnaps: SharedElementSnapMap = new Map();
+    new Set(firstSnaps.keys()).intersection(lastSnaps);
 
     /// first
     await callbacks?.first?.();
-    this.__captureLifecycleSharedElementsStyle(context, 'first', firstStyleStore);
+    this.__captureLifecycleSharedElementsStyle(context, 'first', firstSnaps);
 
     /// last
     const finishedJob = promise_with_resolvers<void>();
@@ -62,11 +62,11 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
           await callbacks.last?.();
           abort_throw_if_aborted(abort.signal);
 
-          this.__captureLifecycleSharedElementsStyle(context, 'last', lastStyleStore);
+          this.__captureLifecycleSharedElementsStyle(context, 'last', lastSnaps);
           updateCallbackDoneJob.resolve();
 
           /// 开始构建动画
-          const animations = this.__buildSharedElementAnimations(firstStyleStore, lastStyleStore);
+          const animations = this.__buildSharedElementAnimations(firstSnaps, lastSnaps);
           abort.signal.addEventListener('abort', () => {
             animations.forEach((ani) => {
               ani.cancel();
@@ -90,62 +90,56 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
       abort_throw_if_aborted(abort.signal);
       await callbacks.finish?.(transition);
       abort_throw_if_aborted(abort.signal);
-      this.__captureLifecycleSharedElementsStyle(context, 'finish', lastStyleStore);
+      this.__captureLifecycleSharedElementsStyle(context, 'finish', lastSnaps);
     } catch (err) {
       abort.abort(err);
     }
   }
-  constructor() {
-    super();
-    const css = String.raw;
-    // TODO 使用手动构建 animation 替代，否则会影响样式的计算
-    this.css.addRules(css`
-      /* appn-navigation-history-entry[data-from-tense='present'] {
-        transition-duration: var(--page-leave-duration);
-        transition-timing-function: var(--page-leave-ease);
-      }
-      appn-navigation-history-entry[data-tense='present'] {
-        transition-duration: var(--page-enter-duration);
-        transition-timing-function: var(--page-enter-ease);
-      } */
-    `);
-  }
 
-  private __captureLifecycleSharedElementsStyle(context: SharedElementTransitionContext, lifecycle: SharedElementLifecycle, store: SharedElementStyleMap = new Map()) {
+  private __captureLifecycleSharedElementsStyle(context: SharedElementTransitionContext, lifecycle: SharedElementLifecycle, snaps: SharedElementSnapMap = new Map()) {
     const sharedElementPagesContext = this.__getPagesContext('last', context);
     const {dest, from} = sharedElementPagesContext;
     // 必须确保两个page都存在
-    if (dest == null || from == null) return store;
+    if (dest == null || from == null) return snaps;
+    const fromNavEntryNode = from.navEntryNode;
+    const destNavEntryNode = dest.navEntryNode;
     if (lifecycle === 'finish') {
-      sharedElementLifecycle.delete(dest.node);
-      sharedElementLifecycle.delete(from.node);
+      sharedElementLifecycle.delete(destNavEntryNode);
+      sharedElementLifecycle.delete(fromNavEntryNode);
       return;
     }
-    sharedElementLifecycle.set(dest.node, lifecycle);
-    sharedElementLifecycle.set(from.node, lifecycle);
+    sharedElementLifecycle.set(destNavEntryNode, lifecycle);
+    sharedElementLifecycle.set(fromNavEntryNode, lifecycle);
+    for (const navEntryNode of [fromNavEntryNode, destNavEntryNode]) {
+      if (navEntryNode.sharedName) {
+        snaps.set(navEntryNode.sharedName, {
+          element: navEntryNode,
+          ...navEntryNode.getSharedStyle(),
+        });
+      }
+    }
 
     // 必须确保同一个name在两个page都都存在
     const queryOpts: QueryOptions<CommonSharedAbleContentsElement> = {
       selector: 'appn-shared-contents',
-      // filter: (ele: HTMLElement) => !!(ele as CommonSharedAbleContentsElement).sharedName,
     };
-    const fromSharedElementMap = new Map(sharedElements.queryAllWithConfig(from.node, queryOpts).map((item) => [item.name, item]));
-    const destSharedElementMap = new Map(sharedElements.queryAllWithConfig(dest.node, queryOpts).map((item) => [item.name, item]));
+    const fromSharedElementMap = new Map(sharedElements.queryAllWithConfig(fromNavEntryNode, queryOpts).map((item) => [item.name, item]));
+    const destSharedElementMap = new Map(sharedElements.queryAllWithConfig(destNavEntryNode, queryOpts).map((item) => [item.name, item]));
     const sharedElementNames = set_intersection(new Set(fromSharedElementMap.keys()), destSharedElementMap);
     // 根据生命周期捕捉对应的page元素信息
     const sharedElementMap = lifecycle === 'first' ? fromSharedElementMap : destSharedElementMap;
     for (const sharedName of sharedElementNames) {
       const {element} = sharedElementMap.get(sharedName)!;
       const style = element.getSharedStyle();
-      store.set(sharedName, {
+      snaps.set(sharedName, {
         element,
         ...style,
       });
     }
-    return store;
+    return snaps;
   }
 
-  private __doAni(item: SharedElementStyle, fromBoudingRect: DOMRect, toBoudingRect: DOMRect) {
+  private __doAni(mode: 'new' | 'old' | 'shared', item: SharedElementSnap, fromBoudingRect: DOMRect, toBoudingRect: DOMRect) {
     const element = item.element;
 
     const baseStyle = {
@@ -155,68 +149,74 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
       outline: '1px solid #0003',
       transformOrigin: 'top left',
       inset: 0,
+      top: 0,
+      left: 0,
+      // mixBlendMode: 'plus-lighter',
     };
+    const keyframes: Keyframe[] = [
+      {
+        ...baseStyle,
 
-    const elementAnimation = element.createSharedAnimation(
-      [
-        {
-          ...baseStyle,
+        translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
+        offset: 0,
 
-          offset: 0,
-          top: fromBoudingRect.top + 'px',
-          left: fromBoudingRect.left + 'px',
+        ...(item.boudingRect === fromBoudingRect
+          ? {
+              width: fromBoudingRect.width + 'px',
+              height: fromBoudingRect.height + 'px',
+              scale: '1 1',
+              opacity: 1,
+            }
+          : {
+              width: toBoudingRect.width + 'px',
+              height: toBoudingRect.height + 'px',
+              scale: `${fromBoudingRect.width / toBoudingRect.width} ${fromBoudingRect.height / toBoudingRect.height}`,
+              opacity: mode === 'shared' ? 1 : 0,
+            }),
+      },
+      {
+        ...baseStyle,
 
-          ...(item.boudingRect === fromBoudingRect
-            ? {
-                width: fromBoudingRect.width + 'px',
-                height: fromBoudingRect.height + 'px',
-                scale: '1 1',
-                opacity: 1,
-              }
-            : {
-                width: toBoudingRect.width + 'px',
-                height: toBoudingRect.height + 'px',
-                scale: `${fromBoudingRect.width / toBoudingRect.width} ${fromBoudingRect.height / toBoudingRect.height}`,
-                opacity: 0,
-              }),
-        },
-        {
-          ...baseStyle,
+        offset: 1,
+        translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
 
-          offset: 1,
-          top: toBoudingRect.top + 'px',
-          left: toBoudingRect.left + 'px',
+        ...(item.boudingRect === fromBoudingRect
+          ? {
+              scale: `${toBoudingRect.width / fromBoudingRect.width} ${toBoudingRect.height / fromBoudingRect.height}`,
+              opacity: mode === 'shared' ? 1 : 0,
+            }
+          : {
+              scale: '1 1',
+              opacity: 1,
+            }),
+      },
+    ];
+    console.log('QAQ keyframes', keyframes);
 
-          ...(item.boudingRect === fromBoudingRect
-            ? {
-                scale: `${toBoudingRect.width / fromBoudingRect.width} ${toBoudingRect.height / fromBoudingRect.height}`,
-                opacity: 0,
-              }
-            : {
-                scale: '1 1',
-                opacity: 1,
-              }),
-        },
-      ],
-      {duration: this.pageAnimationDuration},
-    );
+    const elementAnimation = element.createSharedAnimation(keyframes, {
+      duration: this.animationDuration,
+      easing: this.animationEasing,
+    });
 
     return elementAnimation;
   }
 
-  private __buildSharedElementAnimations(firstStore: SharedElementStyleMap, lastStore: SharedElementStyleMap) {
+  private __buildSharedElementAnimations(firstSnaps: SharedElementSnapMap, lastSnaps: SharedElementSnapMap) {
     const animations: Animation[] = [];
-    for (const [sharedName, firstItem] of firstStore) {
-      if (!lastStore.has(sharedName)) {
+    for (const [sharedName, firstSnap] of firstSnaps) {
+      if (!lastSnaps.has(sharedName)) {
         continue;
       }
-      const lastItem = lastStore.get(sharedName)!;
-      console.log(sharedName, firstItem, lastItem);
-
-      const oldElementAnimation = this.__doAni(firstItem, firstItem.boudingRect, lastItem.boudingRect);
-      const newElementAnimation = this.__doAni(lastItem, firstItem.boudingRect, lastItem.boudingRect);
-
-      animations.push(oldElementAnimation, newElementAnimation);
+      const lastSnap = lastSnaps.get(sharedName)!;
+      console.log(sharedName, firstSnap.element === lastSnap.element, firstSnap, lastSnap);
+      if (firstSnap.element === lastSnap.element) {
+        const sharedElementAnimation = this.__doAni('shared', firstSnap, firstSnap.boudingRect, lastSnap.boudingRect);
+        animations.push(sharedElementAnimation);
+      } else {
+        const oldElementAnimation = this.__doAni('old', firstSnap, firstSnap.boudingRect, lastSnap.boudingRect);
+        const newElementAnimation = this.__doAni('new', lastSnap, firstSnap.boudingRect, lastSnap.boudingRect);
+        animations.push(oldElementAnimation, newElementAnimation);
+      }
     }
     return animations;
   }
