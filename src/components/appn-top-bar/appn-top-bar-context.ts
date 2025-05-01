@@ -23,6 +23,6 @@ export const createPreNavs = (host: ReactiveControllerHost & HTMLElement) => {
     },
     get navigationEntry() {
       return navigationEntryConsumer.value;
-    },
+    }
   };
 };

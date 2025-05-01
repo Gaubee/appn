@@ -16,7 +16,7 @@ import {baseurl_relative_parts} from '../../utils/relative-path';
 import {safeProperty} from '../../utils/safe-property';
 import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
 import {AppnPageElement, type AppnSwapbackInfo} from '../appn-page/appn-page';
-import type {CommonSharedAbleContentsElement} from '../appn-shared-contents/appn-shared-contents-types';
+import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsStyle} from '../appn-shared-contents/appn-shared-contents-types';
 import '../css-starting-style/css-starting-style';
 import {appnNavigationContext, appnNavigationHistoryEntryContext} from './appn-navigation-context';
 import type {AppnNavigation} from './appn-navigation-types';
@@ -491,7 +491,7 @@ export class AppnNavigationHistoryEntryElement extends LitElement implements Com
     }
     return ani;
   }
-  getSharedStyle() {
+  getSharedStyle(): CommonSharedAbleContentsStyle {
     return {boudingRect: this.getBoundingClientRect()};
   }
   //#endregion

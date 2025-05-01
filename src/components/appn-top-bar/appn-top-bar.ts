@@ -12,6 +12,7 @@ import {sharedElements} from '../../shim/shared-element.native/shared-element-co
 import '../appn-icon/appn-icon';
 import '../appn-link/appn-link';
 import {appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';
+import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsStyle} from '../appn-shared-contents/appn-shared-contents-types';
 import '../css-starting-style/css-starting-style';
 import {createPreNavs} from './appn-top-bar-context';
 import {appnNavBackStyle, appnNavTitleStyle, appnTopBarStyle} from './appn-top-bar.css';
@@ -54,6 +55,8 @@ export class AppnTopBarElement extends LitElement {
     `;
   }
 }
+
+//#region appn-nav-back
 
 @customElement('appn-nav-back')
 export class AppnNavBackElement extends LitElement {
@@ -115,23 +118,44 @@ export class AppnNavBackElement extends LitElement {
     `;
   }
 }
+//#endregion
+//#region appn-nav-back-text
 @customElement('appn-nav-back-text')
-export class AppnNavBackTextElement extends LitElement {
+export class AppnNavBackTextElement extends LitElement implements CommonSharedAbleContentsElement {
   accessor #preNavs = createPreNavs(this);
-
-  protected override firstUpdated(_changedProperties: PropertyValues): void {
-    super.firstUpdated(_changedProperties);
-    const navigationEntry = this.#preNavs.navigationEntry;
-    if (navigationEntry) {
-      const pre_index = navigationEntry.index - 1;
-      sharedElements.set(this, `appn-title-${pre_index}`, {
-        both: `width:fit-content;`,
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedName: string | null | undefined;
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedOldStyle: string | null | undefined;
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedNewStyle: string | null | undefined;
+  private __ani: Animation | null = null;
+  createSharedAnimation(...args: Parameters<HTMLElement['animate']>): Animation {
+    let ani = this.__ani;
+    if (!ani) {
+      ani = this.animate(...args);
+      this.__ani = ani;
+      ani.finished.finally(() => {
+        this.__ani = null;
       });
     }
+    return ani;
   }
+  getSharedStyle(): CommonSharedAbleContentsStyle {
+    return {
+      boudingRect: this.getBoundingClientRect(),
+      baseStyle: {position: 'absolute'},
+    };
+  }
+
   protected override render() {
+    const navEntry = this.#preNavs.navigationEntry;
+    sharedElements.set(this, (this.sharedName = navEntry && `appn-title-${navEntry.index - 1}`), {
+      both: `width:fit-content;`,
+    });
+
     return html`<slot>
-      ${this.#preNavs.task?.render({
+      ${this.#preNavs.task.render({
         complete: (preNavEntries) => {
           if (!preNavEntries || preNavEntries.length === 0) {
             return;
@@ -143,8 +167,12 @@ export class AppnNavBackTextElement extends LitElement {
     </slot>`;
   }
 }
+//#endregion
+
+//#region appn-nav-title
+
 @customElement('appn-nav-title')
-export class AppnNavTitleElement extends LitElement {
+export class AppnNavTitleElement extends LitElement implements CommonSharedAbleContentsElement {
   static override styles = appnNavTitleStyle;
 
   /**
@@ -161,15 +189,35 @@ export class AppnNavTitleElement extends LitElement {
   @property({type: String, reflect: true, attribute: true})
   accessor pageTitle = '';
 
-  protected override firstUpdated(_changedProperties: PropertyValues): void {
-    super.firstUpdated(_changedProperties);
-    const navigationEntry = this.#navigationEntry;
-    if (navigationEntry) {
-      this.dataset.sharedElement = `appn-title-${navigationEntry.index}`;
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedName: string | null | undefined;
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedOldStyle: string | null | undefined;
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedNewStyle: string | null | undefined;
+  private __ani: Animation | null = null;
+  createSharedAnimation(...args: Parameters<HTMLElement['animate']>): Animation {
+    let ani = this.__ani;
+    if (!ani) {
+      ani = this.animate(...args);
+      this.__ani = ani;
+      ani.finished.finally(() => {
+        this.__ani = null;
+      });
     }
+    return ani;
   }
+  getSharedStyle(): CommonSharedAbleContentsStyle {
+    return {
+      boudingRect: this.getBoundingClientRect(),
+      baseStyle: {position: 'absolute'},
+    };
+  }
+
   protected override render() {
-    set_navigation_entry_page_title(this.#navigationEntry, this.pageTitle);
+    const navigationEntry = this.#navigationEntry;
+    set_navigation_entry_page_title(navigationEntry, this.pageTitle);
+    sharedElements.set(this, (this.sharedName = navigationEntry && `appn-title-${navigationEntry?.index}`));
 
     return html`<slot>${this.pageTitle}</slot>
       <style>
@@ -180,6 +228,7 @@ export class AppnNavTitleElement extends LitElement {
       </style>`;
   }
 }
+//#endregion
 
 declare global {
   interface HTMLElementTagNameMap {

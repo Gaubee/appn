@@ -1,5 +1,5 @@
 import {iter_first_not_null} from '@gaubee/util';
-import type {CommonSharedAbleContentsElement} from '../../components/appn-shared-contents/appn-shared-contents-types';
+import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsStyle} from '../../components/appn-shared-contents/appn-shared-contents-types';
 import {abort_throw_if_aborted} from '../abort.polyfill';
 import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
 import {set_intersection} from '../set.polyfill';
@@ -15,10 +15,9 @@ import type {
 import {SharedElementTransitionPonyfill} from './shared-element-transition';
 
 type SharedElementSnapMap = Map<string, SharedElementSnap>;
-type SharedElementSnap = {
+interface SharedElementSnap extends CommonSharedAbleContentsStyle {
   element: CommonSharedAbleContentsElement;
-  boudingRect: DOMRect;
-};
+}
 export class SharedElementPonyfill extends SharedElementBaseImpl implements SharedElementBase {
   override getSelector(type?: SharedElementSelectorType, name?: string) {
     return '.' + super.getSelector(type, name).replace(/[:(*)]/g, (c) => `\\${c}`);
@@ -110,18 +109,10 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     }
     sharedElementLifecycle.set(destNavEntryNode, lifecycle);
     sharedElementLifecycle.set(fromNavEntryNode, lifecycle);
-    for (const navEntryNode of [fromNavEntryNode, destNavEntryNode]) {
-      if (navEntryNode.sharedName) {
-        snaps.set(navEntryNode.sharedName, {
-          element: navEntryNode,
-          ...navEntryNode.getSharedStyle(),
-        });
-      }
-    }
 
     // 必须确保同一个name在两个page都都存在
     const queryOpts: QueryOptions<CommonSharedAbleContentsElement> = {
-      selector: 'appn-shared-contents',
+      selector: '[sharedname]',
     };
     const fromSharedElementMap = new Map(sharedElements.queryAllWithConfig(fromNavEntryNode, queryOpts).map((item) => [item.name, item]));
     const destSharedElementMap = new Map(sharedElements.queryAllWithConfig(destNavEntryNode, queryOpts).map((item) => [item.name, item]));
@@ -136,6 +127,15 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
         ...style,
       });
     }
+    /// 最后，将前后两个page也加进来
+    for (const navEntryNode of [fromNavEntryNode, destNavEntryNode]) {
+      if (navEntryNode.sharedName) {
+        snaps.set(navEntryNode.sharedName, {
+          element: navEntryNode,
+          ...navEntryNode.getSharedStyle(),
+        });
+      }
+    }
     return snaps;
   }
 
@@ -143,14 +143,15 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     const element = item.element;
 
     const baseStyle = {
-      margin: 0,
-      overflow: 'hidden',
-      borderWidth: 0,
-      outline: '1px solid #0003',
+      // margin: 0,
+      // borderWidth: 0,
+      // overflow: 'hidden',
+      // outline: '1px solid #0003',
       transformOrigin: 'top left',
-      inset: 0,
-      top: 0,
-      left: 0,
+      // inset: 0,
+      // top: 0,
+      // left: 0,
+      ...item.baseStyle,
       // mixBlendMode: 'plus-lighter',
     };
     const keyframes: Keyframe[] = [
