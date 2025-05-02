@@ -8,6 +8,7 @@ export interface CommonSharedAbleContentsElement extends HTMLElement {
   getSharedStyle(): CommonSharedAbleContentsStyle;
 }
 export interface CommonSharedAbleContentsStyle {
-  boudingRect: DOMRect;
+  fromBounding: DOMRect;
+  toBounding: (fromBounding: DOMRect) => DOMRect;
   baseStyle?: Properties;
 }

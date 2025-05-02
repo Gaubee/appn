@@ -12,6 +12,7 @@ import {sharedElements} from '../../shim/shared-element.native/shared-element-co
 import '../appn-icon/appn-icon';
 import '../appn-link/appn-link';
 import {appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';
+import {staticElementSharedAbleContentsStyle} from '../appn-shared-contents/appn-shared-contents-helper';
 import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsStyle} from '../appn-shared-contents/appn-shared-contents-types';
 import '../css-starting-style/css-starting-style';
 import {createPreNavs} from './appn-top-bar-context';
@@ -142,10 +143,7 @@ export class AppnNavBackTextElement extends LitElement implements CommonSharedAb
     return ani;
   }
   getSharedStyle(): CommonSharedAbleContentsStyle {
-    return {
-      boudingRect: this.getBoundingClientRect(),
-      baseStyle: {position: 'absolute'},
-    };
+    return staticElementSharedAbleContentsStyle(this);
   }
 
   protected override render() {
@@ -195,6 +193,9 @@ export class AppnNavTitleElement extends LitElement implements CommonSharedAbleC
   accessor sharedOldStyle: string | null | undefined;
   @property({type: String, reflect: true, attribute: true})
   accessor sharedNewStyle: string | null | undefined;
+  getSharedStyle(): CommonSharedAbleContentsStyle {
+    return staticElementSharedAbleContentsStyle(this);
+  }
   private __ani: Animation | null = null;
   createSharedAnimation(...args: Parameters<HTMLElement['animate']>): Animation {
     let ani = this.__ani;
@@ -206,12 +207,6 @@ export class AppnNavTitleElement extends LitElement implements CommonSharedAbleC
       });
     }
     return ani;
-  }
-  getSharedStyle(): CommonSharedAbleContentsStyle {
-    return {
-      boudingRect: this.getBoundingClientRect(),
-      baseStyle: {position: 'absolute'},
-    };
   }
 
   protected override render() {

@@ -2,6 +2,7 @@ import {html, LitElement} from 'lit';
 import {customElement, property, query, state} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {sharedElements} from '../../shim/shared-element.native';
+import {fixedElementSharedAbleContentsStyle} from './appn-shared-contents-helper';
 import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsStyle} from './appn-shared-contents-types';
 import {appnSharedStyle} from './appn-shared-contents.css';
 
@@ -45,7 +46,7 @@ export class AppnSharedContentsElement extends LitElement implements CommonShare
   }
   getSharedStyle(): CommonSharedAbleContentsStyle {
     return {
-      boudingRect: this.__startBounding ?? this.__dialogEle.getBoundingClientRect(),
+      ...fixedElementSharedAbleContentsStyle(this),
       baseStyle: {
         margin: 0,
         borderWidth: 0,

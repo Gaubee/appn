@@ -118,6 +118,7 @@ export const appnNavBackStyle = css`
 `;
 export const appnNavTitleStyle = css`
   :host {
+    display: inline-block;
     /**
      * 不使用 font-weight: 600; 这会导致文本宽度的变化。
      * 从而影响 view-transiton 在变换的时候，文本错位的问题

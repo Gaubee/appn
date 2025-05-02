@@ -12,6 +12,7 @@ export const appnSharedStyle = css`
     border: 0;
 
     position: static;
+    color: inherit;
   }
   dialog::backdrop {
     background: transparent;

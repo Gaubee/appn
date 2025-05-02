@@ -1,4 +1,5 @@
 import {iter_first_not_null} from '@gaubee/util';
+import {match} from 'ts-pattern';
 import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsStyle} from '../../components/appn-shared-contents/appn-shared-contents-types';
 import {abort_throw_if_aborted} from '../abort.polyfill';
 import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
@@ -139,60 +140,74 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     return snaps;
   }
 
-  private __doAni(mode: 'new' | 'old' | 'shared', item: SharedElementSnap, fromBoudingRect: DOMRect, toBoudingRect: DOMRect) {
-    const element = item.element;
+  private __doAni(mode: 'new' | 'old' | 'shared', snap: SharedElementSnap, fromBoudingRect: DOMRect, toBoudingRect: DOMRect) {
+    const element = snap.element;
+    if(/appn-nav/i.test(snap.element.tagName)){
+      debugger
+    }
 
     const baseStyle = {
-      // margin: 0,
-      // borderWidth: 0,
-      // overflow: 'hidden',
-      // outline: '1px solid #0003',
       transformOrigin: 'top left',
-      // inset: 0,
-      // top: 0,
-      // left: 0,
-      ...item.baseStyle,
+      ...snap.baseStyle,
       // mixBlendMode: 'plus-lighter',
     };
     const keyframes: Keyframe[] = [
       {
         ...baseStyle,
-
-        translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
-        offset: 0,
-
-        ...(item.boudingRect === fromBoudingRect
-          ? {
-              width: fromBoudingRect.width + 'px',
-              height: fromBoudingRect.height + 'px',
+        ...match(mode)
+          .with('old', () => {
+            return {
+              translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
               scale: '1 1',
               opacity: 1,
-            }
-          : {
-              width: toBoudingRect.width + 'px',
-              height: toBoudingRect.height + 'px',
+            };
+          })
+          .with('new', () => {
+            return {
+              translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
+              scale: `${toBoudingRect.width / fromBoudingRect.width} ${toBoudingRect.height / fromBoudingRect.height}`,
+              opacity: 0,
+            };
+          })
+          .with('shared', () => {
+            return {
+              translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
               scale: `${fromBoudingRect.width / toBoudingRect.width} ${fromBoudingRect.height / toBoudingRect.height}`,
-              opacity: mode === 'shared' ? 1 : 0,
-            }),
+            };
+          })
+          .exhaustive(),
+
+        offset: 0,
       },
       {
         ...baseStyle,
-
-        offset: 1,
-        translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
-
-        ...(item.boudingRect === fromBoudingRect
-          ? {
+        ...match(mode)
+          .with('old', () => {
+            return {
+              translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
               scale: `${toBoudingRect.width / fromBoudingRect.width} ${toBoudingRect.height / fromBoudingRect.height}`,
-              opacity: mode === 'shared' ? 1 : 0,
-            }
-          : {
+              opacity: 0,
+            };
+          })
+          .with('new', () => {
+            return {
+              translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
               scale: '1 1',
               opacity: 1,
-            }),
+            };
+          })
+          .with('shared', () => {
+            return {
+              translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
+              scale: `${fromBoudingRect.width / toBoudingRect.width} ${fromBoudingRect.height / toBoudingRect.height}`,
+            };
+          })
+          .exhaustive(),
+
+        offset: 1,
       },
     ];
-    console.log('QAQ keyframes', keyframes);
+    console.log('QAQ keyframes', mode, snap.element, keyframes);
 
     const elementAnimation = element.createSharedAnimation(keyframes, {
       duration: this.animationDuration,
@@ -209,13 +224,13 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
         continue;
       }
       const lastSnap = lastSnaps.get(sharedName)!;
-      console.log(sharedName, firstSnap.element === lastSnap.element, firstSnap, lastSnap);
+      // console.log(sharedName, firstSnap.element === lastSnap.element, firstSnap, lastSnap);
       if (firstSnap.element === lastSnap.element) {
-        const sharedElementAnimation = this.__doAni('shared', firstSnap, firstSnap.boudingRect, lastSnap.boudingRect);
+        const sharedElementAnimation = this.__doAni('shared', firstSnap, firstSnap.fromBounding, lastSnap.toBounding(firstSnap.fromBounding));
         animations.push(sharedElementAnimation);
       } else {
-        const oldElementAnimation = this.__doAni('old', firstSnap, firstSnap.boudingRect, lastSnap.boudingRect);
-        const newElementAnimation = this.__doAni('new', lastSnap, firstSnap.boudingRect, lastSnap.boudingRect);
+        const oldElementAnimation = this.__doAni('old', firstSnap, firstSnap.fromBounding, lastSnap.toBounding(firstSnap.fromBounding));
+        const newElementAnimation = this.__doAni('new', lastSnap, lastSnap.fromBounding, firstSnap.toBounding(lastSnap.fromBounding));
         animations.push(oldElementAnimation, newElementAnimation);
       }
     }
