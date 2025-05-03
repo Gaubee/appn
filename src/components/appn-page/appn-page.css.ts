@@ -19,7 +19,7 @@ export const appnPageStyles = [
       padding: 0;
       width: fit-content;
       height: fit-content;
-      overflow: hidden;
+      /* overflow: hidden; */
 
       color: var(--color-canvas-text);
       background-color: var(--color-canvas);

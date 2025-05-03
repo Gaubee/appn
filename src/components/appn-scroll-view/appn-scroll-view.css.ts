@@ -28,9 +28,8 @@ export const appnScrollViewStyle = css`
 
   :host {
     display: block;
-    overflow: auto;
     position: relative;
-    overflow: scroll;
+    overflow: var(--appn-scroll-view-overflow, scroll);
     scroll-behavior: smooth;
     container-type: size;
     container-type: size scroll-state;

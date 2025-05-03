@@ -3,7 +3,7 @@ import {customElement, property, query, state} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {sharedElements} from '../../shim/shared-element.native';
 import {fixedElementSharedAbleContentsStyle} from './appn-shared-contents-helper';
-import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsStyle} from './appn-shared-contents-types';
+import type {CommonSharedAbleContentsElement, CommonSharedElementSnap} from './appn-shared-contents-types';
 import {appnSharedStyle} from './appn-shared-contents.css';
 
 @customElement('appn-shared-contents')
@@ -44,7 +44,7 @@ export class AppnSharedContentsElement extends LitElement implements CommonShare
     }
     return ani;
   }
-  getSharedStyle(): CommonSharedAbleContentsStyle {
+  getSnap(): CommonSharedElementSnap {
     return {
       ...fixedElementSharedAbleContentsStyle(this),
       baseStyle: {

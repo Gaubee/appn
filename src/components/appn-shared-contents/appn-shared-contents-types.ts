@@ -5,10 +5,13 @@ export interface CommonSharedAbleContentsElement extends HTMLElement {
   sharedOldStyle: string | undefined | null;
   sharedNewStyle: string | undefined | null;
   createSharedAnimation(...args: Parameters<HTMLElement['animate']>): Animation;
-  getSharedStyle(): CommonSharedAbleContentsStyle;
+  getSnap(): CommonSharedElementSnap;
 }
-export interface CommonSharedAbleContentsStyle {
+export interface CommonSharedElementSnap {
+  element: CommonSharedAbleContentsElement;
   fromBounding: DOMRect;
-  toBounding: (fromBounding: DOMRect) => DOMRect;
+  toTranslate(toSnap: CommonSharedElementSnap, mode: CommonSharedAbleContentsMode): `${number}px ${number}px`; //{x: number; y: number};
+  // toBounding: (fromBounding: DOMRect) => DOMRect;
   baseStyle?: Properties;
 }
+export type CommonSharedAbleContentsMode = 'new' | 'old' | 'shared';

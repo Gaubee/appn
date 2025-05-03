@@ -13,7 +13,7 @@ import '../appn-icon/appn-icon';
 import '../appn-link/appn-link';
 import {appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';
 import {staticElementSharedAbleContentsStyle} from '../appn-shared-contents/appn-shared-contents-helper';
-import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsStyle} from '../appn-shared-contents/appn-shared-contents-types';
+import type {CommonSharedAbleContentsElement, CommonSharedElementSnap} from '../appn-shared-contents/appn-shared-contents-types';
 import '../css-starting-style/css-starting-style';
 import {createPreNavs} from './appn-top-bar-context';
 import {appnNavBackStyle, appnNavTitleStyle, appnTopBarStyle} from './appn-top-bar.css';
@@ -142,7 +142,7 @@ export class AppnNavBackTextElement extends LitElement implements CommonSharedAb
     }
     return ani;
   }
-  getSharedStyle(): CommonSharedAbleContentsStyle {
+  getSnap(): CommonSharedElementSnap {
     return staticElementSharedAbleContentsStyle(this);
   }
 
@@ -193,7 +193,7 @@ export class AppnNavTitleElement extends LitElement implements CommonSharedAbleC
   accessor sharedOldStyle: string | null | undefined;
   @property({type: String, reflect: true, attribute: true})
   accessor sharedNewStyle: string | null | undefined;
-  getSharedStyle(): CommonSharedAbleContentsStyle {
+  getSnap(): CommonSharedElementSnap {
     return staticElementSharedAbleContentsStyle(this);
   }
   private __ani: Animation | null = null;

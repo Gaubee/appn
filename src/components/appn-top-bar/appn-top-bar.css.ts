@@ -26,14 +26,14 @@ export const appnTopBarStyle = css`
     flex: 1;
     flex-shrink: 0;
 
-    overflow: hidden;
+    /* overflow: hidden; */
     text-overflow: ellipsis;
     text-align: center;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: var(--title-clamp, 1);
     height: 2em;
-    line-height: 1.8;
+    /* line-height: 1.8; */
   }
 
   .actions {

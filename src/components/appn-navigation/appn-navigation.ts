@@ -17,7 +17,7 @@ import {safeProperty} from '../../utils/safe-property';
 import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
 import {AppnPageElement, type AppnSwapbackInfo} from '../appn-page/appn-page';
 import {fixedElementSharedAbleContentsStyle} from '../appn-shared-contents/appn-shared-contents-helper';
-import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsStyle} from '../appn-shared-contents/appn-shared-contents-types';
+import type {CommonSharedAbleContentsElement, CommonSharedElementSnap} from '../appn-shared-contents/appn-shared-contents-types';
 import '../css-starting-style/css-starting-style';
 import {appnNavigationContext, appnNavigationHistoryEntryContext} from './appn-navigation-context';
 import type {AppnNavigation} from './appn-navigation-types';
@@ -492,7 +492,7 @@ export class AppnNavigationHistoryEntryElement extends LitElement implements Com
     }
     return ani;
   }
-  getSharedStyle(): CommonSharedAbleContentsStyle {
+  getSnap(): CommonSharedElementSnap {
     return fixedElementSharedAbleContentsStyle(this);
   }
   //#endregion

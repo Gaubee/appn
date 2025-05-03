@@ -1,6 +1,6 @@
 import {iter_first_not_null} from '@gaubee/util';
 import {match} from 'ts-pattern';
-import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsStyle} from '../../components/appn-shared-contents/appn-shared-contents-types';
+import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsMode, CommonSharedElementSnap} from '../../components/appn-shared-contents/appn-shared-contents-types';
 import {abort_throw_if_aborted} from '../abort.polyfill';
 import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
 import {set_intersection} from '../set.polyfill';
@@ -15,10 +15,8 @@ import type {
 } from '../shared-element.native/types';
 import {SharedElementTransitionPonyfill} from './shared-element-transition';
 
-type SharedElementSnapMap = Map<string, SharedElementSnap>;
-interface SharedElementSnap extends CommonSharedAbleContentsStyle {
-  element: CommonSharedAbleContentsElement;
-}
+type SharedElementSnapMap = Map<string, CommonSharedElementSnap>;
+
 export class SharedElementPonyfill extends SharedElementBaseImpl implements SharedElementBase {
   override getSelector(type?: SharedElementSelectorType, name?: string) {
     return '.' + super.getSelector(type, name).replace(/[:(*)]/g, (c) => `\\${c}`);
@@ -122,28 +120,24 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     const sharedElementMap = lifecycle === 'first' ? fromSharedElementMap : destSharedElementMap;
     for (const sharedName of sharedElementNames) {
       const {element} = sharedElementMap.get(sharedName)!;
-      const style = element.getSharedStyle();
-      snaps.set(sharedName, {
-        element,
-        ...style,
-      });
+      const snap = element.getSnap();
+      snaps.set(sharedName, snap);
     }
     /// 最后，将前后两个page也加进来
     for (const navEntryNode of [fromNavEntryNode, destNavEntryNode]) {
       if (navEntryNode.sharedName) {
-        snaps.set(navEntryNode.sharedName, {
-          element: navEntryNode,
-          ...navEntryNode.getSharedStyle(),
-        });
+        snaps.set(navEntryNode.sharedName, navEntryNode.getSnap());
       }
     }
     return snaps;
   }
 
-  private __doAni(mode: 'new' | 'old' | 'shared', snap: SharedElementSnap, fromBoudingRect: DOMRect, toBoudingRect: DOMRect) {
+  private __doAni(mode: CommonSharedAbleContentsMode, snap: CommonSharedElementSnap, firstSnap: CommonSharedElementSnap, lastSnap: CommonSharedElementSnap) {
+    const fromBoudingRect = firstSnap.fromBounding;
+    const toBoudingRect = lastSnap.fromBounding;
     const element = snap.element;
-    if(/appn-nav/i.test(snap.element.tagName)){
-      debugger
+    if (/appn-nav/i.test(snap.element.tagName)) {
+      debugger;
     }
 
     const baseStyle = {
@@ -154,24 +148,26 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     const keyframes: Keyframe[] = [
       {
         ...baseStyle,
+        translate: snap.toTranslate(firstSnap, mode),
         ...match(mode)
           .with('old', () => {
             return {
-              translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
+              // translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
               scale: '1 1',
               opacity: 1,
             };
           })
           .with('new', () => {
             return {
-              translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
-              scale: `${toBoudingRect.width / fromBoudingRect.width} ${toBoudingRect.height / fromBoudingRect.height}`,
+              // translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
+              scale: `${fromBoudingRect.width / toBoudingRect.width} ${fromBoudingRect.height / toBoudingRect.height}`,
+              // translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
               opacity: 0,
             };
           })
           .with('shared', () => {
             return {
-              translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
+              // translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
               scale: `${fromBoudingRect.width / toBoudingRect.width} ${fromBoudingRect.height / toBoudingRect.height}`,
             };
           })
@@ -181,24 +177,27 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
       },
       {
         ...baseStyle,
+        translate: snap.toTranslate(lastSnap, mode),
         ...match(mode)
           .with('old', () => {
             return {
-              translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
+              // translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
               scale: `${toBoudingRect.width / fromBoudingRect.width} ${toBoudingRect.height / fromBoudingRect.height}`,
               opacity: 0,
             };
           })
           .with('new', () => {
             return {
-              translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
+              // translate: `${fromBoudingRect.left}px ${fromBoudingRect.top}px`,
               scale: '1 1',
+              // translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
+              // scale: `${fromBoudingRect.width / toBoudingRect.width} ${fromBoudingRect.height / toBoudingRect.height}`,
               opacity: 1,
             };
           })
           .with('shared', () => {
             return {
-              translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
+              // translate: `${toBoudingRect.left}px ${toBoudingRect.top}px`,
               scale: `${fromBoudingRect.width / toBoudingRect.width} ${fromBoudingRect.height / toBoudingRect.height}`,
             };
           })
@@ -226,11 +225,11 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
       const lastSnap = lastSnaps.get(sharedName)!;
       // console.log(sharedName, firstSnap.element === lastSnap.element, firstSnap, lastSnap);
       if (firstSnap.element === lastSnap.element) {
-        const sharedElementAnimation = this.__doAni('shared', firstSnap, firstSnap.fromBounding, lastSnap.toBounding(firstSnap.fromBounding));
+        const sharedElementAnimation = this.__doAni('shared', firstSnap, firstSnap, lastSnap);
         animations.push(sharedElementAnimation);
       } else {
-        const oldElementAnimation = this.__doAni('old', firstSnap, firstSnap.fromBounding, lastSnap.toBounding(firstSnap.fromBounding));
-        const newElementAnimation = this.__doAni('new', lastSnap, lastSnap.fromBounding, firstSnap.toBounding(lastSnap.fromBounding));
+        const oldElementAnimation = this.__doAni('old', firstSnap, firstSnap, lastSnap);
+        const newElementAnimation = this.__doAni('new', lastSnap, firstSnap, lastSnap);
         animations.push(oldElementAnimation, newElementAnimation);
       }
     }
