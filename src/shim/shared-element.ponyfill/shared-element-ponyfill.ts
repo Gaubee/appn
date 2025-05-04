@@ -120,13 +120,13 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     const sharedElementMap = lifecycle === 'first' ? fromSharedElementMap : destSharedElementMap;
     for (const sharedName of sharedElementNames) {
       const {element} = sharedElementMap.get(sharedName)!;
-      const snap = element.getSnap();
+      const snap = element.sharedController.getSharedSnap();
       snaps.set(sharedName, snap);
     }
     /// 最后，将前后两个page也加进来
     for (const navEntryNode of [fromNavEntryNode, destNavEntryNode]) {
       if (navEntryNode.sharedName) {
-        snaps.set(navEntryNode.sharedName, navEntryNode.getSnap());
+        snaps.set(navEntryNode.sharedName, navEntryNode.sharedController.getSharedSnap());
       }
     }
     return snaps;
@@ -136,9 +136,6 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     const fromBoudingRect = firstSnap.fromBounding;
     const toBoudingRect = lastSnap.fromBounding;
     const element = snap.element;
-    if (/appn-nav/i.test(snap.element.tagName)) {
-      debugger;
-    }
 
     const baseStyle = {
       transformOrigin: 'top left',
@@ -208,7 +205,7 @@ export class SharedElementPonyfill extends SharedElementBaseImpl implements Shar
     ];
     console.log('QAQ keyframes', mode, snap.element, keyframes);
 
-    const elementAnimation = element.createSharedAnimation(keyframes, {
+    const elementAnimation = element.sharedController.createSharedAnimation(keyframes, {
       duration: this.animationDuration,
       easing: this.animationEasing,
     });

@@ -16,8 +16,8 @@ import {baseurl_relative_parts} from '../../utils/relative-path';
 import {safeProperty} from '../../utils/safe-property';
 import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
 import {AppnPageElement, type AppnSwapbackInfo} from '../appn-page/appn-page';
-import {fixedElementSharedAbleContentsStyle} from '../appn-shared-contents/appn-shared-contents-helper';
-import type {CommonSharedAbleContentsElement, CommonSharedElementSnap} from '../appn-shared-contents/appn-shared-contents-types';
+import {StaticSharedController} from '../appn-shared-contents/appn-shared-contents-helper';
+import type {CommonSharedAbleContentsElement} from '../appn-shared-contents/appn-shared-contents-types';
 import '../css-starting-style/css-starting-style';
 import {appnNavigationContext, appnNavigationHistoryEntryContext} from './appn-navigation-context';
 import type {AppnNavigation} from './appn-navigation-types';
@@ -94,8 +94,8 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     return match_entries;
   }
 
-  async findFirstEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null) {
-    const entries = await this.entries();
+  findFirstEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null) {
+    const entries = this.entries();
     const startIndex = fromEntry ? entries.indexOf(fromEntry) : 0;
     for (let i = startIndex > 0 ? startIndex : 0; i < entries.length; i++) {
       const entry = entries[i];
@@ -107,8 +107,8 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     return null;
   }
 
-  async findLastEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null) {
-    const entries = await this.entries();
+  findLastEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null) {
+    const entries = this.entries();
     const startIndex = fromEntry ? entries.indexOf(fromEntry) : entries.length - 1;
     for (let i = startIndex < entries.length ? startIndex : entries.length - 1; i >= 0; i--) {
       const entry = entries[i];
@@ -468,33 +468,13 @@ export class AppnNavigationHistoryEntryElement extends LitElement implements Com
 
   @property({type: String, reflect: true, attribute: true})
   accessor sharedName: string | undefined | null;
+  readonly sharedController: StaticSharedController = new StaticSharedController(this);
 
   #sharedIndex = 0;
   get sharedIndex() {
     return this.#sharedIndex;
   }
 
-  @property({type: String, reflect: true, attribute: true})
-  accessor sharedOldStyle: string | undefined | null;
-  @property({type: String, reflect: true, attribute: true})
-  accessor sharedNewStyle: string | undefined | null;
-
-  private accessor __sharedAnimation: Animation | null = null;
-
-  createSharedAnimation(...args: Parameters<HTMLElement['animate']>) {
-    let ani = this.__sharedAnimation;
-    if (!ani) {
-      ani = this.animate(...args);
-      this.__sharedAnimation = ani;
-      ani.finished.finally(() => {
-        this.__sharedAnimation = null;
-      });
-    }
-    return ani;
-  }
-  getSnap(): CommonSharedElementSnap {
-    return fixedElementSharedAbleContentsStyle(this);
-  }
   //#endregion
 
   override render() {

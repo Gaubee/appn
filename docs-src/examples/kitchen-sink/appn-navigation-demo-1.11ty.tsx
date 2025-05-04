@@ -1,5 +1,6 @@
 import React from 'react';
 import type {} from '../../../src/react';
+import {escapeHTML} from 'es-escape-html';
 
 export default class Page {
   data() {
@@ -63,9 +64,15 @@ export default class Page {
                 </appn-header>
                 <appn-view>
                   <appn-link mode="back">go back</appn-link>
-                  <appn-link to="#page1">go to page1</appn-link>
-                  <appn-link to="#page2">go to page2</appn-link>
-                  <appn-link to="#page3">go to page3</appn-link>
+                  <appn-link to="#page1">
+                    go to&nbsp;<appn-nav-text>page1</appn-nav-text>
+                  </appn-link>
+                  <appn-link to="#page2">
+                    go to&nbsp;<appn-nav-text>page2</appn-nav-text>
+                  </appn-link>
+                  <appn-link to="#page3">
+                    go to&nbsp;<appn-nav-text>page3</appn-nav-text>
+                  </appn-link>
                   <appn-link mode="replace" to="#page1">
                     replace as page1
                   </appn-link>

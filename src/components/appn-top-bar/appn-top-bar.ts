@@ -5,28 +5,20 @@
  */
 
 import {consume} from '@lit/context';
-import {LitElement, html, type PropertyValues} from 'lit';
+import {html, LitElement, type PropertyValues} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 import {when} from 'lit/directives/when.js';
 import {sharedElements} from '../../shim/shared-element.native/shared-element-common';
 import '../appn-icon/appn-icon';
 import '../appn-link/appn-link';
 import {appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';
-import {staticElementSharedAbleContentsStyle} from '../appn-shared-contents/appn-shared-contents-helper';
-import type {CommonSharedAbleContentsElement, CommonSharedElementSnap} from '../appn-shared-contents/appn-shared-contents-types';
+import {FixedSharedController} from '../appn-shared-contents/appn-shared-contents-helper';
+import type {CommonSharedAbleContentsElement} from '../appn-shared-contents/appn-shared-contents-types';
 import '../css-starting-style/css-starting-style';
 import {createPreNavs} from './appn-top-bar-context';
 import {appnNavBackStyle, appnNavTitleStyle, appnTopBarStyle} from './appn-top-bar.css';
+import { get_navigation_entry_page_title, set_navigation_entry_page_title } from './appn-top-bar-helper';
 
-const navigation_entry_page_title_wm = new WeakMap<NavigationHistoryEntry, string>();
-const get_navigation_entry_page_title = (entry: NavigationHistoryEntry | null | undefined) => {
-  return entry ? navigation_entry_page_title_wm.get(entry) : undefined;
-};
-const set_navigation_entry_page_title = (entry: NavigationHistoryEntry | null | undefined, page_title: string) => {
-  if (entry) {
-    navigation_entry_page_title_wm.set(entry, page_title);
-  }
-};
 const css = String.raw;
 
 /**
@@ -120,52 +112,6 @@ export class AppnNavBackElement extends LitElement {
   }
 }
 //#endregion
-//#region appn-nav-back-text
-@customElement('appn-nav-back-text')
-export class AppnNavBackTextElement extends LitElement implements CommonSharedAbleContentsElement {
-  accessor #preNavs = createPreNavs(this);
-  @property({type: String, reflect: true, attribute: true})
-  accessor sharedName: string | null | undefined;
-  @property({type: String, reflect: true, attribute: true})
-  accessor sharedOldStyle: string | null | undefined;
-  @property({type: String, reflect: true, attribute: true})
-  accessor sharedNewStyle: string | null | undefined;
-  private __ani: Animation | null = null;
-  createSharedAnimation(...args: Parameters<HTMLElement['animate']>): Animation {
-    let ani = this.__ani;
-    if (!ani) {
-      ani = this.animate(...args);
-      this.__ani = ani;
-      ani.finished.finally(() => {
-        this.__ani = null;
-      });
-    }
-    return ani;
-  }
-  getSnap(): CommonSharedElementSnap {
-    return staticElementSharedAbleContentsStyle(this);
-  }
-
-  protected override render() {
-    const navEntry = this.#preNavs.navigationEntry;
-    sharedElements.set(this, (this.sharedName = navEntry && `appn-title-${navEntry.index - 1}`), {
-      both: `width:fit-content;`,
-    });
-
-    return html`<slot>
-      ${this.#preNavs.task.render({
-        complete: (preNavEntries) => {
-          if (!preNavEntries || preNavEntries.length === 0) {
-            return;
-          }
-          const prePageTitle = get_navigation_entry_page_title(preNavEntries.at(-1));
-          return prePageTitle;
-        },
-      })}
-    </slot>`;
-  }
-}
-//#endregion
 
 //#region appn-nav-title
 
@@ -189,32 +135,14 @@ export class AppnNavTitleElement extends LitElement implements CommonSharedAbleC
 
   @property({type: String, reflect: true, attribute: true})
   accessor sharedName: string | null | undefined;
-  @property({type: String, reflect: true, attribute: true})
-  accessor sharedOldStyle: string | null | undefined;
-  @property({type: String, reflect: true, attribute: true})
-  accessor sharedNewStyle: string | null | undefined;
-  getSnap(): CommonSharedElementSnap {
-    return staticElementSharedAbleContentsStyle(this);
-  }
-  private __ani: Animation | null = null;
-  createSharedAnimation(...args: Parameters<HTMLElement['animate']>): Animation {
-    let ani = this.__ani;
-    if (!ani) {
-      ani = this.animate(...args);
-      this.__ani = ani;
-      ani.finished.finally(() => {
-        this.__ani = null;
-      });
-    }
-    return ani;
-  }
+  readonly sharedController: FixedSharedController = new FixedSharedController(this);
 
   protected override render() {
     const navigationEntry = this.#navigationEntry;
     set_navigation_entry_page_title(navigationEntry, this.pageTitle);
     sharedElements.set(this, (this.sharedName = navigationEntry && `appn-title-${navigationEntry?.index}`));
 
-    return html`<slot>${this.pageTitle}</slot>
+    return html`${this.sharedController.render(html`<slot>${this.pageTitle}</slot>`)}
       <style>
         ${css`
           :host {
@@ -229,7 +157,6 @@ declare global {
   interface HTMLElementTagNameMap {
     'appn-top-bar': AppnTopBarElement;
     'appn-nav-back': AppnNavBackElement;
-    'appn-nav-back-text': AppnNavBackTextElement;
     'appn-nav-title': AppnNavTitleElement;
   }
 }

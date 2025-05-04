@@ -1,15 +1,22 @@
+import {type Func} from '@gaubee/util';
 import {consume} from '@lit/context';
 import {html, LitElement, type PropertyValues} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {cache} from 'lit/directives/cache.js';
 import {ifDefined} from 'lit/directives/if-defined.js';
 import {match} from 'ts-pattern';
+import {sharedElements} from '../../shim/shared-element.native';
 import {eventProperty, type PropertyEventListener} from '../../utils/event-property';
 import {safeProperty} from '../../utils/safe-property';
 import {enumToSafeConverter} from '../../utils/safe-property/enum-to-safe-converter';
 import {appnNavigationContext, appnNavigationHistoryEntryContext} from '../appn-navigation/appn-navigation-context';
 import type {AppnNavigation} from '../appn-navigation/appn-navigation-types';
-import {appnLinkStyle} from './appn-link.css';
+import {FixedSharedController} from '../appn-shared-contents/appn-shared-contents-helper';
+import type {CommonSharedAbleContentsElement} from '../appn-shared-contents/appn-shared-contents-types';
+import {createPreNavs} from '../appn-top-bar/appn-top-bar-context';
+import {get_navigation_entry_page_title} from '../appn-top-bar/appn-top-bar-helper';
+import {appnLinkStyle, appnNavBackTextStyle} from './appn-link.css';
+//#region appn-link
 
 const APP_LINK_MODE_ENUM_VALUES = ['push', 'replace', 'forward', 'back', 'back-or-push', 'forward-or-push'] as const;
 export type AppnLinkMode = (typeof APP_LINK_MODE_ENUM_VALUES)[number];
@@ -80,19 +87,19 @@ export class AppnLinkElement extends LitElement {
       return false;
     };
 
-    await match(this.mode)
+    match(this.mode)
       .with('push', () => {
         if (to_url && !isEquals()) {
           const event = new AppnNavigateEvent({type: 'push', url: to_url, state, info});
           this.dispatchEvent(event);
-          event.applyNavigate(nav, currentEntry);
+          event.applyNavigate(nav, currentEntry, this);
         }
       })
       .with('replace', () => {
         if (to_url && !isEquals()) {
           const event = new AppnNavigateEvent({type: 'replace', url: to_url, state, info});
           this.dispatchEvent(event);
-          event.applyNavigate(nav, currentEntry);
+          event.applyNavigate(nav, currentEntry, this);
         }
       })
       .with('forward', () => {
@@ -101,48 +108,48 @@ export class AppnLinkElement extends LitElement {
         } else if (nav.canGoForward) {
           const event = new AppnNavigateEvent({type: 'forward', info});
           this.dispatchEvent(event);
-          event.applyNavigate(nav, currentEntry);
+          event.applyNavigate(nav, currentEntry, this);
         }
       })
-      .with('back', async () => {
+      .with('back', () => {
         if (to_url || toKey) {
-          const history = await nav.findFirstEntry(toKey ? {key: toKey} : {url: to_url});
+          const history = nav.findFirstEntry(toKey ? {key: toKey} : {url: to_url});
           if (history) {
             const event = new AppnNavigateEvent({type: 'traverse', key: history.key, info});
             this.dispatchEvent(event);
-            event.applyNavigate(nav, currentEntry);
+            event.applyNavigate(nav, currentEntry, this);
           }
         } else if (nav.canGoBack) {
           const event = new AppnNavigateEvent({type: 'back', info});
           this.dispatchEvent(event);
-          event.applyNavigate(nav, currentEntry);
+          event.applyNavigate(nav, currentEntry, this);
         }
       })
-      .with('back-or-push', async () => {
+      .with('back-or-push', () => {
         if (to_url || toKey) {
-          const history = await nav.findLastEntry(toKey ? {key: toKey} : {url: to_url}, this.#navigationEntry);
+          const history = nav.findLastEntry(toKey ? {key: toKey} : {url: to_url}, this.#navigationEntry);
           if (history) {
             const event = new AppnNavigateEvent({type: 'traverse', key: history.key, info});
             this.dispatchEvent(event);
-            event.applyNavigate(nav, currentEntry);
+            event.applyNavigate(nav, currentEntry, this);
           } else if (to_url) {
             const event = new AppnNavigateEvent({type: 'push', url: to_url, state, info});
             this.dispatchEvent(event);
-            event.applyNavigate(nav, currentEntry);
+            event.applyNavigate(nav, currentEntry, this);
           }
         }
       })
-      .with('forward-or-push', async () => {
+      .with('forward-or-push', () => {
         if (to_url || toKey) {
-          const history = await nav.findFirstEntry(toKey ? {key: toKey} : {url: to_url}, this.#navigationEntry);
+          const history = nav.findFirstEntry(toKey ? {key: toKey} : {url: to_url}, this.#navigationEntry);
           if (history) {
             const event = new AppnNavigateEvent({type: 'traverse', key: history.key, info});
             this.dispatchEvent(event);
-            event.applyNavigate(nav, currentEntry);
+            event.applyNavigate(nav, currentEntry, this);
           } else if (to_url) {
             const event = new AppnNavigateEvent({type: 'push', url: to_url, state, info});
             this.dispatchEvent(event);
-            event.applyNavigate(nav, currentEntry);
+            event.applyNavigate(nav, currentEntry, this);
           }
         }
       })
@@ -168,10 +175,13 @@ export class AppnLinkElement extends LitElement {
         .with('button', 'submit', (type) => html`<button part="link button" class="link ${type}" role="link" type="${type}"><slot></slot></button>`)
         .with('a', 'text-button', (type) => html`<a part="link a" class="link ${type}" href="${ifDefined(this.to)}"><slot></slot></a>`)
         .with('contents', () => html`<slot></slot>`)
-        .exhaustive()
+        .exhaustive(),
     );
   }
 }
+//#endregion
+
+//#region AppnNavigateEvent
 
 export namespace AppnNavigateEvent {
   interface DetailBase<T> {
@@ -212,11 +222,28 @@ export class AppnNavigateEvent extends CustomEvent<AppnNavigateEvent.Detail> {
   get result() {
     return this.#result;
   }
-  applyNavigate(nav: AppnNavigation, currentEntry: NavigationHistoryEntry | null | undefined) {
+  applyNavigate(nav: AppnNavigation, currentEntry: NavigationHistoryEntry | null | undefined, host?: AppnLinkElement | null) {
     if (this.defaultPrevented) {
       return;
     }
     const {detail} = this;
+
+    const navText = host?.querySelector('appn-nav-text');
+    let off: Func | undefined;
+
+    if (navText) {
+      const currentIndex = currentEntry?.index ?? -1;
+      navText.sharedName = match(detail)
+        .with({type: 'push'}, () => `appn-title-${currentIndex + 1}`)
+        .with({type: 'replace'}, () => `appn-title-${currentIndex}`)
+        .with({type: 'back'}, () => `appn-title-${currentIndex - 1}`)
+        .with({type: 'traverse'}, (detail) => `appn-title-${nav.findFirstEntry({key: detail.key})?.index ?? -1}`)
+        .with({type: 'forward'}, () => `appn-title-${currentIndex + 1}`)
+        .exhaustive();
+      off = () => {
+        navText.sharedName = null;
+      };
+    }
     const result = match(detail)
       .with({type: 'push'}, (detail) => nav.navigate(detail.url, detail))
       .with({type: 'replace'}, (detail) => nav.navigate(detail.url, {...detail, history: 'replace'}))
@@ -231,13 +258,67 @@ export class AppnNavigateEvent extends CustomEvent<AppnNavigateEvent.Detail> {
         }
       });
     }
+    if (off) {
+      result.finished.then(off);
+    }
 
     this.#result = result;
   }
 }
+//#endregion
+
+//#region appn-nav-back-text
+@customElement('appn-nav-back-text')
+export class AppnNavBackTextElement extends LitElement implements CommonSharedAbleContentsElement {
+  static override styles = appnNavBackTextStyle;
+  accessor #preNavs = createPreNavs(this);
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedName: string | null | undefined;
+  readonly sharedController: FixedSharedController = new FixedSharedController(this);
+  protected override render() {
+    const navEntry = this.#preNavs.navigationEntry;
+    sharedElements.set(this, (this.sharedName = navEntry && `appn-title-${navEntry.index - 1}`), {
+      both: `width:fit-content;`,
+    });
+
+    return this.sharedController.render(
+      html`<slot>
+        ${this.#preNavs.task.render({
+          complete: (preNavEntries) => {
+            if (!preNavEntries || preNavEntries.length === 0) {
+              return;
+            }
+            const prePageTitle = get_navigation_entry_page_title(preNavEntries.at(-1));
+            return prePageTitle;
+          },
+        })}
+      </slot>`,
+    );
+  }
+}
+//#endregion
+
+//#region appn-nav-text
+@customElement('appn-nav-text')
+export class AppnNavTextElement extends LitElement implements CommonSharedAbleContentsElement {
+  static override styles = appnNavBackTextStyle;
+  @property({type: String, reflect: true, attribute: true})
+  accessor sharedName: string | null | undefined;
+  readonly sharedController: FixedSharedController = new FixedSharedController(this);
+  protected override render() {
+    sharedElements.set(this, this.sharedName, {
+      both: `width:fit-content;`,
+    });
+
+    return this.sharedController.render(html`<slot></slot>`);
+  }
+}
+//#endregion
 
 declare global {
   interface HTMLElementTagNameMap {
     'appn-link': AppnLinkElement;
+    'appn-nav-back-text': AppnNavBackTextElement;
+    'appn-nav-text': AppnNavTextElement;
   }
 }

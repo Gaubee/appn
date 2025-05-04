@@ -2,10 +2,11 @@ import type {Properties} from 'csstype';
 
 export interface CommonSharedAbleContentsElement extends HTMLElement {
   sharedName: string | undefined | null;
-  sharedOldStyle: string | undefined | null;
-  sharedNewStyle: string | undefined | null;
+  readonly sharedController: CommonSharedController;
+}
+export interface CommonSharedController {
   createSharedAnimation(...args: Parameters<HTMLElement['animate']>): Animation;
-  getSnap(): CommonSharedElementSnap;
+  getSharedSnap(): CommonSharedElementSnap;
 }
 export interface CommonSharedElementSnap {
   element: CommonSharedAbleContentsElement;

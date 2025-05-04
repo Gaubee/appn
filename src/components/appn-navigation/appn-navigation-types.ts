@@ -1,11 +1,11 @@
 import type {Pattern} from 'ts-pattern';
+import type {NavigationBase} from '../../shim/navigation.native/types';
 import type {AppnNavigationProviderElement} from './appn-navigation';
-import type { NavigationBase } from '../../shim/navigation.native/types';
 export interface AppnNavigation<T extends AppnNavigation<any> = AppnNavigationProviderElement> extends NavigationBase {
   readonly baseURI: string;
 
-  findFirstEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null): Promise<NavigationHistoryEntry | null>;
-  findLastEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null): Promise<NavigationHistoryEntry | null>;
+  findFirstEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null): NavigationHistoryEntry | null;
+  findLastEntry(pattern: Pattern.Pattern<NavigationHistoryEntry>, fromEntry?: NavigationHistoryEntry | null): NavigationHistoryEntry | null;
 
   // Event Handlers (using specific event types is better if available)
   onnavigate: ((this: T, ev: NavigateEvent) => void) | null;

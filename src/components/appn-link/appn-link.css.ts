@@ -1,4 +1,5 @@
 import {css} from 'lit';
+import { appnNavTitleStyle } from '../appn-top-bar/appn-top-bar.css';
 
 CSS.registerProperty({
   name: '--_link-halo-angle',
@@ -14,7 +15,8 @@ export const appnLinkStyle = css`
   .link {
     display: inline-flex;
     flex-direction: row;
-    align-items: baseline;
+    /**这里不好不用baseline，因为会有shared-element，它在shared模式下，baseline没有文字就无法生效 */
+    align-items: center;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
   }
@@ -109,3 +111,6 @@ export const appnLinkStyle = css`
     transition-timing-function: var(--common-enter-ease);
   }
 `;
+
+export const appnNavBackTextStyle = appnNavTitleStyle;
+export const appnNavTextStyle = appnNavTitleStyle;
