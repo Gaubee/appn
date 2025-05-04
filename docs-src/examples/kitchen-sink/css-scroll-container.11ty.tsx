@@ -4,8 +4,7 @@ import {styleText} from './css-scroll-container.css.ts';
 export default class Page {
   data() {
     return {
-      layout: 'example.11ty.ts',
-      tags: 'example',
+      layout: 'root.11ty.ts',
       name: 'css `scroll-state()`',
       description: 'A shadow visual affordance to indicate scroll',
     };

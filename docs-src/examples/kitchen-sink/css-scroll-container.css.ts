@@ -1,6 +1,11 @@
 const css = String.raw;
 export const styleText = [
   css`
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
     @layer support, demo;
 
     @layer support {
@@ -12,12 +17,7 @@ export const styleText = [
         --text-2: light-dark(oklch(20% 5% 250), oklch(80% 5% 250));
       }
       .scroll-container {
-        background: radial-gradient(
-            circle in oklab,
-            var(--surface-2),
-            var(--surface-1)
-          )
-          fixed;
+        background: radial-gradient(circle in oklab, var(--surface-2), var(--surface-1)) fixed;
         color: var(--text-1);
 
         inline-size: 30ch;
@@ -102,26 +102,12 @@ export const styleText = [
             --_scroll-shadow-color-2-opacity 0.5s ease;
 
           /* derive shadow from background */
-          --_scroll-shadow-color-1: oklch(
-            from var(--surface-1) 10% calc(c * 2) h /
-              var(--_scroll-shadow-color-1-opacity)
-          );
-          --_scroll-shadow-color-2: oklch(
-            from var(--surface-1) 10% calc(c * 2) h /
-              var(--_scroll-shadow-color-2-opacity)
-          );
+          --_scroll-shadow-color-1: oklch(from var(--surface-1) 10% calc(c * 2) h / var(--_scroll-shadow-color-1-opacity));
+          --_scroll-shadow-color-2: oklch(from var(--surface-1) 10% calc(c * 2) h / var(--_scroll-shadow-color-2-opacity));
 
           /* define top and bottom gradient shadow effects */
-          --_shadow-top: linear-gradient(
-            to bottom,
-            var(--_scroll-shadow-color-1),
-            #0000 20px
-          );
-          --_shadow-bottom: linear-gradient(
-            to top,
-            var(--_scroll-shadow-color-2),
-            #0000 20px
-          );
+          --_shadow-top: linear-gradient(to bottom, var(--_scroll-shadow-color-1), #0000 20px);
+          --_shadow-bottom: linear-gradient(to top, var(--_scroll-shadow-color-2), #0000 20px);
 
           @media (prefers-color-scheme: dark) {
             --_shadow-color-opacity: 90%;
