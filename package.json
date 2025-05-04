@@ -1,7 +1,6 @@
 {
   "name": "appn",
-  "private": true,
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "A simple web component",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
