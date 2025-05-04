@@ -3,11 +3,11 @@
       <head>
         <meta charset="utf-8" />
         <meta name="description" content="A shadow visual affordance to indicate scroll" />
-        <meta name="keywords" content="Appn, WebComponent, example" />
+        <meta name="keywords" content="Appn, WebComponent" />
         <meta name="author" content="Gaubee, gaubeebangeel@gmail.com" />
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-        <title>Appn Example: css `scroll-state()`</title>
+        <title>undefined</title>
         <link rel="shortcut icon" href="/assets/favicon-BMfT6qdq.ico" />
         
         
@@ -31,61 +31,12 @@
         <link rel="stylesheet" crossorigin href="/assets/index-3IkY5QXo.css">
       </head>
       <body>
-        <header class="bg-ani">
-    <h1>Appn</h1>
-    <h2>
-      A web component library focuses on building a common Webapp navigation
-      standard on the Web.
-    </h2>
-     <style>
-      .nav {
-        margin-top: 2em;
-        padding: 0 2em;
-        border-radius: 2em;
-        backdrop-filter: contrast(0.5) brightness(2);
-        width: fit-content;
-        max-width: 100%;
-      }
-      .nav {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, 180px);
-        justify-content: center;
-        gap: 24px;
-      }
-
-      .nav > a {
-        display: block;
-        flex: 1;
-        font-size: 18px;
-        padding: 16px;
-        text-align: center;
-      }
-    </style>
-    <nav class="nav">
-      <a class="" href="../../">Home</a>
-      <a class="target" href="../">Examples</a>
-      <a class="" href="../../api/">API</a>
-      <a class="" href="../../install/">Install</a>
-    </nav>
-  </header>
-      <div id="main-wrapper">
-        <main>
-    <style>
-      
-        section.examples {
-          min-width: 600px;
-        }
-        section.examples > .content {
-          padding-inline: 16px;
-          padding-block-end: 16px;
-        }
-      
-    </style>
-    <section class="examples">
-      
-      <div class="content">
-        <h2>Example: css `scroll-state()`</h2>
         <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
     @layer support, demo;
 
     @layer support {
@@ -97,12 +48,7 @@
         --text-2: light-dark(oklch(20% 5% 250), oklch(80% 5% 250));
       }
       .scroll-container {
-        background: radial-gradient(
-            circle in oklab,
-            var(--surface-2),
-            var(--surface-1)
-          )
-          fixed;
+        background: radial-gradient(circle in oklab, var(--surface-2), var(--surface-1)) fixed;
         color: var(--text-1);
 
         inline-size: 30ch;
@@ -186,26 +132,12 @@
             --_scroll-shadow-color-2-opacity 0.5s ease;
 
           /* derive shadow from background */
-          --_scroll-shadow-color-1: oklch(
-            from var(--surface-1) 10% calc(c * 2) h /
-              var(--_scroll-shadow-color-1-opacity)
-          );
-          --_scroll-shadow-color-2: oklch(
-            from var(--surface-1) 10% calc(c * 2) h /
-              var(--_scroll-shadow-color-2-opacity)
-          );
+          --_scroll-shadow-color-1: oklch(from var(--surface-1) 10% calc(c * 2) h / var(--_scroll-shadow-color-1-opacity));
+          --_scroll-shadow-color-2: oklch(from var(--surface-1) 10% calc(c * 2) h / var(--_scroll-shadow-color-2-opacity));
 
           /* define top and bottom gradient shadow effects */
-          --_shadow-top: linear-gradient(
-            to bottom,
-            var(--_scroll-shadow-color-1),
-            #0000 20px
-          );
-          --_shadow-bottom: linear-gradient(
-            to top,
-            var(--_scroll-shadow-color-2),
-            #0000 20px
-          );
+          --_shadow-top: linear-gradient(to bottom, var(--_scroll-shadow-color-1), #0000 20px);
+          --_shadow-bottom: linear-gradient(to top, var(--_scroll-shadow-color-2), #0000 20px);
 
           @media (prefers-color-scheme: dark) {
             --_shadow-color-opacity: 90%;
@@ -264,16 +196,5 @@
       }
     }
   </style><section id="example-1"><h3>scroll-state(scrollable: top)</h3><div class="scroll-container"><div class="scroller"><div class="item">One</div><div class="item">Two</div><div class="item">Three</div><div class="item">Four</div><div class="item">Five</div><div class="item">Six</div><div class="item">Seven</div><div class="item">Eight</div><div class="item">Nine</div><div class="item">Ten</div></div></div></section><section id="example-2"><h3>scroll-state(stuck: top)</h3><div class="scroll-container"><div class="stuck-top"><div class="content">Stuck Top!!</div></div><div class="scroller"><div class="item">Item 1/0</div><div class="item">Item 1/1</div><div class="item">Item 1/2</div><div class="item">Item 1/3</div><div class="item">Item 1/4</div><div class="item">Item 1/5</div><div class="item">Item 2/0</div><div class="item">Item 2/1</div><div class="item">Item 2/2</div><div class="item">Item 2/3</div><div class="item">Item 2/4</div><div class="item">Item 2/5</div><div class="item">Item 3/0</div><div class="item">Item 3/1</div><div class="item">Item 3/2</div><div class="item">Item 3/3</div><div class="item">Item 3/4</div><div class="item">Item 3/5</div></div><div class="stuck-bottom"><div class="content">Stuck Bottom!!</div></div></div></section>
-      </div>
-    </section>
-  </main>
-      </div>
-      <footer class="bg-ani">
-    <ul>
-      <li>
-        <a target="_blank" href="https://github.com/gaubee/appn">Github</a>
-      </li>
-    </ul>
-  </footer>
       </body>
     </html>
