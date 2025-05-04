@@ -16,8 +16,8 @@ import {FixedSharedController} from '../appn-shared-contents/appn-shared-content
 import type {CommonSharedAbleContentsElement} from '../appn-shared-contents/appn-shared-contents-types';
 import '../css-starting-style/css-starting-style';
 import {createPreNavs} from './appn-top-bar-context';
+import {get_navigation_entry_page_title, set_navigation_entry_page_title} from './appn-top-bar-helper';
 import {appnNavBackStyle, appnNavTitleStyle, appnTopBarStyle} from './appn-top-bar.css';
-import { get_navigation_entry_page_title, set_navigation_entry_page_title } from './appn-top-bar-helper';
 
 const css = String.raw;
 
@@ -140,7 +140,9 @@ export class AppnNavTitleElement extends LitElement implements CommonSharedAbleC
   protected override render() {
     const navigationEntry = this.#navigationEntry;
     set_navigation_entry_page_title(navigationEntry, this.pageTitle);
-    sharedElements.set(this, (this.sharedName = navigationEntry && `appn-title-${navigationEntry?.index}`));
+    sharedElements.set(this, (this.sharedName = navigationEntry && `appn-title-${navigationEntry?.index}`), {
+      both: `width:fit-content;`,
+    });
 
     return html`${this.sharedController.render(html`<slot>${this.pageTitle}</slot>`)}
       <style>

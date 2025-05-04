@@ -32,6 +32,7 @@ const STYLES = [
   {key: 'old', alias: 'both', prop: 'sharedElementOldStyle'},
   {key: 'imagePair', alias: null, prop: 'sharedElementImagePairStyle'},
 ] as const;
+const styles_key_prop = new Map(STYLES.map((style) => [style.key, style.prop]));
 class SharedElementRegistry {
   set(element: HTMLElement, sharedName: string | null = null, styles?: Partial<SharedElementStyles> & {both?: string}): void {
     if (sharedName == null) {
@@ -57,7 +58,10 @@ class SharedElementRegistry {
       return {
         name: sharedName,
         get styles() {
-          return (styles ??= obj_lazy_builder<SharedElementStyles>({}, (_target, prop) => dataset[prop] ?? ''));
+          return (styles ??= obj_lazy_builder<SharedElementStyles>({}, (_target, key) => {
+            const prop = styles_key_prop.get(key);
+            return prop ? (dataset[prop] ?? '') : '';
+          }));
         },
       };
     }
