@@ -123,8 +123,5 @@ export const appnNavigationHistoryEntryStyle = [
     :host([data-tense='past']:not([data-shared-element-lifecycle])) {
       display: none;
     }
-    :host([data-shared-element-lifecycle]) {
-      --appn-scroll-view-overflow: visible;
-    }
   `,
 ];
