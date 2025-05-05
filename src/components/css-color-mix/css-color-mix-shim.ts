@@ -1,21 +1,6 @@
 import {func_lazy, map_get_or_put, math_clamp} from '@gaubee/util';
 import {match, P} from 'ts-pattern';
-
-export type CssColorMix = {
-  /**
-   * 混合两个颜色，返回混合后的颜色
-   * @param colorSpace 色彩空间
-   * @param c1 第一个颜色
-   * @param c2 第二个颜色
-   * @param p1 第一个颜色的权重，取值范围 0-1，默认为 0.5
-   * @param p2 第二个颜色的权重，取值范围 0-1，默认为 0.5
-   * @returns 混合后的颜色
-   */
-  (colorSpace: ColorSpace, c1: string, c2: string, p1?: number | null, p2?: number | null): string;
-};
-export const calc_color_mix_native: CssColorMix = (colorSpace, c1, c2, p1, p2) => {
-  return `color-mix(in ${colorSpace}, ${c1} ${p1 != null ? p1 * 100 + '%' : ''}, ${c2} ${p2 != null ? p2 * 100 + '%' : ''})`;
-};
+import type {CssColorMix} from './css-color-mix-type';
 
 export const calc_color_mix_shim_rgba: CssColorMix = func_lazy(() => {
   const canvas_cache = new Map<string, CanvasRenderingContext2D>();
@@ -84,7 +69,6 @@ import {
   modeXyz65,
   useMode,
 } from 'culori/fn';
-import type {ColorSpace} from './css-color-mix';
 export const calc_color_mix_shim: CssColorMix = func_lazy(() => {
   useMode(modeRgb);
   useMode(modeLrgb);
@@ -154,5 +138,3 @@ export const calc_color_mix_shim: CssColorMix = func_lazy(() => {
     return formatCss(mixedColorObject);
   };
 });
-
-export const calc_color_mix = CSS.supports('color:color-mix(in srgb,#000,#000)') ? calc_color_mix_native : calc_color_mix_shim;

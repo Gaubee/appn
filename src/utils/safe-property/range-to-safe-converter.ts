@@ -2,7 +2,7 @@
  * Configuration options for the rangeToSafeConverter function.
  */
 
-import Big from 'big.js';
+import {decimal, decimal_div, decimal_mul, decimal_round, decimal_toNumber, DecimalRoundingMode} from '@gaubee/shim';
 import {match, P} from 'ts-pattern';
 import type {SafeReflectPropertyConverter} from '../safe-property';
 
@@ -92,6 +92,9 @@ const _rangeToSafeConverter = (min: number, max: number, options: RangeToSafeCon
    * Pre-computes the stepping function based on normalizedStep to avoid repeated pattern matching
    */
   type SteppingFunction = (value: number) => number | undefined | null;
+  const decimal_calc = (value: number, unit: number, rm: DecimalRoundingMode) => {
+    return decimal_toNumber(decimal_mul(decimal_round(decimal_div(decimal(value), unit), 0, rm), unit));
+  };
   /**
    * 使用 js 进行数学会导致精度问题，比如 Math.floor(0.3/0.1) = 2.9999999999999996 => Math.floor(2.9999999999999996) = 2
    * 因此这里统一通过引入 big.js 来计算，避免出现精度问题
@@ -99,13 +102,13 @@ const _rangeToSafeConverter = (min: number, max: number, options: RangeToSafeCon
   const applyStepping = match<typeof normalizedStep, SteppingFunction>(normalizedStep)
     .with(P.nullish, () => (value) => value)
     .with({type: 'exact'}, {type: 'mode', mode: 'floor'}, ({unit}) => (value) => {
-      return new Big(value).div(unit).round(0, Big.roundDown).times(unit).toNumber();
+      return decimal_calc(value, unit, DecimalRoundingMode.ROUND_DOWN);
     })
     .with({type: 'mode', mode: 'ceil'}, ({unit}) => (value) => {
-      return new Big(value).div(unit).round(0, Big.roundUp).times(unit).toNumber();
+      return decimal_calc(value, unit, DecimalRoundingMode.ROUND_UP);
     })
     .with({type: 'mode', mode: 'round'}, ({unit}) => (value) => {
-      return new Big(value).div(unit).round(0, Big.roundHalfUp).times(unit).toNumber();
+      return decimal_calc(value, unit, DecimalRoundingMode.ROUND_HALF_UP);
     })
     .with({type: 'function'}, ({fn}) => (value) => {
       return fn(value, ctx);

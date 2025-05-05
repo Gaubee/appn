@@ -1,4 +1,6 @@
-import 'urlpattern-polyfill';
+if (typeof URLPattern !== 'function') {
+  await import('urlpattern-polyfill');
+}
 
 import {iter_map_not_null, math_clamp} from '@gaubee/util';
 import {ContextProvider, provide} from '@lit/context';

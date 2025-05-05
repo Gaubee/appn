@@ -1,10 +1,17 @@
+import {func_remember} from '@gaubee/util';
 import type {Property} from 'csstype';
 import {css, LitElement, type PropertyValues} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
+import {getFlags} from '../../utils/env';
 import {safeProperty} from '../../utils/safe-property';
 import {percentageToSafeConverter} from '../../utils/safe-property/range-to-safe-converter';
-import {calc_color_mix, calc_color_mix_native, calc_color_mix_shim} from './css-color-mix.shim';
-export type ColorSpace = 'srgb' | 'srgb-linear' | 'display-p3' | 'a98-rgb' | 'prophoto-rgb' | 'rec2020' | 'lab' | 'hwb' | 'oklab' | 'xyz' | 'xyz-d50' | 'xyz-d65' | (string & {});
+import {calc_color_mix_native} from './css-color-mix-native';
+import {caniuseColorMix, type ColorSpace} from './css-color-mix-type';
+export * from './css-color-mix-type';
+
+const loadCalcColorMixShim = func_remember(() => import('./css-color-mix-shim').then((r) => r.calc_color_mix_shim));
+
+const calc_color_mix = getFlags().has('color-mix-shim') || !caniuseColorMix ? await loadCalcColorMixShim() : calc_color_mix_native;
 
 @customElement('css-color-mix')
 export class CssColorMixElement extends LitElement {
@@ -14,7 +21,7 @@ export class CssColorMixElement extends LitElement {
   };
   static readonly calcColorMix = calc_color_mix;
   static readonly calcColorMixNative = calc_color_mix_native;
-  static readonly calcColorMixShim = calc_color_mix_shim;
+  static readonly loadCalcColorMixShim = loadCalcColorMixShim;
   static override styles = css`
     :host {
       display: none;
