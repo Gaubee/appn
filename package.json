@@ -29,11 +29,11 @@
     "analyze:watch": "cem analyze --litelement --globs \"src/**/*.ts\" --watch",
     "serve": "wds --watch",
     "serve:prod": "MODE=prod pnpm serve",
-    "test": "pnpm test:dev && pnpm test:prod",
-    "test:dev": "wtr --files dist/**/*.test.js",
-    "test:watch": "pnpm test:dev --watch",
-    "test:prod": "MODE=prod pnpm test:dev",
-    "test:prod:watch": "MODE=prod pnpm test:dev --watch",
+    "test": "pnpm wtr:dev && pnpm wtr:prod",
+    "wtr:dev": "wtr --files dist/**/*.test.js",
+    "wtr:watch": "pnpm wtr:dev --watch",
+    "wtr:prod": "pnpm wtr:dev --prod",
+    "wtr:prod:watch": "pnpm wtr:prod --watch",
     "checksize": "rollup -c ; cat my-element.bundled.js | gzip -9 | wc -c ; rm my-element.bundled.js"
   },
   "keywords": [
@@ -52,7 +52,7 @@
   "dependencies": {
     "@gaubee/util": "^0.30.2",
     "@gaubee/web": "^0.8.0",
-    "@gaubee/shim": "^0.1.1",
+    "@gaubee/shim": "^0.2.0",
     "@lit/context": "^1.1.5",
     "@lit/react": "^1.0.7",
     "@lit/task": "^1.0.2",

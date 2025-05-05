@@ -341,7 +341,6 @@ suite('enumToSafeConverter', () => {
     // Check init warning specifically here
     test('Initialization check for object string collision', () => {
       if (String(objB) === String(objC)) {
-        debugger;
         enumToSafeConverter<Obj>(values);
         sinon.assert.calledWithExactly(warnStub, sinon.match(/Warning: Multiple values map to the same case-insensitive attribute string: \[object object\]/)); // Or specific string if toString is overridden
       } else {

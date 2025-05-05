@@ -7,7 +7,7 @@
 import {MyElement} from '../my-element';
 
 import {fixture, assert} from '@open-wc/testing';
-import {html} from 'lit/static-html.js';
+import {html} from 'lit';
 
 suite('my-element', () => {
   test('is defined', () => {

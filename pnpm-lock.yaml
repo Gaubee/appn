@@ -35,8 +35,8 @@ importers:
   .:
     dependencies:
       '@gaubee/shim':
-        specifier: ^0.1.1
-        version: 0.1.1(@gaubee/util@0.30.2)
+        specifier: ^0.2.0
+        version: 0.2.0(@gaubee/util@0.30.2)
       '@gaubee/util':
         specifier: ^0.30.2
         version: 0.30.2
@@ -1008,8 +1008,8 @@ packages:
   '@esm-bundle/chai@4.3.4-fix.0':
     resolution: {integrity: sha512-26SKdM4uvDWlY8/OOOxSB1AqQWeBosCX3wRYUZO7enTAj03CtVxIiCimYVG2WpULcyV51qapK4qTovwkUr5Mlw==}
 
-  '@gaubee/shim@0.1.1':
-    resolution: {integrity: sha512-3jsfl36Bs7YcxW0svxdyGvvCGlTGpR7N2Pkb1wHJLmWZP5nmcYZUrK5fp7iJueX6R2kgj7oAmdV6PgTcInYsbw==}
+  '@gaubee/shim@0.2.0':
+    resolution: {integrity: sha512-E8hfGFggimGax5JhiosIyYU9r6941y2uPdRVDSWz743boRiuMDEJMdq0gc4vnI+yXeh9/opOgza7TSyB+N+fRw==}
     peerDependencies:
       '@gaubee/util': '*'
 
@@ -4906,7 +4906,7 @@ snapshots:
     dependencies:
       '@types/chai': 5.2.1
 
-  '@gaubee/shim@0.1.1(@gaubee/util@0.30.2)':
+  '@gaubee/shim@0.2.0(@gaubee/util@0.30.2)':
     dependencies:
       '@gaubee/util': 0.30.2
       tslib: 2.8.1
