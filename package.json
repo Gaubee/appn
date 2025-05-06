@@ -52,7 +52,7 @@
   "dependencies": {
     "@gaubee/util": "^0.30.2",
     "@gaubee/web": "^0.8.0",
-    "@gaubee/tc39-shim": "^0.3.3",
+    "@gaubee/tc39-shim": "^0.3.7",
     "@lit/context": "^1.1.5",
     "@lit/react": "^1.0.7",
     "@lit/task": "^1.0.2",
@@ -126,7 +126,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "rimraf": "^6.0.1",
-    "rollup": "^4.40.1",
+    "rollup": "^4.40.2",
     "rollup-plugin-minify-template-literals": "^1.1.7",
     "rollup-plugin-summary": "^3.0.1",
     "sinon": "^20.0.0",
