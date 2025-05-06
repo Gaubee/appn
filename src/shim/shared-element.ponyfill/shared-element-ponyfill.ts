@@ -1,9 +1,9 @@
+import {set_intersection} from '@gaubee/tc39-shim';
 import {iter_first_not_null} from '@gaubee/util';
 import {match} from 'ts-pattern';
 import type {CommonSharedAbleContentsElement, CommonSharedAbleContentsMode, CommonSharedElementSnap} from '../../components/appn-shared-contents/appn-shared-contents-types';
 import {abort_throw_if_aborted} from '../abort.polyfill';
 import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
-import {set_intersection} from '../set.polyfill';
 import {SharedElementBaseImpl, sharedElementLifecycle, sharedElements, type QueryOptions} from '../shared-element.native';
 import type {
   SharedElementAnimation,

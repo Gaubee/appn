@@ -2,7 +2,7 @@
  * Configuration options for the rangeToSafeConverter function.
  */
 
-import {decimal, decimal_div, decimal_mul, decimal_round, decimal_toNumber, DecimalRoundingMode} from '@gaubee/shim';
+import {decimal, decimal_div, decimal_mul, decimal_round, decimal_toNumber, DecimalRoundingMode} from '@gaubee/tc39-shim';
 import {match, P} from 'ts-pattern';
 import type {SafeReflectPropertyConverter} from '../safe-property';
 

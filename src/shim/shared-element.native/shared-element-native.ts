@@ -1,6 +1,6 @@
+import {set_intersection} from '@gaubee/tc39-shim';
 import {CssSheetArray} from '@gaubee/web';
 import {match} from 'ts-pattern';
-import {set_intersection} from '../set.polyfill';
 import {SharedElementBaseImpl, sharedElementLifecycle, sharedElements} from './shared-element-common';
 import {
   type SharedElementAnimation,
