@@ -1,1 +1,0 @@
-const i=t=>f(t,()=>{}),f=(t,r)=>{for(const o of t)return o;return r()},l=(t,r)=>{const o=[];let e=0;if(r)for(const n of t){const s=r(n,e++,t);s!=null&&o.push(s)}else for(const n of t)n!=null&&o.push(n);return o},u=(t,r)=>{let o=0;if(r)for(const e of t){const n=r(e,o++,t);if(n!=null)return n}else for(const e of t)if(e!=null)return e};export{l as a,u as b,i};
