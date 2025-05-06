@@ -52,7 +52,7 @@
   "dependencies": {
     "@gaubee/util": "^0.30.2",
     "@gaubee/web": "^0.8.0",
-    "@gaubee/tc39-shim": "^0.3.2",
+    "@gaubee/tc39-shim": "^0.3.3",
     "@lit/context": "^1.1.5",
     "@lit/react": "^1.0.7",
     "@lit/task": "^1.0.2",
