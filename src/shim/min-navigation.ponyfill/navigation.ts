@@ -1,7 +1,7 @@
+import {promise_with_resolvers} from '@gaubee/tc39-shim';
 import {match, P} from 'ts-pattern';
-import type {NavigationBase} from '../navigation.native/types';
-import {promise_with_resolvers} from '../promise-with-resolvers.polyfill';
 import {uuid_reg} from '../../utils/uuid-helper';
+import type {NavigationBase} from '../navigation.native/types';
 import {MinNavigateEvent} from './navigate-event';
 import {MinNavigationCurrentEntryChangeEvent} from './navigation-current-entry-change-event';
 import {MinNavigationDestination} from './navigation-destination';
@@ -32,7 +32,7 @@ export class MinNavigation extends EventTarget implements NavigationBase {
               return;
             }
             this.traverseTo(toEntryInit.key, {info: event});
-          }
+          },
         )
         .otherwise(() => {});
     });
@@ -53,7 +53,7 @@ export class MinNavigation extends EventTarget implements NavigationBase {
         state: options.state,
       },
       '',
-      location.href
+      location.href,
     );
     const newEntryInit = history.state as MinNavigationEntryInit;
     // 如果成功，再绑定到 currentEntryInit 中
@@ -167,7 +167,7 @@ export class MinNavigation extends EventTarget implements NavigationBase {
     fromEntry: MinNavigationHistoryEntry,
     toEntryOrInit: MinNavigationHistoryEntry | MinNavigationEntryInit,
     navigationType: NavigationType,
-    info: unknown
+    info: unknown,
   ) {
     let toEntryInit: MinNavigationEntryInit;
     let _toEntry: MinNavigationHistoryEntry | undefined;
@@ -246,7 +246,7 @@ export class MinNavigation extends EventTarget implements NavigationBase {
         new MinNavigationCurrentEntryChangeEvent({
           navigationType,
           from: fromEntry,
-        })
+        }),
       );
       (async () => {
         try {
@@ -283,7 +283,7 @@ class MinNavigationResults {
   constructor() {
     const abort = this.abort;
     abort.signal.addEventListener('abort', () => {
-      const reason = abort.signal.reason
+      const reason = abort.signal.reason;
       this.committer.reject(reason);
       this.finisher.reject(reason);
     });

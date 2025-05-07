@@ -1,6 +1,6 @@
+import {addScrollendEventListener, removeScrollendEventListener} from '@gaubee/w3c-shim';
 import {noChange, type ElementPart, type ReactiveController, type ReactiveControllerHost} from 'lit';
-import {Directive, type PartInfo, PartType, directive} from 'lit/directive.js';
-import {addScrollendEventListener, removeScrollendEventListener} from '../shim/scrollend.ponyfill';
+import {Directive, PartType, directive, type PartInfo} from 'lit/directive.js';
 
 class ScrollDirective extends Directive {
   constructor(partInfo: PartInfo) {

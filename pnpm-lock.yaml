@@ -35,14 +35,17 @@ importers:
   .:
     dependencies:
       '@gaubee/tc39-shim':
-        specifier: ^0.3.7
-        version: 0.3.7(@gaubee/util@0.30.2)
+        specifier: ^0.4.2
+        version: 0.4.2(@gaubee/util@0.30.3)
       '@gaubee/util':
-        specifier: ^0.30.2
-        version: 0.30.2
+        specifier: ^0.30.3
+        version: 0.30.3
+      '@gaubee/w3c-shim':
+        specifier: ^0.1.1
+        version: 0.1.1(@gaubee/util@0.30.3)
       '@gaubee/web':
         specifier: ^0.8.0
-        version: 0.8.0(@gaubee/util@0.30.2)
+        version: 0.8.0(@gaubee/util@0.30.3)
       '@lit/context':
         specifier: ^1.1.5
         version: 1.1.5
@@ -1008,13 +1011,18 @@ packages:
   '@esm-bundle/chai@4.3.4-fix.0':
     resolution: {integrity: sha512-26SKdM4uvDWlY8/OOOxSB1AqQWeBosCX3wRYUZO7enTAj03CtVxIiCimYVG2WpULcyV51qapK4qTovwkUr5Mlw==}
 
-  '@gaubee/tc39-shim@0.3.7':
-    resolution: {integrity: sha512-XQHhUTGcKXHnJ87h7IKJApdJeVamh6BJmgGFvtJcCg/TwXJYYHBjroaN92+TbpSwZBf7w83e1v6TwfgPELkk3w==}
+  '@gaubee/tc39-shim@0.4.2':
+    resolution: {integrity: sha512-t5nW/Sfk9xpAdjE0u3z2PHpjLFy6QuBeCFucTo2gljeCeDwAHWN8m3FfkYBSIStObZJ8hYLNb/XREPkOqNJeTQ==}
     peerDependencies:
       '@gaubee/util': '*'
 
-  '@gaubee/util@0.30.2':
-    resolution: {integrity: sha512-n9Q4PJ5EVdhtpil15mbWCDwHr/ZH/e4db5Q1vgbLRvmpyU2hIE3XRxFisUy9yy8OGcF9nQT1zJ6Ub2N0xWu1Lw==}
+  '@gaubee/util@0.30.3':
+    resolution: {integrity: sha512-4VR9KPEftLUMZzFmGR5gg6qe6ijlJW7mBAi3QMdpijNnFtNYBvZrPBnz3k8SHMhD67to8rU0qMA8628fNDCELw==}
+
+  '@gaubee/w3c-shim@0.1.1':
+    resolution: {integrity: sha512-ZO9aewViWS5l3v5VavAcyQohqYjbyYloA46A9KT4sVfCPiQtKmdZ7M1apVJ36e7+Q4peqxWF06gCd0Q0QzwEDg==}
+    peerDependencies:
+      '@gaubee/util': '*'
 
   '@gaubee/web@0.8.0':
     resolution: {integrity: sha512-WYf0CC7HPgHWO3k3k/2nDRay/VkieDwQB04XVsFFatlVwI6xGSdZmIY6/+wHbHpxOvtZ/0yrgpq8TL2UB/lBHw==}
@@ -4906,18 +4914,23 @@ snapshots:
     dependencies:
       '@types/chai': 5.2.1
 
-  '@gaubee/tc39-shim@0.3.7(@gaubee/util@0.30.2)':
+  '@gaubee/tc39-shim@0.4.2(@gaubee/util@0.30.3)':
     dependencies:
-      '@gaubee/util': 0.30.2
+      '@gaubee/util': 0.30.3
       tslib: 2.8.1
 
-  '@gaubee/util@0.30.2':
+  '@gaubee/util@0.30.3':
     dependencies:
       tslib: 2.8.1
 
-  '@gaubee/web@0.8.0(@gaubee/util@0.30.2)':
+  '@gaubee/w3c-shim@0.1.1(@gaubee/util@0.30.3)':
     dependencies:
-      '@gaubee/util': 0.30.2
+      '@gaubee/util': 0.30.3
+      tslib: 2.8.1
+
+  '@gaubee/web@0.8.0(@gaubee/util@0.30.3)':
+    dependencies:
+      '@gaubee/util': 0.30.3
       tslib: 2.8.1
 
   '@github/catalyst@1.7.0': {}

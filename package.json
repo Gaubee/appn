@@ -50,9 +50,10 @@
     "dist"
   ],
   "dependencies": {
-    "@gaubee/util": "^0.30.2",
+    "@gaubee/util": "^0.30.3",
     "@gaubee/web": "^0.8.0",
-    "@gaubee/tc39-shim": "^0.3.7",
+    "@gaubee/tc39-shim": "^0.4.2",
+    "@gaubee/w3c-shim": "^0.1.1",
     "@lit/context": "^1.1.5",
     "@lit/react": "^1.0.7",
     "@lit/task": "^1.0.2",
