@@ -27,14 +27,11 @@ export const appnTopBarStyle = css`
     flex: 1;
     flex-shrink: 0;
 
-    /* overflow: hidden; */
-    text-overflow: ellipsis;
-    text-align: center;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: var(--title-clamp, 1);
-    height: 2em;
-    /* line-height: 1.8; */
+    min-height: 2em;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .actions {
@@ -131,4 +128,3 @@ export const appnNavTitleStyle = [
   `,
   fixedSharedInnerStyle,
 ];
-

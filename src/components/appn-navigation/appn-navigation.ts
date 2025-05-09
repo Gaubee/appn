@@ -393,14 +393,20 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         const oldNavHistoryEntryNode = allNavHistoryEntryNodeMap.get(navEntry.index);
         let navHistoryEntryNode: AppnNavigationHistoryEntryElement;
 
+        const routeMode = match(templateElement.dataset.routeMode)
+          .with('dynamic' as const, 'static' as const, (v) => v)
+          .otherwise(() => 'static' as const);
+
         if (oldNavHistoryEntryNode) {
           navHistoryEntryNode = oldNavHistoryEntryNode;
           oldNavHistoryEntryNode.navigationEntry = navEntry;
           if (oldNavHistoryEntryNode.templateEle !== templateElement) {
             oldNavHistoryEntryNode.templateEle = templateElement;
             oldNavHistoryEntryNode.hash = relative_parts.hash;
-            oldNavHistoryEntryNode.innerHTML = '';
-            oldNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
+            if (routeMode === 'static') {
+              oldNavHistoryEntryNode.innerHTML = '';
+              oldNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
+            }
           }
         } else {
           const newNavHistoryEntryNode = new AppnNavigationHistoryEntryElement();
@@ -411,7 +417,9 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           newNavHistoryEntryNode.pathname = relative_parts.pathname;
           newNavHistoryEntryNode.search = relative_parts.search;
           newNavHistoryEntryNode.hash = relative_parts.hash;
-          newNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
+          if (routeMode === 'static') {
+            newNavHistoryEntryNode.appendChild(templateElement.content.cloneNode(true));
+          }
         }
 
         navHistoryEntryNode.navigationType = context.navigationType ?? null; // 它可能一开始的时候就在 future 里，所以 navigationType 默认为 null
@@ -422,6 +430,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           await this.appendChild(navHistoryEntryNode);
         }
 
+        templateElement.dispatchEvent(new AppnRouteActivatedEvent(navEntry, navHistoryEntryNode));
         return navHistoryEntryNode;
       }
     }
@@ -544,6 +553,15 @@ export class AppnNavigationHistoryEntryElement extends LitElement implements Com
 }
 
 //#endregion
+
+export class AppnRouteActivatedEvent extends CustomEvent<{
+  navEntry: NavigationHistoryEntry;
+  navHistoryEntryNode: AppnNavigationHistoryEntryElement;
+}> {
+  constructor(navEntry: NavigationHistoryEntry, navHistoryEntryNode: AppnNavigationHistoryEntryElement) {
+    super('appnrouteactivated', {detail: {navEntry, navHistoryEntryNode}});
+  }
+}
 
 //#region global-type
 declare global {

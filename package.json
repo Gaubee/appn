@@ -4,6 +4,10 @@
   "description": "A simple web component",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./react": "./dist/react.js"
+  },
   "sideEffects": true,
   "type": "module",
   "scripts": {
@@ -34,7 +38,8 @@
     "wtr:watch": "pnpm wtr:dev --watch",
     "wtr:prod": "pnpm wtr:dev --prod",
     "wtr:prod:watch": "pnpm wtr:prod --watch",
-    "checksize": "rollup -c ; cat my-element.bundled.js | gzip -9 | wc -c ; rm my-element.bundled.js"
+    "checksize": "rollup -c ; cat my-element.bundled.js | gzip -9 | wc -c ; rm my-element.bundled.js",
+    "demo-1:serve": "cd example/react-app-1 && pnpm serve"
   },
   "keywords": [
     "web-components",

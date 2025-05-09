@@ -1,0 +1,13 @@
+{
+  "name": "react-app-1",
+  "private": true,
+  "scripts": {
+    "serve": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.5",
+    "appn": "workspace:*",
+    "tailwindcss": "^4.1.5"
+  }
+}

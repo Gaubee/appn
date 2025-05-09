@@ -32,6 +32,12 @@ pnpm 11ty:watch # gen /docs/ (depends on /bundle/ and /custom-elements.json)
 
 The site will usually be served at http://localhost:8000.
 
+```bash
+pnpm demo-1:serve # run react app demo
+```
+
+The demo will usually be served at http://localhost:8200.
+
 ## Linting
 
 To lint the project run:

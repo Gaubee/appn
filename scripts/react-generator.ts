@@ -158,7 +158,9 @@ declare global {
       ${intrinsicElementsCode}
     }
   }
-}`;
+}
+export * from './react-dom'  
+`;
 generateCode = [
   //
   [...importCodes.values()],
@@ -180,7 +182,7 @@ export const doWrite = async (format: boolean) => {
           parser: 'typescript',
           ...(prettierconfig as any),
         })
-      : generateCode
+      : generateCode,
   );
 };
 
