@@ -1,20 +1,15 @@
-import {AppnCommonTitleHeader, AppnLink, AppnNavText, AppnPage, AppnView} from 'appn/react';
+import {AppnCommonTitleHeader, AppnPage, AppnView} from 'appn/react';
 import React from 'react';
+import {GoToHome, GoToPage1, GoToPage2} from './link';
 export default function () {
   return (
     <AppnPage>
       <AppnCommonTitleHeader pageTitle="Page 2"></AppnCommonTitleHeader>
 
       <AppnView className="bg-amber-100">
-        <AppnLink to="#">
-          <AppnNavText>Home</AppnNavText>
-        </AppnLink>
-        <AppnLink to="#page1">
-          <AppnNavText>Page 1</AppnNavText>
-        </AppnLink>
-        <AppnLink to="#page2">
-          <AppnNavText>Page 2</AppnNavText>
-        </AppnLink>
+        <GoToHome></GoToHome>
+        <GoToPage1></GoToPage1>
+        <GoToPage2></GoToPage2>
       </AppnView>
     </AppnPage>
   );

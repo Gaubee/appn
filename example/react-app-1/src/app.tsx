@@ -11,7 +11,8 @@ export const App = () => {
           <AppRoute hash="" loader={() => import('./home.page')}></AppRoute>
           <AppRoute hash="#page1" loader={() => import('./page1.page')}></AppRoute>
           <AppRoute hash="#page2" loader={() => import('./page2.page')}></AppRoute>
-        </AppnNavigationProvider>
+          <AppRoute hash="*" loader={() => import('./home.page')}></AppRoute>
+          </AppnNavigationProvider>
       </AppnThemeProvider>
     </React.StrictMode>
   );
