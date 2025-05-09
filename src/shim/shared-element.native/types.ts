@@ -67,6 +67,7 @@ export interface SharedElementBase {
   // ): void;
 }
 export interface SharedElementTransitionContext {
+  signal: AbortSignal;
   /** 导航的起始页 */
   from: NavigationHistoryEntry | null;
   /** 导航的目标页 */

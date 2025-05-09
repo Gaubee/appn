@@ -18,7 +18,7 @@ import {get_navigation_entry_page_title} from '../appn-top-bar/appn-top-bar-help
 import {appnLinkStyle, appnNavBackTextStyle} from './appn-link.css';
 //#region appn-link
 
-const APP_LINK_MODE_ENUM_VALUES = ['push', 'replace', 'forward', 'back', 'back-or-push', 'forward-or-push'] as const;
+const APP_LINK_MODE_ENUM_VALUES = ['auto', 'push', 'replace', 'forward', 'back', 'back-or-push', 'forward-or-push'] as const;
 export type AppnLinkMode = (typeof APP_LINK_MODE_ENUM_VALUES)[number];
 
 const APP_LINK_TYPE_ENUM_VALUES = ['button', 'submit', 'a', 'text-button', 'contents'] as const;
@@ -52,7 +52,7 @@ export class AppnLinkElement extends LitElement {
   @property({type: Object, attribute: true, reflect: true})
   accessor state: object | null = null;
   @safeProperty(enumToSafeConverter(APP_LINK_MODE_ENUM_VALUES))
-  accessor mode: AppnLinkMode = 'push';
+  accessor mode: AppnLinkMode = 'auto';
 
   @safeProperty(enumToSafeConverter(APP_LINK_ACTION_TYPE_ENUM_VALUES))
   accessor actionType: AppnLinkActionType = 'click';
@@ -88,6 +88,17 @@ export class AppnLinkElement extends LitElement {
     };
 
     match(this.mode)
+      .with('auto', () => {
+        if (to_url && !isEquals()) {
+          /// 如果正在导航中，点击新的导航链接，就会中断当前的导航任务。
+          /// 默认情况下，这个导航任务仍然会被加入到 entries 中
+          /// auto 模式则是会使用 replace 模式，直接做替换。
+          const type = AppnNavigateEvent.navigating.size > 0 ? 'replace' : 'push';
+          const event = new AppnNavigateEvent({type: type, url: to_url, state, info});
+          this.dispatchEvent(event);
+          event.applyNavigate(nav, currentEntry, this);
+        }
+      })
       .with('push', () => {
         if (to_url && !isEquals()) {
           const event = new AppnNavigateEvent({type: 'push', url: to_url, state, info});
@@ -222,6 +233,7 @@ export class AppnNavigateEvent extends CustomEvent<AppnNavigateEvent.Detail> {
   get result() {
     return this.#result;
   }
+  static navigating = new Set<AppnNavigateEvent>();
   applyNavigate(nav: AppnNavigation, currentEntry: NavigationHistoryEntry | null | undefined, host?: AppnLinkElement | null) {
     if (this.defaultPrevented) {
       return;
@@ -244,6 +256,7 @@ export class AppnNavigateEvent extends CustomEvent<AppnNavigateEvent.Detail> {
         navText.sharedName = null;
       };
     }
+    AppnNavigateEvent.navigating.add(this);
     const result = match(detail)
       .with({type: 'push'}, (detail) => nav.navigate(detail.url, detail))
       .with({type: 'replace'}, (detail) => nav.navigate(detail.url, {...detail, history: 'replace'}))
@@ -258,9 +271,14 @@ export class AppnNavigateEvent extends CustomEvent<AppnNavigateEvent.Detail> {
         }
       });
     }
-    if (off) {
-      result.finished.then(off);
-    }
+    result.finished
+      .finally(() => {
+        off?.();
+        AppnNavigateEvent.navigating.delete(this);
+      })
+      .catch(() => {
+        /** ignore catch error, maybe aborted */
+      });
 
     this.#result = result;
   }

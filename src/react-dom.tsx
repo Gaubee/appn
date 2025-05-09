@@ -1,4 +1,4 @@
-import {abort_signal_race, map_get_or_put, type PromiseMaybe} from '@gaubee/util';
+import {abort_signal_merge, abort_signal_race, func_remember, map_get_or_put, type PromiseMaybe} from '@gaubee/util';
 import React, {type FC} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import type {AppnNavigationHistoryEntryElement, AppnRouteActivatedEvent} from './components/appn-navigation/appn-navigation';
@@ -14,24 +14,26 @@ type RouteLoader =
 
 const childrenBuilder = new WeakMap<RouteLoader, () => Promise<React.ReactElement>>();
 const getLoadChildren = (loader: RouteLoader) => {
-  const loadChildren = map_get_or_put(childrenBuilder, loader, () => async () => {
-    let children: React.ReactElement;
-    if (!React.isValidElement(loader)) {
-      const loadChildren = await loader();
-      if (React.isValidElement(loadChildren)) {
-        children = loadChildren;
-      } else if (typeof loadChildren === 'function') {
-        children = loadChildren();
-      } else if ('default' in loadChildren) {
-        children = loadChildren.default();
+  const loadChildren = map_get_or_put(childrenBuilder, loader, () =>
+    func_remember(async () => {
+      let children: React.ReactElement;
+      if (!React.isValidElement(loader)) {
+        const loadChildren = await loader();
+        if (React.isValidElement(loadChildren)) {
+          children = loadChildren;
+        } else if (typeof loadChildren === 'function') {
+          children = loadChildren();
+        } else if ('default' in loadChildren) {
+          children = loadChildren.default();
+        } else {
+          throw new Error('unknown children type');
+        }
       } else {
-        throw new Error('unknown children type');
+        children = loader;
       }
-    } else {
-      children = loader;
-    }
-    return children;
-  });
+      return children;
+    }),
+  );
   return loadChildren;
 };
 export const useAppnRoute = (loader: RouteLoader) =>
@@ -40,18 +42,24 @@ export const useAppnRoute = (loader: RouteLoader) =>
     const onAppnRouteactivated = ((event: AppnRouteActivatedEvent) => {
       event.intercept({
         async handler() {
-          console.log(event.detail.navEntry.index, event.detail.navHistoryEntryNode);
-          const navHistoryEntryNode = event.detail.navHistoryEntryNode;
+          const navHistoryEntryNode = event.navHistoryEntryNode;
           // map_delete_and_get(installedAppnRouteActivated, navHistoryEntryNode)?.unmount();
           const root = map_get_or_put(installedAppnRouteActivated, navHistoryEntryNode, () => {
             const root = createRoot(navHistoryEntryNode);
             return root;
           });
           const loadChildren = getLoadChildren(loader);
-          root.render(await abort_signal_race(aborter.signal, loadChildren()));
+
+          const children = await abort_signal_race(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            abort_signal_merge(event.signal, aborter.signal)!,
+            loadChildren(),
+          );
+          root.render(children);
         },
       });
     }) as EventListenerOrEventListenerObject;
+
     ele?.addEventListener('appnrouteactivated', onAppnRouteactivated);
     return () => {
       aborter.abort();

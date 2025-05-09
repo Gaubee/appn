@@ -78,6 +78,8 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       const fromEntry = this.currentEntry;
       event.intercept({
         handler: () => {
+          this.__pre_signal_controller?.abort();
+          this.__pre_signal_controller = undefined;
           return this.__effectRoutes(fromEntry, event);
         },
       });
@@ -209,7 +211,15 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
   /**
    * 将 NavigationHistoryEntry[] 映射到元素里
    */
-  private __effectRoutes = async (fromEntry: NavigationHistoryEntry | null, event?: NavigateEvent) => {
+  private __effectRoutes = async (fromEntry: NavigationHistoryEntry | null, event_or_signal: NavigateEvent | AbortSignal) => {
+    let event: NavigateEvent | undefined;
+    let signal: AbortSignal;
+    if (event_or_signal instanceof NavigateEvent) {
+      event = event_or_signal;
+      signal = event.signal;
+    } else {
+      signal = event_or_signal;
+    }
     /**
      * 所有`<appn-nabigation-history-entry>`元素索引
      */
@@ -241,6 +251,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           allEntries,
           currentEntry: fromEntry,
           navigationType: undefined,
+          signal: signal,
         });
         if (ele) {
           unuseEntryNodes.delete(ele);
@@ -271,6 +282,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
             allEntries,
             currentEntry,
             navigationType: event.navigationType,
+            signal: signal,
           });
           if (ele) {
             unuseEntryNodes.delete(ele);
@@ -342,6 +354,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
         finish: () => effectRoutes('finish'),
       },
       {
+        signal,
         from: fromEntry,
         /** 不要用 event.destination
          * 在push模式下，它是“空”的（index=-1）
@@ -360,6 +373,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
       allEntries: NavigationHistoryEntry[];
       currentEntry: NavigationHistoryEntry | null;
       navigationType?: NavigationTypeString;
+      signal: AbortSignal;
     },
   ): Promise<AppnNavigationHistoryEntryElement | undefined> => {
     const current_url = navEntry.url;
@@ -430,7 +444,7 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           await this.appendChild(navHistoryEntryNode);
         }
 
-        const routeEvent = new AppnRouteActivatedEvent(navEntry, navHistoryEntryNode);
+        const routeEvent = new AppnRouteActivatedEvent(navEntry, navHistoryEntryNode, context.signal);
         templateElement.dispatchEvent(routeEvent);
         await routeEvent.__runHandler();
 
@@ -439,13 +453,20 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
     }
     return;
   };
+
+  private __pre_signal_controller?: AbortController;
+  private __effectSlotChange = () => {
+    this.__pre_signal_controller?.abort();
+    const ac = (this.__pre_signal_controller = new AbortController());
+    this.__effectRoutes(this.currentEntry, ac.signal);
+  };
   //#endregion
 
   override render() {
     return this.__html;
   }
   private __html = cache(html`
-    <slot name="router" @slotchange=${() => this.__effectRoutes(this.currentEntry)}></slot>
+    <slot name="router" @slotchange=${this.__effectSlotChange}></slot>
     <slot></slot>
     <css-starting-style
       slotted=""
@@ -557,12 +578,13 @@ export class AppnNavigationHistoryEntryElement extends LitElement implements Com
 
 //#endregion
 
-export class AppnRouteActivatedEvent extends CustomEvent<{
-  navEntry: NavigationHistoryEntry;
-  navHistoryEntryNode: AppnNavigationHistoryEntryElement;
-}> {
-  constructor(navEntry: NavigationHistoryEntry, navHistoryEntryNode: AppnNavigationHistoryEntryElement) {
-    super('appnrouteactivated', {detail: {navEntry, navHistoryEntryNode}});
+export class AppnRouteActivatedEvent extends Event {
+  constructor(
+    readonly navEntry: NavigationHistoryEntry,
+    readonly navHistoryEntryNode: AppnNavigationHistoryEntryElement,
+    readonly signal: AbortSignal,
+  ) {
+    super('appnrouteactivated');
   }
   async __runHandler() {
     const handler = this.#handler;

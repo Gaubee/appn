@@ -1,6 +1,7 @@
 import {set_intersection} from '@gaubee/tc39-shim';
 import {CssSheetArray} from '@gaubee/web';
 import {match} from 'ts-pattern';
+import {abort_throw_if_aborted} from '../abort.polyfill';
 import {SharedElementBaseImpl, sharedElementLifecycle, sharedElements} from './shared-element-common';
 import {
   type SharedElementAnimation,
@@ -21,16 +22,22 @@ export class SharedElement extends SharedElementBaseImpl implements SharedElemen
   }
 
   async startTransition(_scopeElement: HTMLElement, callbacks: SharedElementLifecycleCallbacks, context: SharedElementTransitionContext): Promise<void> {
+    const try_abort = () => abort_throw_if_aborted(context.signal);
     try {
       await callbacks?.first?.();
+      try_abort();
       this.__effectPagesSharedElement('first', context);
       const transition = document.startViewTransition(async () => {
         await callbacks.last?.();
+        try_abort();
         this.__effectPagesSharedElement('last', context);
       });
       await callbacks?.start?.(transition);
+      try_abort();
       await transition.finished;
+      try_abort();
       await callbacks.finish?.(transition);
+      try_abort();
     } finally {
       this.__effectPagesSharedElement('finish', context);
     }
