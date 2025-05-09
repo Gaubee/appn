@@ -41,35 +41,15 @@ export const useAppnRoute = (loader: RouteLoader) =>
         return root;
       });
 
-      // root.render(loadChildren());
-      root.render(loadChildren());
-      // root.unmount();
-      // root.render(
-      //   (() => {
-      //     const [isPending, startTransition] = useTransition();
-      //     const [content, setContent] = useState<React.ReactNode>(null);
-      //     startTransition(async () => {
-      //       if (!React.isValidElement(children)) {
-      //         const loadChildren = await children();
-      //         if (React.isValidElement(loadChildren)) {
-      //           children = loadChildren;
-      //         } else if (typeof loadChildren === 'function') {
-      //           children = loadChildren();
-      //         } else if ('default' in loadChildren) {
-      //           children = loadChildren.default();
-      //         } else {
-      //           throw new Error('unknown children type');
-      //         }
-      //       }
-      //       setContent(children);
-      //     });
-      //     return isPending ? <dialog open>Loading...</dialog> : content;
-      //   })(),
-      // );
+      root.render(await loadChildren());
     };
     const onAppnRouteactivated = ((event: AppnRouteActivatedEvent) => {
-      console.log(event.detail.navEntry.index, event.detail.navHistoryEntryNode);
-      render(event);
+      event.intercept({
+        async handler() {
+          console.log(event.detail.navEntry.index, event.detail.navHistoryEntryNode);
+          await render(event);
+        },
+      });
     }) as EventListenerOrEventListenerObject;
     ele?.addEventListener('appnrouteactivated', onAppnRouteactivated);
     return () => {

@@ -430,7 +430,10 @@ export class AppnNavigationProviderElement extends LitElement implements AppnNav
           await this.appendChild(navHistoryEntryNode);
         }
 
-        templateElement.dispatchEvent(new AppnRouteActivatedEvent(navEntry, navHistoryEntryNode));
+        const routeEvent = new AppnRouteActivatedEvent(navEntry, navHistoryEntryNode);
+        templateElement.dispatchEvent(routeEvent);
+        await routeEvent.__runHandler();
+
         return navHistoryEntryNode;
       }
     }
@@ -560,6 +563,19 @@ export class AppnRouteActivatedEvent extends CustomEvent<{
 }> {
   constructor(navEntry: NavigationHistoryEntry, navHistoryEntryNode: AppnNavigationHistoryEntryElement) {
     super('appnrouteactivated', {detail: {navEntry, navHistoryEntryNode}});
+  }
+  async __runHandler() {
+    const handler = this.#handler;
+    if (typeof handler === 'function') {
+      await handler.call(this);
+    }
+  }
+  #handler?: () => Promise<void>;
+  intercept(options?: NavigationInterceptOptions) {
+    if (!options) {
+      return;
+    }
+    this.#handler = options.handler;
   }
 }
 
