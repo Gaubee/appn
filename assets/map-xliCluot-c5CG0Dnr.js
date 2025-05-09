@@ -1,0 +1,1 @@
+import"./_dnt.polyfills--JVbbcbr-CSw9Ua_j.js";const _=(t,e,s)=>{let l;return t.has(e)?l=t.get(e):(l=s(e,t),t.set(e,l)),l},a=(t,e)=>{let s;return t.has(e)&&(s=t.get(e),t.delete(e)),s};export{a,_ as m};

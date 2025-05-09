@@ -1,0 +1,1 @@
+import"./_dnt.polyfills--JVbbcbr-CSw9Ua_j.js";const i=Promise.withResolvers.bind(Promise),t=function(){let e,s;return{promise:new this((o,r)=>{e=o,s=r}),resolve:e,reject:s}}.bind(Promise),n="withResolvers"in Promise,h=n?i:t;export{h as p};
