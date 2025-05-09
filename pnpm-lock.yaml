@@ -67,6 +67,9 @@ importers:
       culori:
         specifier: ^4.0.1
         version: 4.0.1
+      defu:
+        specifier: ^6.1.4
+        version: 6.1.4
       idb:
         specifier: ^8.0.2
         version: 8.0.2(patch_hash=e6f7074a60cf86f8841e4981d3f0e71207a01e5b686a59ffaafca701fa876cee)
@@ -79,9 +82,6 @@ importers:
       signal-utils:
         specifier: ^0.21.1
         version: 0.21.1(signal-polyfill@0.2.2)
-      ts-deepmerge:
-        specifier: ^7.0.3
-        version: 7.0.3
       ts-pattern:
         specifier: ^5.7.0
         version: 5.7.0
@@ -2186,6 +2186,9 @@ packages:
     resolution: {integrity: sha512-Ds09qNh8yw3khSjiJjiUInaGX9xlqZDY7JVryGxdxV7NPeuqQfplOpQ66yJFZut3jLa5zOwkXw1g9EI2uKh4Og==}
     engines: {node: '>=8'}
 
+  defu@6.1.4:
+    resolution: {integrity: sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==}
+
   degenerator@5.0.1:
     resolution: {integrity: sha512-TllpMR/t0M5sqCXfj85i4XaAzxmS5tVA16dqvdkMwGmzI+dXLXnw3J+3Vdv7VKw+ThlTMboK6i9rnZ6Nntj5CQ==}
     engines: {node: '>= 14'}
@@ -3860,10 +3863,6 @@ packages:
     engines: {node: '>=18.12'}
     peerDependencies:
       typescript: '>=4.8.4'
-
-  ts-deepmerge@7.0.3:
-    resolution: {integrity: sha512-Du/ZW2RfwV/D4cmA5rXafYjBQVuvu4qGiEEla4EmEHVHgRdx68Gftx7i66jn2bzHPwSVZY36Ae6OuDn9el4ZKA==}
-    engines: {node: '>=14.13.1'}
 
   ts-pattern@5.7.0:
     resolution: {integrity: sha512-0/FvIG4g3kNkYgbNwBBW5pZBkfpeYQnH+2AA3xmjkCAit/DSDPKmgwC3fKof4oYUq6gupClVOJlFl+939VRBMg==}
@@ -6428,6 +6427,8 @@ snapshots:
 
   define-lazy-prop@2.0.0: {}
 
+  defu@6.1.4: {}
+
   degenerator@5.0.1:
     dependencies:
       ast-types: 0.13.4
@@ -8181,8 +8182,6 @@ snapshots:
   ts-api-utils@2.1.0(typescript@5.8.3):
     dependencies:
       typescript: 5.8.3
-
-  ts-deepmerge@7.0.3: {}
 
   ts-pattern@5.7.0: {}
 

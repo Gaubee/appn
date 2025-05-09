@@ -87,7 +87,7 @@ type DeepPartial<T> = {
 };
 export type AppnThemePartial = DeepPartial<AppnTheme>;
 
-import {merge} from 'ts-deepmerge';
+import {defu} from 'defu';
 
 /**
  * 混合theme，遵循后来者居上的优先级
@@ -100,7 +100,14 @@ import {merge} from 'ts-deepmerge';
  * @returns
  */
 export const appnThemeMixin = (base: AppnTheme, ...exts: AppnThemePartial[]) => {
-  return merge.withOptions({mergeArrays: false, allowUndefinedOverrides: false}, base, ...exts) as AppnTheme;
+  if (exts.length === 0) {
+    return base;
+  }
+  let prev = {...base};
+  for (const ext of exts) {
+    prev = defu(ext, prev) as AppnTheme;
+  }
+  return prev;
 };
 
 /**
